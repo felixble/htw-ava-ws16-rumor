@@ -5,14 +5,24 @@ export class Server {
     constructor(host, port) {
         this.host = host;
         this.port = port;
+        this.server = null;
     }
 
     listen(callback) {
-        net.createServer(function (socket) {
+        this.server = net.createServer(function (socket) {
             socket.on('data', function (data) {
                 callback(socket, JSON.parse(data));
             });
-        }).listen(this.port, this.host);
+        });
+        this.server.listen(this.port, this.host);
+    }
+
+    close() {
+        if (null !== this.server) {
+            this.server.close(()=> {console.log('server closed')});
+        } else {
+            console.log('no server instance!');
+        }
     }
 
 }

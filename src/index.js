@@ -33,6 +33,12 @@ async function main() {
     myServer.listen(async(socket, data) => {
         socket.write(JSON.stringify({}));
         logR(data.msg);
+        if (data.msg == "STOP") {
+            socket.destroy();
+            myServer.close();
+            process.exit();
+            return;
+        }
         if (!sendMyId) {
             sendMyId = true;
             for (let i = 0; i < myNeightbors.length; i++) {
@@ -45,7 +51,6 @@ async function main() {
                 logS(msg.msg, neightbor);
             }
         }
-
     });
 
 }
