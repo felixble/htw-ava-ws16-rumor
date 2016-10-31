@@ -8,9 +8,12 @@ export class Client {
     }
 
     connect() {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             this.client.connect(this.port, this.host, function () {
                 resolve();
+            });
+            this.client.on('error', function(error) {
+                reject(error);
             });
         });
     }
