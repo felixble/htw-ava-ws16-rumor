@@ -25,14 +25,22 @@ async function main() {
             {
                 let host = await readLine('Enter host:');
                 let port = await readLine('Enter port:');
-                await initClient(host, port);
+                try {
+                    await initClient(host, port);
+                } catch (e) {
+                    console.log(`Could not init host: ${host}:${port}`);
+                }
                 break;
             }
             case 'stop':
             {
                 let host = await readLine('Enter host:');
                 let port = await readLine('Enter port:');
-                await stopClient(host, port);
+                try {
+                    await stopClient(host, port);
+                } catch (e) {
+                    console.log(`Could not init host: ${host}:${port}`);
+                }
                 break;
             }
             case 'exit':

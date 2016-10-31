@@ -42,5 +42,5 @@ let getNeightbors = function(id, endpoints) {
 module.exports = {
     parse: parse,
     getEndpointById: getEndpointById,
-    getNeightbors: getNeightbors
+    getNeighbors: getNeightbors
 };

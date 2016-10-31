@@ -27,8 +27,7 @@ async function main() {
     let myId = await readLine('Please insert the ID of this endpoint:');
     let myEndpoint = endpointParser.getEndpointById(myId, endpoints);
     console.log(myEndpoint);
-    let myNeightbors = endpointParser.getNeightbors(myId, endpoints);
-    let sendMyId = false;
+    let myNeighbors = endpointParser.getNeighbors(myId, endpoints);
     let myServer = new Server(myEndpoint.host, myEndpoint.port);
     myServer.listen(async(socket, data) => {
         socket.write(JSON.stringify({}));
@@ -39,16 +38,22 @@ async function main() {
             process.exit();
             return;
         }
-        if (!sendMyId) {
-            sendMyId = true;
-            for (let i = 0; i < myNeightbors.length; i++) {
-                let neightbor = myNeightbors[i];
-                let msg = {msg: 'My id: ' + myId};
-                let client = new Client(neightbor.host, neightbor.port);
-                await client.connect();
-                await client.send(msg);
-                client.close();
-                logS(msg.msg, neightbor);
+        for (let i = 0; i < myNeighbors.length; i++) {
+            let neighbor = myNeighbors[i];
+            if (!neighbor.contactedAlready) {
+                try {
+                    neighbor.contactedAlready = true;
+                    let msg = {msg: 'My id: ' + myId};
+                    let client = new Client(neighbor.host, neighbor.port);
+                    await client.connect();
+                    await client.send(msg);
+                    client.close();
+                    logS(msg.msg, neighbor);
+                    neighbor.contactedAlready = true;
+                } catch(e) {
+                    neighbor.contactedAlready = false;
+                    console.log('Could not contact neighbor: ' + JSON.stringify(neighbor));
+                }
             }
         }
     });
