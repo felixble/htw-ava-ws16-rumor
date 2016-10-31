@@ -39,8 +39,15 @@ let getNeightbors = function(id, endpoints) {
     })
 };
 
+let getEndpoints = function(ids, endpoints) {
+    return ids.map(id => {
+        return getEndpointById(id, endpoints);
+    })
+};
+
 module.exports = {
     parse: parse,
     getEndpointById: getEndpointById,
-    getNeighbors: getNeightbors
+    getNeighbors: getNeightbors,
+    getEndpoints: getEndpoints
 };
