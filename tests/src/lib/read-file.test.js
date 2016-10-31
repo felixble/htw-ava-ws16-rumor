@@ -3,7 +3,7 @@ let expect = require('chai').expect;
 let readFile = require('../../../src/lib/read-file');
 
 
-let endpointParser = require('../../../src/endpointParser');
+let endpointParser = require('../../../src/parser/endpointParser');
 
 describe('read-file', function() {
 

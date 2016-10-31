@@ -1,10 +1,8 @@
 import { Server } from './lib/server';
 import { Client } from './lib/client';
-import { GraphvizParser } from './graphvizParser';
+import { EndpointManager } from './endpointManager'
 
-let readFile = require('./lib/read-file');
 let readLine = require('./lib/read-line');
-let endpointParser = require('./endpointParser');
 
 const endpointFilename = './config/endpoints';
 const graphFilename = './config/graph';
@@ -24,16 +22,12 @@ function logS(msg, node) {
 }
 
 async function main() {
-    let rawEndpointsFile = await readFile(endpointFilename);
-    let endpoints = endpointParser.parse(rawEndpointsFile);
+    let endpointManager = new EndpointManager(endpointFilename, graphFilename);
+    await endpointManager.init();
     let myId = await readLine('Please insert the ID of this endpoint:');
-    let myEndpoint = endpointParser.getEndpointById(myId, endpoints);
-    console.log(myEndpoint);
-    let rawGraphFile = await readFile(graphFilename);
-    let graphvizParser = new GraphvizParser();
-    graphvizParser.parse(rawGraphFile);
-    let myNeighbors = endpointParser.getEndpoints(graphvizParser.getNode(myId).neighbors, endpoints);
-    let myServer = new Server(myEndpoint.host, myEndpoint.port);
+    await endpointManager.setMyId(myId);
+    console.log(endpointManager.getMyEndpoint());
+    let myServer = new Server(endpointManager.getMyEndpoint().host, endpointManager.getMyEndpoint().port);
     myServer.listen(async(socket, data) => {
         socket.write(JSON.stringify({}));
         logR(data.msg);
@@ -43,8 +37,8 @@ async function main() {
             process.exit();
             return;
         }
-        for (let i = 0; i < myNeighbors.length; i++) {
-            let neighbor = myNeighbors[i];
+        for (let i = 0; i < endpointManager.getMyNeighbors().length; i++) {
+            let neighbor = endpointManager.getMyNeighbors()[i];
             if (!neighbor.contactedAlready) {
                 try {
                     neighbor.contactedAlready = true;
