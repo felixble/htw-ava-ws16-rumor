@@ -1,6 +1,6 @@
 let expect = require('chai').expect;
 
-import { GraphvizParser } from '../../src/graphvizParser';
+import { GraphvizParser } from '../../../src/parser/graphvizParser';
 
 describe('graphvizParser', function() {
 

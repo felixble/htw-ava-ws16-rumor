@@ -1,6 +1,6 @@
 let expect = require('chai').expect;
 
-let endpointParser = require('../../src/endpointParser');
+let endpointParser = require('../../../src/parser/endpointParser');
 
 describe('endpointParser', function() {
 
