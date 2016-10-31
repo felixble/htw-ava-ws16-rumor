@@ -1,11 +1,13 @@
 import { Server } from './lib/server';
 import { Client } from './lib/client';
+import { GraphvizParser } from './graphvizParser';
 
 let readFile = require('./lib/read-file');
 let readLine = require('./lib/read-line');
 let endpointParser = require('./endpointParser');
 
-const filename = './config/endpoints';
+const endpointFilename = './config/endpoints';
+const graphFilename = './config/graph';
 
 function log(type, msg) {
     let date = new Date();
@@ -22,12 +24,15 @@ function logS(msg, node) {
 }
 
 async function main() {
-    let rawFile = await readFile(filename);
-    let endpoints = endpointParser.parse(rawFile);
+    let rawEndpointsFile = await readFile(endpointFilename);
+    let endpoints = endpointParser.parse(rawEndpointsFile);
     let myId = await readLine('Please insert the ID of this endpoint:');
     let myEndpoint = endpointParser.getEndpointById(myId, endpoints);
     console.log(myEndpoint);
-    let myNeighbors = endpointParser.getNeighbors(myId, endpoints);
+    let rawGraphFile = await readFile(graphFilename);
+    let graphvizParser = new GraphvizParser();
+    graphvizParser.parse(rawGraphFile);
+    let myNeighbors = endpointParser.getEndpoints(graphvizParser.getNode(myId).neighbors, endpoints);
     let myServer = new Server(myEndpoint.host, myEndpoint.port);
     myServer.listen(async(socket, data) => {
         socket.write(JSON.stringify({}));
