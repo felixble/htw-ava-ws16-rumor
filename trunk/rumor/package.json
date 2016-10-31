@@ -5,7 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "start": " node ./node_modules/babel-cli/bin/babel-node.js src/index.js",
-    "init": " node ./node_modules/babel-cli/bin/babel-node.js src/init.js",
+    "init": " node ./node_modules/babel-cli/bin/babel-node.js src/tools/init.js",
+    "graphgen": " node ./node_modules/babel-cli/bin/babel-node.js src/tools/graphgen.js",
     "test": "node ./node_modules/mocha/bin/mocha  --recursive ./tests/ --compilers js:babel-register"
   },
   "author": "Felix Blechschmitt",

@@ -1,6 +1,6 @@
 
-import { Client } from './lib/client';
-let readLine = require('./lib/read-line');
+import { Client } from './../lib/client';
+let readLine = require('./../lib/read-line');
 
 async function initClient(host, port) {
     let client = new Client(host, port);
