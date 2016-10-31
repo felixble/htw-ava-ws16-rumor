@@ -5,7 +5,7 @@ import { EndpointManager } from './endpointManager'
 let readLine = require('./lib/read-line');
 
 const endpointFilename = './config/endpoints';
-const graphFilename = './config/graph';
+const graphFilename = './config/graph.dot';
 
 function log(type, msg) {
     let date = new Date();
