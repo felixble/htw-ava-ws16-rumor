@@ -10,7 +10,7 @@ export class ServerLogic {
     onReceiveData() {
         return async(socket, data) => {
             socket.write(JSON.stringify({}));
-            this.constructor.logR(data.msg);
+            this.constructor.logR(JSON.stringify(data));
             if (data.msg == "STOP") {
                 socket.destroy();
                 this.server.close();
@@ -25,7 +25,7 @@ export class ServerLogic {
                 process.exit();
                 return;
             }
-            await this.runAlgorithm(data.msg, socket);
+            await this.runAlgorithm(data, socket);
         };
     }
 
