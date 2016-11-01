@@ -2,18 +2,21 @@
 import { Client } from './../lib/client';
 let readLine = require('./../lib/read-line');
 
-async function initClient(host, port) {
+async function sendMsgClient(host, port, msg) {
     let client = new Client(host, port);
     await client.connect();
-    await client.send({msg: 'INIT'});
+    await client.send({msg: msg});
     client.close();
 }
 
-async function stopClient(host, port) {
-    let client = new Client(host, port);
-    await client.connect();
-    await client.send({msg: 'STOP'});
-    client.close();
+async function queryAddressSendMsg(msg) {
+    let host = await readLine('Enter host:');
+    let port = await readLine('Enter port:');
+    try {
+        await sendMsgClient(host, port, msg);
+    } catch (e) {
+        console.log(`Could not send msg to host: ${host}:${port}`);
+    }
 }
 
 async function main() {
@@ -23,24 +26,17 @@ async function main() {
         switch (cmd) {
             case 'init':
             {
-                let host = await readLine('Enter host:');
-                let port = await readLine('Enter port:');
-                try {
-                    await initClient(host, port);
-                } catch (e) {
-                    console.log(`Could not init host: ${host}:${port}`);
-                }
+                await queryAddressSendMsg('INIT');
                 break;
             }
             case 'stop':
             {
-                let host = await readLine('Enter host:');
-                let port = await readLine('Enter port:');
-                try {
-                    await stopClient(host, port);
-                } catch (e) {
-                    console.log(`Could not init host: ${host}:${port}`);
-                }
+                await queryAddressSendMsg('STOP');
+                break;
+            }
+            case 'stop all':
+            {
+                await queryAddressSendMsg('STOP ALL');
                 break;
             }
             case 'exit':
