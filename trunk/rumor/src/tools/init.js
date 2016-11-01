@@ -26,7 +26,8 @@ async function main() {
         switch (cmd) {
             case 'init':
             {
-                await queryAddressSendMsg('INIT');
+                let rumor = await readLine('Enter rumor:');
+                await queryAddressSendMsg(rumor);
                 break;
             }
             case 'stop':

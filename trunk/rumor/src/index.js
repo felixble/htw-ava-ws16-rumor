@@ -1,5 +1,5 @@
 import { Server } from './lib/server';
-import { HelloServer } from './helloServer'
+import { RumorServer } from './rumorServer'
 import { EndpointManager } from './endpointManager'
 
 let readLine = require('./lib/read-line');
@@ -15,7 +15,7 @@ async function main() {
     await endpointManager.setMyId(myId);
     console.log(endpointManager.getMyEndpoint());
     let myServer = new Server(endpointManager.getMyEndpoint().host, endpointManager.getMyEndpoint().port);
-    let serverLogic = new HelloServer(myServer, endpointManager);
+    let serverLogic = new RumorServer(myServer, endpointManager);
     myServer.listen(serverLogic.onReceiveData());
 }
 
