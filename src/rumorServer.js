@@ -1,8 +1,6 @@
 import { ServerLogic } from './serverLogic'
 import { Client } from './lib/client'
 
-let sleep = require('./lib/sleep');
-
 export class RumorServer extends ServerLogic {
 
     constructor(server, endpointManager) {
@@ -14,18 +12,18 @@ export class RumorServer extends ServerLogic {
         let newRumor = data.msg;
         let from = data.from || undefined;
 
-        if (!this.isKnown(newRumor)) {
+        let alreadyKnown = this.isKnown(newRumor);
+        this.addRumor(newRumor, from);
+
+        if (!alreadyKnown) {
             this.addRumor(newRumor, from);
             for (let i = 0; i < this.endpointManager.getMyNeighbors().length; i++) {
                 let neighbor = this.endpointManager.getMyNeighbors()[i];
 
-                await sleep(2000);
                 if (!this.toldMe(newRumor, neighbor.id)) {
                     await this.tellRumorTo(newRumor, neighbor);
                 }
             }
-        } else {
-            this.addRumor(newRumor, from);
         }
 
     }
