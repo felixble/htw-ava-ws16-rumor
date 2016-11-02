@@ -10,7 +10,7 @@ export class RumorServer extends ServerLogic {
         this.rumors = [];
     }
 
-    async runAlgorithm(data, socket) {
+    async _runAlgorithm(data, socket) {
         let newRumor = data.msg;
         let from = data.from || undefined;
 
@@ -23,7 +23,6 @@ export class RumorServer extends ServerLogic {
                 if (!this.toldMe(newRumor, neighbor.id)) {
                     await this.tellRumorTo(newRumor, neighbor);
                 }
-
             }
         } else {
             this.addRumor(newRumor, from);

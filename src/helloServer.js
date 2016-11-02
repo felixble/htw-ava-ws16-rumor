@@ -3,7 +3,7 @@ import { Client } from './lib/client'
 
 export class HelloServer extends ServerLogic {
 
-    async runAlgorithm(incomingMsg, socket) {
+    async _runAlgorithm(incomingMsg, socket) {
         for (let i = 0; i < this.endpointManager.getMyNeighbors().length; i++) {
             let neighbor = this.endpointManager.getMyNeighbors()[i];
             if (!neighbor.contactedAlready) {
