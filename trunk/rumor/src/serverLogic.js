@@ -1,15 +1,18 @@
 import { Client } from './lib/client'
+import { Semaphore } from './lib/async-semaphore'
 
 export class ServerLogic {
 
     constructor(server, endpointManager) {
         this.server = server;
         this.endpointManager = endpointManager;
+        this.sem = new Semaphore(1);
     }
 
     onReceiveData() {
         return async(socket, data) => {
             socket.write(JSON.stringify({}));
+            await this.sem.take();
             this.constructor.logR(JSON.stringify(data));
             if (data.msg == "STOP") {
                 socket.destroy();
@@ -25,7 +28,8 @@ export class ServerLogic {
                 process.exit();
                 return;
             }
-            await this.runAlgorithm(data, socket);
+            await this._runAlgorithm(data, socket);
+            this.sem.leave();
         };
     }
 
@@ -45,7 +49,11 @@ export class ServerLogic {
         }
     }
 
-    async runAlgorithm(incomingMsg, socket) {
+    async _onNewData() {
+
+    }
+
+    async _runAlgorithm(incomingMsg, socket) {
     }
 
     static log(type, msg) {
