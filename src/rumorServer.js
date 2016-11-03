@@ -1,7 +1,11 @@
 import { ServerLogic } from './serverLogic'
 import { Client } from './lib/client'
 
+
+const BELIEVE_COUNT = 2;
+
 export class RumorServer extends ServerLogic {
+
 
     constructor(server, endpointManager) {
         super(server, endpointManager);
@@ -10,7 +14,7 @@ export class RumorServer extends ServerLogic {
 
     async _runAlgorithm(data, socket) {
         let newRumor = data.msg;
-        let from = data.from || undefined;
+        let from = data.from || this.endpointManager.getMyId();
 
         let alreadyKnown = this.isKnown(newRumor);
         this.addRumor(newRumor, from);
@@ -26,10 +30,19 @@ export class RumorServer extends ServerLogic {
             }
         }
 
+        if (!this.getRumorByText(newRumor).believe && this.doIbelieve(newRumor)) {
+            this.constructor.log('INFO', `I believe the rumor: ${newRumor}`);
+        }
+    }
+
+    doIbelieve(rumorText) {
+        let rumor = this.getRumorByText(rumorText);
+        rumor.believe = rumor.from.length >= BELIEVE_COUNT;
+        return rumor.believe;
     }
 
     toldMe(rumorText, id) {
-        let index = this.findByText(rumorText);
+        let index = this.getRumorIndexByText(rumorText);
         if (index === undefined) {
             return false;
         }
@@ -38,7 +51,7 @@ export class RumorServer extends ServerLogic {
     }
 
     addRumor(text, from) {
-        let rumorIndex = this.findByText(text);
+        let rumorIndex = this.getRumorIndexByText(text);
         if (rumorIndex !== undefined) { // is known already
             let fromIndex = this.rumors[rumorIndex].from.indexOf(from);
             if (fromIndex === -1) {
@@ -48,12 +61,18 @@ export class RumorServer extends ServerLogic {
             let fromArr = (from === undefined) ? [] : [from];
             this.rumors.push({
                 text: text,
-                from: fromArr
+                from: fromArr,
+                believe: false
             });
         }
     }
 
-    findByText(text) {
+    getRumorByText(text) {
+        let index = this.getRumorIndexByText(text);
+        return this.rumors[index];
+    }
+
+    getRumorIndexByText(text) {
         for (let i = 0; i < this.rumors.length; i++) {
             if (this.rumors[i].text === text) {
                 return i;
@@ -63,7 +82,7 @@ export class RumorServer extends ServerLogic {
     }
 
     isKnown(rumor) {
-        let index = this.findByText(rumor);
+        let index = this.getRumorIndexByText(rumor);
         return (index !== undefined);
     }
 
