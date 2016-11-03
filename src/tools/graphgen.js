@@ -1,6 +1,6 @@
 let readLine = require('./../lib/read-line');
 let writeFile = require('./../lib/write-file');
-let edgeGenerator = require('./helpers/edgeGenerator');
+import { EdgeGenerator } from './helpers/edgeGenerator';
 
 async function readArguments() {
     let n, m, filename;
@@ -24,15 +24,20 @@ async function readArguments() {
 
 
 async function main() {
-    let args = await readArguments();
-    let edges = edgeGenerator.createEdges(args.n, args.m);
-    let data = edgeGenerator.generateGraphvizData(edges);
     try {
-        await writeFile(args.filename, data);
-    } catch (e) {
-        console.log(e);
+        let args = await readArguments();
+        let edgeGenerator = new EdgeGenerator(args.n, args.m);
+        edgeGenerator.createEdges();
+        let data = edgeGenerator.generateGraphvizData();
+        try {
+            await writeFile(args.filename, data);
+        } catch (e) {
+            console.log(e);
+        }
+        process.exit();
+    } catch(e) {
+        console.error('Caught exception: ' + e);
     }
-    process.exit();
 }
 
 main();

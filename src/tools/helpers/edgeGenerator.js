@@ -1,55 +1,72 @@
+export class EdgeGenerator {
 
+    constructor(n, m) {
+        this.constructor._assert(m > n, 'm > n');
+        this.constructor._assert(n > 3, 'n > 3');
+        this.constructor._assert(m <= (n*(n-1))/2, 'm <= (n*(n-1))/2');
 
-let randInt = function (min, max) {
-    return Math.floor(Math.random()*(max-min+1)+min);
-};
+        this.n = n;
+        this.m = m;
+        this.edges = [];
+    }
 
-let rand = function (max) {
-    return randInt(1, max-1);
-};
-
-let containsEdge = function(edge, edges) {
-    let a = edge[0];
-    let b = edge[1];
-    let contains = false;
-    edges.some(e => {
-        if (e.indexOf(a) !== -1 && e.indexOf(b) !== -1 ) {
-            contains = true;
-            return true;
-        }
-        return false;
-    });
-    return contains;
-};
-
-let createEdges = function (n, m) {
-    let edges = [];
-    while (edges.length < m) {
-        for (let i = 2; i <= n; i++) {
-            let j = rand(i);
-            let edge = [i, j];
-            edges.push(edge);
-            if (edges.length >= m) {
-                break;
+    createEdges() {
+        let start = 2;
+        while (this.edges.length < this.m) {
+            for (let i = start; i <= this.n; i++) {
+                let accepted = false;
+                let edge;
+                while (!accepted) {
+                    let j = this.constructor._rand(i);
+                    edge = [i, j];
+                    accepted = !this._containsEdge(edge);
+                }
+                this.edges.push(edge);
+                if (this.edges.length >= this.m) {
+                    break;
+                }
             }
+            start++;
+        }
+        return this.edges;
+    }
+
+    generateGraphvizData() {
+        let result = 'graph G {\n';
+        this.edges.forEach(node => {
+            let a = node[0];
+            let b = node[1];
+            result += `${a} -- ${b};\n`;
+        });
+        return result += '}';
+    }
+
+    static _assert(bed, message) {
+        if (!bed) {
+            throw new Error(`Assertion (${message}) failed.`);
         }
     }
-    return edges;
-};
 
-let generateGraphvizData = function(edges) {
-    let result = 'graph G {\n';
-    edges.forEach(node => {
-        let a = node[0];
-        let b = node[1];
-        result += `${a} -- ${b};\n`;
-    });
-    return result += '}';
-};
+    static _rand(max) {
+        return EdgeGenerator._randInt(1, max-1);
+    }
 
-module.exports = {
-    createEdges: createEdges,
-    rand: rand,
-    generateGraphvizData: generateGraphvizData,
-    containsEdge: containsEdge
-};
+    static _randInt(min, max) {
+        return Math.floor(Math.random()*(max-min+1)+min);
+    }
+
+    _containsEdge(edge) {
+        let a = edge[0];
+        let b = edge[1];
+        let contains = false;
+        this.edges.some(e => {
+            if (e.indexOf(a) !== -1 && e.indexOf(b) !== -1 ) {
+                contains = true;
+                return true;
+            }
+            return false;
+        });
+        return contains;
+    }
+
+}
