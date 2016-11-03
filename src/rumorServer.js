@@ -7,9 +7,10 @@ const BELIEVE_COUNT = 2;
 export class RumorServer extends ServerLogic {
 
 
-    constructor(server, endpointManager) {
+    constructor(server, endpointManager, believeCount = -1) {
         super(server, endpointManager);
         this.rumors = [];
+        this.believeCount = (believeCount === -1) ? BELIEVE_COUNT : believeCount;
     }
 
     async _runAlgorithm(data, socket) {
@@ -20,7 +21,6 @@ export class RumorServer extends ServerLogic {
         this.addRumor(newRumor, from);
 
         if (!alreadyKnown) {
-            this.addRumor(newRumor, from);
             for (let i = 0; i < this.endpointManager.getMyNeighbors().length; i++) {
                 let neighbor = this.endpointManager.getMyNeighbors()[i];
 
@@ -37,7 +37,7 @@ export class RumorServer extends ServerLogic {
 
     doIbelieve(rumorText) {
         let rumor = this.getRumorByText(rumorText);
-        rumor.believe = rumor.from.length >= BELIEVE_COUNT;
+        rumor.believe = rumor.from.length >= this.believeCount;
         return rumor.believe;
     }
 
