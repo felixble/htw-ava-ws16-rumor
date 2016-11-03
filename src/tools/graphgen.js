@@ -2,19 +2,28 @@ let readLine = require('./../lib/read-line');
 let writeFile = require('./../lib/write-file');
 import { EdgeGenerator } from './helpers/edgeGenerator';
 
-async function readArguments() {
+let optionParser = require('node-getopt').create([
+        ['n', 'n=[ARG]', 'Number of nodes'],
+        ['m', 'm=[ARG]', 'Number of edges'],
+        ['f', 'filename=[ARG]', 'Filename'],
+        ['h', 'help', 'Display this help']
+    ]);
+
+let arg = optionParser.bindHelp().parseSystem();
+
+async function readArguments(args) {
     let n, m, filename;
     let gotInput = false;
     while(!gotInput) {
-        n = parseInt(await readLine('Please enter the number of nodes:'));
-        m = parseInt(await readLine('Please enter the number of edges:'));
+        n = parseInt(args.n || await readLine('Please enter the number of nodes:'));
+        m = parseInt(args.m || await readLine('Please enter the number of edges:'));
         if (m > n) {
             gotInput = true;
         } else {
             console.log('The number of edges must be greater than the number of nodes')
         }
     }
-    filename = await readLine('Please enter a filename:');
+    filename = args.filename || await readLine('Please enter a filename:');
     return {
         n: n,
         m: m,
@@ -25,7 +34,13 @@ async function readArguments() {
 
 async function main() {
     try {
-        let args = await readArguments();
+        let args = {
+            n: arg.options.n,
+            m: arg.options.m,
+            filename: arg.options.filename
+        };
+
+        args = await readArguments(args);
         let edgeGenerator = new EdgeGenerator(args.n, args.m);
         edgeGenerator.createEdges();
         let data = edgeGenerator.generateGraphvizData();
