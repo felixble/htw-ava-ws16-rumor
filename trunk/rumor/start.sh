@@ -45,12 +45,12 @@ done
 echo "All nodes has been started"
 
 echo "Send rumor to node 1"
-npm run init -- -c init -r "this is the rumor" --host localhost --port 6001
+npm run init -- -c init -r "this is the rumor" --host localhost --port 6000
 
-sleep 10
+sleep 20
 
 echo "Stop all nodes"
-npm run init -- -c "stop all" --host localhost --port 6001
+npm run init -- -c "stop all" --host localhost --port 6000
 
 echo ""
 echo ""

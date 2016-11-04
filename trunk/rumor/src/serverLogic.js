@@ -7,67 +7,84 @@ export class ServerLogic {
         this.server = server;
         this.endpointManager = endpointManager;
         this.sem = new Semaphore(1);
+        this.killed = false;
     }
 
     onReceiveData() {
         return async(socket, data) => {
-            socket.write(JSON.stringify({}));
-            await this.sem.take();
-            this.constructor.logR(JSON.stringify(data));
-            if (data.msg == "STOP") {
-                socket.destroy();
-                this.server.close();
-                process.exit();
-                return;
-            }
-            if (data.msg == "STOP ALL") {
-                await this.sendStopSignalToNeighbors();
+            try {
+                socket.write(JSON.stringify({}));
+                await this.sem.take();
 
-                socket.destroy();
-                this.server.close();
-                process.exit();
-                return;
+                if (this.killed) {
+                    this.sem.leave();
+                    return;
+                }
+
+                this.logR(JSON.stringify(data));
+                if (data.msg === "STOP") {
+                    this.stop();
+                    return;
+                }
+                if (data.msg === "STOP ALL") {
+                    await this.sendStopSignalToNeighbors();
+                    this.stop();
+                    return;
+                }
+                await this._runAlgorithm(data, socket);
+                this.sem.leave();
+            } catch(e) {
+                console.error(e);
             }
-            await this._runAlgorithm(data, socket);
-            this.sem.leave();
         };
+    }
+
+    stop() {
+        this.killed = true;
+        this.server.close();
+        this.log('SHUTDOWN', '');
     }
 
     async sendStopSignalToNeighbors() {
         for (let i = 0; i < this.endpointManager.getMyNeighbors().length; i++) {
             let neighbor = this.endpointManager.getMyNeighbors()[i];
             try {
-                let msg = {msg: 'STOP ALL'};
+                let msg = {msg: 'STOP ALL', from: this.endpointManager.getMyId()};
                 let client = new Client(neighbor.host, neighbor.port);
                 await client.connect();
                 await client.send(msg);
                 client.close();
-                this.constructor.logS(msg.msg, neighbor);
+                this.logS(msg.msg, neighbor);
             } catch(e) {
-                console.log('Could not contact neighbor: ' + JSON.stringify(neighbor));
+                this.logE('Could not contact neighbor: ' + JSON.stringify(neighbor));
             }
         }
-    }
-
-    async _onNewData() {
-
     }
 
     async _runAlgorithm(incomingMsg, socket) {
     }
 
-    static log(type, msg) {
+    log(type, msg) {
         let date = new Date();
-        console.log(`${type} (${date}): ${msg}`);
+        let myId = this.endpointManager.getMyId();
+        console.log(`${type} (${myId}) (${date}): ${msg}`);
     }
 
-    static logR(msg) {
-        ServerLogic.log('RECEIVE', msg);
+    logR(msg) {
+        this.log('RECEIVE', msg);
     }
 
-    static logS(msg, node) {
+    logS(msg, node) {
         let nodeStr = JSON.stringify(node);
-        ServerLogic.log('SEND   ', `${msg} to ${nodeStr}`);
+        this.log('SEND   ', `${msg} to ${nodeStr}`);
+    }
+
+    logI(msg) {
+        this.log('INFO   ', msg);
+    }
+
+    logE(msg) {
+        this.log('ERROR  ', msg);
     }
 
 }
