@@ -31,7 +31,7 @@ export class RumorServer extends ServerLogic {
         }
 
         if (!this.getRumorByText(newRumor).believe && this.doIbelieve(newRumor)) {
-            this.constructor.log('INFO', `I believe the rumor: ${newRumor}`);
+            this.logI(`I believe the rumor: ${newRumor}`);
         }
     }
 
@@ -93,9 +93,9 @@ export class RumorServer extends ServerLogic {
             await client.connect();
             await client.send(msg);
             client.close();
-            this.constructor.logS(msg.msg, neighbor);
+            this.logS(msg.msg, neighbor);
         } catch(e) {
-            console.log('Could not contact neighbor: ' + JSON.stringify(neighbor));
+            this.logE('Could not contact neighbor: ' + JSON.stringify(neighbor));
         }
     }
 }

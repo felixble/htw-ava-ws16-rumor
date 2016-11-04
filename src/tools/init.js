@@ -64,17 +64,21 @@ async function dialog() {
     let exit = false;
     while(!exit) {
         let cmd = await readLine('Enter command:');
-        execCommand(cmd);
+        await execCommand(cmd);
     }
     process.exit();
 }
 
-try {
-    if (arg.options.cmd) {
-        execCommand(arg.options.cmd);
-    } else {
-        dialog();
+async function main() {
+    try {
+        if (arg.options.cmd) {
+            await execCommand(arg.options.cmd);
+        } else {
+            await dialog();
+        }
+    } catch (e) {
+        console.error(e);
     }
-} catch (e) {
-    console.error(e);
 }
+
+main();
