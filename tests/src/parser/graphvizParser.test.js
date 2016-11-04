@@ -4,7 +4,6 @@ import { GraphvizParser } from '../../../src/parser/graphvizParser';
 
 describe('graphvizParser', function() {
 
-    const INPUT = "graph G {\n1 -- 2;\n3 -- 2;\n4 -- 2;\n4 -- 3;\n5 -- 1;\n5 -- 3;\n}";
     let parser;
 
     beforeEach(function() {
@@ -12,14 +11,29 @@ describe('graphvizParser', function() {
     });
 
     it('parses a string correctly', function() {
+        const INPUT = "graph G {\n1 -- 2;\n3 -- 2;\n4 -- 2;\n4 -- 3;\n5 -- 1;\n5 -- 3;\n}";
         parser.parse(INPUT);
 
         expect(parser.nodes).to.have.length(5);
-        expect(parser.nodes[0].neighbors).to.have.members(['2', '5']);      // 1: 1 -- 2 ; 5 -- 1
-        expect(parser.nodes[1].neighbors).to.have.members(['1', '3', '4']); // 2: 1 -- 2 ; 3 -- 2 ; 4 -- 2
-        expect(parser.nodes[2].neighbors).to.have.members(['4', '5', '2']); // 3: 3 -- 2 ; 4 -- 3 ; 5 -- 3
-        expect(parser.nodes[3].neighbors).to.have.members(['3', '2']);      // 4: 4 -- 3 ; 4 -- 2
-        expect(parser.nodes[4].neighbors).to.have.members(['1', '3']);      // 5: 5 -- 1 ; 5 -- 3
+        expect(parser.nodes[0].neighbors).to.have.members([2, 5]);      // 1: 1 -- 2 ; 5 -- 1
+        expect(parser.nodes[1].neighbors).to.have.members([1, 3, 4]); // 2: 1 -- 2 ; 3 -- 2 ; 4 -- 2
+        expect(parser.nodes[2].neighbors).to.have.members([4, 5, 2]); // 3: 3 -- 2 ; 4 -- 3 ; 5 -- 3
+        expect(parser.nodes[3].neighbors).to.have.members([3, 2]);      // 4: 4 -- 3 ; 4 -- 2
+        expect(parser.nodes[4].neighbors).to.have.members([1, 3]);      // 5: 5 -- 1 ; 5 -- 3
+    });
+
+    it('parses a string containing nodes identified by a number with more than 1 digits', function() {
+        const INPUT = "graph G {10 -- 5;10 -- 4;}";
+        parser.parse(INPUT);
+
+        expect(parser.nodes).to.have.length(3);
+        expect(parser.nodes[0].neighbors).to.have.members([5, 4]);      // 1: 10 -- 5 ; 10 -- 4
+        expect(parser.nodes[1].neighbors).to.have.members([10]);      // 1: 10 -- 5
+        expect(parser.nodes[2].neighbors).to.have.members([10]);      // 1: 10 -- 4
+
+        expect(parser.nodes[0].id).to.equal(10);
+        expect(parser.nodes[1].id).to.equal(5);
+        expect(parser.nodes[2].id).to.equal(4);
     });
 
     it('adds nodes correctly', function() {

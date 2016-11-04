@@ -5,12 +5,12 @@ let endpointParser = require('../../../src/parser/endpointParser');
 describe('endpointParser', function() {
 
     it('parses a string correctly', function() {
-        let res = endpointParser.parse(" 1 isl-s-01:5000\n 2 isl-s-01:5001\n 3 127.0.0.1:2712");
+        let res = endpointParser.parse(" 1 isl-s-01:5000\n 2 isl-s-01:5001\n 30 127.0.0.1:2712");
 
         expect(res).to.have.length(3);
-        expect(res[0].id).to.equal('1');
-        expect(res[1].id).to.equal('2');
-        expect(res[2].id).to.equal('3');
+        expect(res[0].id).to.equal(1);
+        expect(res[1].id).to.equal(2);
+        expect(res[2].id).to.equal(30);
         expect(res[0].host).to.equal('isl-s-01');
         expect(res[1].host).to.equal('isl-s-01');
         expect(res[2].host).to.equal('127.0.0.1');

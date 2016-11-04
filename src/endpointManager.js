@@ -22,7 +22,11 @@ export class EndpointManager {
     setMyId(id) {
         this.myId = id;
         this.myEndpoint = endpointParser.getEndpointById(this.myId, this.endpoints);
-        this.myNeighbors = endpointParser.getEndpoints(this.graphvizParser.getNode(this.myId).neighbors, this.endpoints);
+        let myNode = this.graphvizParser.getNode(this.myId);
+        if (myNode === undefined) {
+            throw new Error(`Illegal state - the Id ${id} is not a node in the given graph`);
+        }
+        this.myNeighbors = endpointParser.getEndpoints(myNode.neighbors, this.endpoints);
     }
 
     getMyId() {
