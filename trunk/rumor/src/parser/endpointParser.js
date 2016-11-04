@@ -8,7 +8,7 @@ let parse = function(string) {
 
         let match = pattern.exec(line);
         while (match != null) {
-            id = match[1];
+            id = parseInt(match[1]);
             host = match[2];
             port = match[3];
             match = pattern.exec(line);

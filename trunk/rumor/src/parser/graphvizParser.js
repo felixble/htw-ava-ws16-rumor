@@ -1,5 +1,5 @@
 
-const pattern = /([0-9+])\s*--\s*([0-9]+);/g;
+const pattern = /([0-9]+)\s*--\s*([0-9]+);/g;
 
 export class GraphvizParser {
 
@@ -10,8 +10,8 @@ export class GraphvizParser {
     parse(string) {
         let match = pattern.exec(string);
         while (match != null) {
-            let nodeA = match[1];
-            let nodeB = match[2];
+            let nodeA = parseInt(match[1]);
+            let nodeB = parseInt(match[2]);
             this.addEdge(nodeA, nodeB);
             match = pattern.exec(string);
         }

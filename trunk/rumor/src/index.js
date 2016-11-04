@@ -17,18 +17,22 @@ let arg = optionParser.bindHelp().parseSystem();
 const endpointFilename = arg.options.endpointFilename || './config/endpoints';
 const graphFilename = arg.options.graphFilename || './config/graph.dot';
 
-// TODO: STOP ALL nodes
 
 async function main() {
-    let endpointManager = new EndpointManager(endpointFilename, graphFilename);
-    await endpointManager.init();
-    let myId = arg.options.id || await readLine('Please insert the ID of this endpoint:');
-    await endpointManager.setMyId(myId);
-    console.log(endpointManager.getMyEndpoint());
-    let c = arg.options.count || undefined;
-    let myServer = new Server(endpointManager.getMyEndpoint().host, endpointManager.getMyEndpoint().port);
-    let serverLogic = new RumorServer(myServer, endpointManager, c);
-    myServer.listen(serverLogic.onReceiveData());
+    try {
+        let endpointManager = new EndpointManager(endpointFilename, graphFilename);
+        await endpointManager.init();
+        let myId = parseInt(arg.options.id || await readLine('Please insert the ID of this endpoint:'));
+        await endpointManager.setMyId(myId);
+        console.log(endpointManager.getMyEndpoint());
+        let c = arg.options.count || undefined;
+        let myServer = new Server(endpointManager.getMyEndpoint().host, endpointManager.getMyEndpoint().port);
+        let serverLogic = new RumorServer(myServer, endpointManager, c);
+        await myServer.listen(serverLogic.onReceiveData());
+        console.log('exit node ' + myId);
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 main();

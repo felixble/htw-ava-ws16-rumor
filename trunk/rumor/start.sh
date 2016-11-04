@@ -27,13 +27,13 @@ do
      npm run start -- --endpointFilename ./config/endpoints -g $graphFile --id $i -c $c >> output.txt &
 done
 
-MINLINES=$(($n + 20))
+MINLINES=$((4 * $n + $n))
 COUNTER=0
 MAX_WAIT=900
 until [ $(cat output.txt | wc -l) -ge $MINLINES ]; do
     echo Not all nodes has been started... Waiting for $COUNTER seconds
-    sleep 30
-    COUNTER=$(($COUNTER+30))
+    sleep 5
+    COUNTER=$(($COUNTER+5))
 
     if [ $COUNTER -gt $MAX_WAIT ]; then
         echo Starting all nodes takes too long, exiting. Log:
@@ -47,7 +47,9 @@ echo "All nodes has been started"
 echo "Send rumor to node 1"
 npm run init -- -c init -r "this is the rumor" --host localhost --port 6000
 
-sleep 20
+sleep 10
+
+echo "\n\n" >> output.txt
 
 echo "Stop all nodes"
 npm run init -- -c "stop all" --host localhost --port 6000
@@ -59,3 +61,5 @@ echo ""
 believers=$(cat output.txt | grep INFO | wc -l | tr -d '[:space:]')
 
 echo $believers nodes believe the rumor
+
+exit $believers
