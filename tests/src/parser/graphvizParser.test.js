@@ -16,8 +16,8 @@ describe('graphvizParser', function() {
 
         expect(parser.nodes).to.have.length(5);
         expect(parser.nodes[0].neighbors).to.have.members([2, 5]);      // 1: 1 -- 2 ; 5 -- 1
-        expect(parser.nodes[1].neighbors).to.have.members([1, 3, 4]); // 2: 1 -- 2 ; 3 -- 2 ; 4 -- 2
-        expect(parser.nodes[2].neighbors).to.have.members([4, 5, 2]); // 3: 3 -- 2 ; 4 -- 3 ; 5 -- 3
+        expect(parser.nodes[1].neighbors).to.have.members([1, 3, 4]);   // 2: 1 -- 2 ; 3 -- 2 ; 4 -- 2
+        expect(parser.nodes[2].neighbors).to.have.members([4, 5, 2]);   // 3: 3 -- 2 ; 4 -- 3 ; 5 -- 3
         expect(parser.nodes[3].neighbors).to.have.members([3, 2]);      // 4: 4 -- 3 ; 4 -- 2
         expect(parser.nodes[4].neighbors).to.have.members([1, 3]);      // 5: 5 -- 1 ; 5 -- 3
     });
@@ -79,6 +79,26 @@ describe('graphvizParser', function() {
         expect(parser.nodes[1].neighbors).to.include(nodeA);
         expect(parser.nodes[1].neighbors).to.include(nodeC);
         expect(parser.nodes[2].neighbors).to.include(nodeB);
+    });
+
+    describe('getSmallest / Biggest Node', function() {
+        it('returns the node with the smallest id', function() {
+            const INPUT = "graph G {\n1 -- 2;\n3 -- 2;\n4 -- 2;\n4 -- 3;\n5 -- 1;\n5 -- 3;\n}";
+            parser.parse(INPUT);
+
+            expect(parser.getNodeWithSmallestId().id).to.equal(1);
+        });
+
+        it('returns the node with the biggest id', function() {
+            const INPUT = "graph G {\n1 -- 2;\n3 -- 2;\n4 -- 2;\n4 -- 3;\n5 -- 1;\n5 -- 3;\n}";
+            parser.parse(INPUT);
+
+            expect(parser.getNodeWithBiggestId().id).to.equal(5);
+        });
+
+        it('returns undefined if there are no nodes set', function() {
+            expect(parser.getNodeWithBiggestId()).be.undefined;
+        });
     });
 
 });

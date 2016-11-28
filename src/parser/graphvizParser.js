@@ -48,4 +48,39 @@ export class GraphvizParser {
         return undefined;
     }
 
+    getNodeWithSmallestId() {
+        let min = Number.MAX_VALUE;
+        let index = -1;
+        for (let i = 0; i < this.nodes.length; i++) {
+            let id = this.nodes[i].id;
+            if (id <= min) {
+                index = i;
+                min = id;
+            }
+        }
+
+        if (index !== -1) {
+            return this.nodes[index];
+        }
+
+        return undefined;
+    }
+
+    getNodeWithBiggestId() {
+        let max = 0;
+        let index = -1;
+        for (let i = 0; i < this.nodes.length; i++) {
+            let id = this.nodes[i].id;
+            if (id >= max) {
+                index = i;
+                max = id;
+            }
+        }
+
+        if (index !== -1) {
+            return this.nodes[index];
+        }
+
+        return undefined;
+    }
 }

@@ -11,11 +11,13 @@ m=$2
 c=$3
 graphFile=$4
 
-if [ $n -gt 20 ]
-    then
-        echo "Please add more endpoints to ./config/endpoints"
-        exit -1
-fi
+INIT_PORT=4000;
+
+#if [ $n -gt 20 ]
+#    then
+#        echo "Please add more endpoints to ./config/endpoints"
+#        exit -1
+#fi
 
 npm run graphgen -- -n $n -m $m -f $graphFile
 echo generated graph with $n nodes and $m edges
@@ -24,7 +26,7 @@ rm output.txt
 
 for ((i=1;i<=$n;i++))
 do
-     npm run start -- --endpointFilename ./config/endpoints -g $graphFile --id $i -c $c >> output.txt &
+     npm run start -- -g $graphFile --id $i -c $c >> output.txt &
 done
 
 MINLINES=$((4 * $n + $n))
@@ -45,14 +47,14 @@ done
 echo "All nodes has been started"
 
 echo "Send rumor to node 1"
-npm run init -- -c init -r "this is the rumor" --host localhost --port 6000
+npm run init -- -c init -r "this is the rumor" --host localhost --port ${INIT_PORT}
 
 sleep 10
 
 echo "\n\n" >> output.txt
 
 echo "Stop all nodes"
-npm run init -- -c "stop all" --host localhost --port 6000
+npm run init -- -c "stop all" --host localhost --port ${INIT_PORT}
 
 echo ""
 echo ""

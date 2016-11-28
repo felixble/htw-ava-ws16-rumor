@@ -5,7 +5,7 @@ import { EndpointManager } from './endpointManager'
 let readLine = require('./lib/read-line');
 
 let optionParser = require('node-getopt').create([
-    ['', 'endpointFilename=[ARG]', 'path to the endpoints file'],
+    ['', 'endpointFilename=[ARG]', 'path to the endpoints file, leave blank to map ids to local ports'],
     ['g', 'graphFilename=[ARG]', 'path to the graph file defining the network node topology'],
     ['', 'id=[ARG]', 'ID of this endpoint'],
     ['c', 'count=[ARG]', 'number of receives until a rumor will be believed'],
@@ -14,7 +14,7 @@ let optionParser = require('node-getopt').create([
 
 let arg = optionParser.bindHelp().parseSystem();
 
-const endpointFilename = arg.options.endpointFilename || './config/endpoints';
+const endpointFilename = arg.options.endpointFilename || null;
 const graphFilename = arg.options.graphFilename || './config/graph.dot';
 
 
