@@ -12,34 +12,31 @@ c=$3
 graphFile=$4
 
 INIT_PORT=4000;
+LOGFILE=log.txt
+ERR_LOGFILE=log_err.txt
 
-#if [ $n -gt 20 ]
-#    then
-#        echo "Please add more endpoints to ./config/endpoints"
-#        exit -1
-#fi
+rm ${LOGFILE} ${ERR_LOGFILE}
 
-npm run graphgen -- -n $n -m $m -f $graphFile
-echo generated graph with $n nodes and $m edges
+npm run build
 
-rm output.txt
+npm run graphgen -- -n ${n} -m ${m} -f ${graphFile}
+echo generated graph with ${n} nodes and ${m} edges
 
 for ((i=1;i<=$n;i++))
 do
-     npm run start -- -g $graphFile --id $i -c $c >> output.txt &
+     npm run start -- -g ${graphFile} --id ${i} -c ${c} >> ${LOGFILE} 2>> ${ERR_LOGFILE} &
 done
 
-MINLINES=$((4 * $n + $n))
+MIN_LINES=$((4 * $n + $n))
 COUNTER=0
 MAX_WAIT=900
-until [ $(cat output.txt | wc -l) -ge $MINLINES ]; do
-    echo Not all nodes has been started... Waiting for $COUNTER seconds
+until [ $(cat ${LOGFILE} | wc -l) -ge ${MIN_LINES} ]; do
+    echo Not all nodes has been started... Waiting for ${COUNTER} seconds
     sleep 5
     COUNTER=$(($COUNTER+5))
 
-    if [ $COUNTER -gt $MAX_WAIT ]; then
-        echo Starting all nodes takes too long, exiting. Log:
-        cat server.log
+    if [ ${COUNTER} -gt ${MAX_WAIT} ]; then
+        echo Starting all nodes takes too long, exiting.
         exit 1
     fi
 done
@@ -51,7 +48,7 @@ npm run init -- -c init -r "this is the rumor" --host localhost --port ${INIT_PO
 
 sleep 10
 
-echo "\n\n" >> output.txt
+echo "\n\n" >> ${LOGFILE}
 
 echo "Stop all nodes"
 npm run init -- -c "stop all" --host localhost --port ${INIT_PORT}
@@ -60,8 +57,8 @@ echo ""
 echo ""
 echo ""
 
-believers=$(cat output.txt | grep INFO | wc -l | tr -d '[:space:]')
+believers=$(cat ${LOGFILE} | grep INFO | wc -l | tr -d '[:space:]')
 
-echo $believers nodes believe the rumor
+echo ${believers} nodes believe the rumor
 
-exit $believers
+exit ${believers}
