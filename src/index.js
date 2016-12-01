@@ -31,7 +31,8 @@ async function main() {
         await myServer.listen(serverLogic.onReceiveData());
         console.log('exit node ' + myId);
     } catch (e) {
-        console.error(e);
+        if (!e.stack) console.error(e);
+        else console.error(e.stack)
     }
 }
 
