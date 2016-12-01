@@ -12,8 +12,8 @@ c=$3
 graphFile=$4
 
 INIT_PORT=4000;
-LOGFILE=log.txt
-ERR_LOGFILE=log_err.txt
+LOGFILE=out.log
+ERR_LOGFILE=err.log
 
 rm ${LOGFILE} ${ERR_LOGFILE}
 
