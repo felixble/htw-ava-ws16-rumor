@@ -31,6 +31,12 @@ async function queryAddressSendMsg(msg) {
     }
 }
 
+/**
+ * Executes a command.
+ *
+ * @param cmd
+ * @returns {boolean} true, if the dialog should be terminated.
+ */
 async function execCommand(cmd) {
     switch (cmd) {
         case 'init':
@@ -51,20 +57,35 @@ async function execCommand(cmd) {
         }
         case 'exit':
         {
-            exit = true;
+            return true;
+        }
+        case '?':
+        case 'help':
+        {
+            console.log('init: Initialize distribution of a rumor.');
+            console.log('stop: Stop one rumor node');
+            console.log('stop all: Stop all rumor nodes');
+            console.log('exit: Exit this program');
+            console.log('?: Display this help');
             break;
         }
         default: {
             throw new Error('Unknown command ' + cmd);
         }
     }
+    return false;
 }
 
 async function dialog() {
     let exit = false;
     while(!exit) {
         let cmd = await readLine('Enter command:');
-        await execCommand(cmd);
+        try {
+            exit = await execCommand(cmd);
+        } catch(e) {
+            if (!e.stack) console.error(e);
+            else console.error(e.stack)
+        }
     }
     process.exit();
 }

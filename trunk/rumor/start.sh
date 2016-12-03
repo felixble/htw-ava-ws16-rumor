@@ -1,8 +1,8 @@
 #!/bin/sh
 
-if [ $# -ne 4 ]
+if [ $# -ne 5 ]
     then
-        echo "$0 n m c graphFilename"
+        echo "$0 n m c graphFilename rumor"
         exit -1
 fi
 
@@ -10,6 +10,7 @@ n=$1
 m=$2
 c=$3
 graphFile=$4
+rumor=$4
 
 INIT_PORT=4000;
 LOGFILE=out.log
@@ -17,7 +18,7 @@ ERR_LOGFILE=err.log
 
 rm ${LOGFILE} ${ERR_LOGFILE}
 
-npm run build
+#npm run build
 
 npm run graphgen -- -n ${n} -m ${m} -f ${graphFile}
 echo generated graph with ${n} nodes and ${m} edges
@@ -44,7 +45,7 @@ done
 echo "All nodes has been started"
 
 echo "Send rumor to node 1"
-npm run init -- -c init -r "this is the rumor" --host localhost --port ${INIT_PORT}
+npm run init -- -c init -r ${rumor} --host localhost --port ${INIT_PORT}
 
 sleep 10
 
