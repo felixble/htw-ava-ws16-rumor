@@ -47,7 +47,7 @@ echo "All nodes has been started"
 echo "Send rumor to node 1"
 npm run init -- -c init -r ${rumor} --host localhost --port ${INIT_PORT}
 
-sleep 10
+sleep 20
 
 echo "\n\n" >> ${LOGFILE}
 
