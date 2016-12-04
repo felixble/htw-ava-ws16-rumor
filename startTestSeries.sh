@@ -14,22 +14,23 @@ do
     do
         case ${i} in
             "0")
-                n=$x
+                n=${x}
                 ;;
             "1")
-                m=$x
+                m=${x}
                 ;;
             "2")
-                c=$x
+                c=${x}
                 ;;
             "3")
-                rumor=$x
+                rumor=${x}
                 ;;
         esac
         i=$((i+1))
     done
     ./start.sh ${n} ${m} ${c} config/graph2.dot ${rumor}
+    res=$?
     echo "./start.sh ${n} ${m} ${c} config/graph2.dot ${rumor}"
-    echo ${n} ${m} ${c} ${rumor} $? >> ${out}
-    echo $?
+    echo ${n} ${m} ${c} ${rumor} ${res} >> ${out}
+    echo ${res}
 done
