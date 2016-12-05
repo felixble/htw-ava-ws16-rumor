@@ -122,9 +122,41 @@ direkt als Parameter übergeben. Eine Hilfe wird auch hier mit dem Parameter "-h
 Über den Parameter "-f" bzw. "--filename" (Filename) wird der Pfad angegeben, an dem der erzeugte Graph gespeichert
 werden soll.
 
-### Beispiel
+### Shellskripte
 
+Zum einfachen Ausführen von Versuchen und als nützliche Hilfe während des Entwicklungsprozesses wurden zusätzliche
+Shellskripte erstellt. Diese befinden sich im Verzeichnis "scripts". Ausgaben der Skripte erfolgen entweder auf die
+Standardausgabe oder in spezielle Log-Dateien, welche unter "scripts/logs" abgelegt werden. Benötigt ein Skript
+spezielle Eingabeparameter, so werden Hinweise zur Verwendung ausgegeben, falls keine Parameter übergeben wurden.
 
+#### Skript: kill-all.sh
+
+Das Skript "kill-all.sh" sendet das Signal "-SIGKILL" an alle derzeit laufenden node-Prozesse. Es kann dazu verwendet
+werden, falls sich die Netzwerkknoten in einem ungewolltem Zustand befinden und sich nicht mehr auf "normalem" Weg
+terminieren lassen.
+
+> Hinweis: Das Skript ist mit besonderer Vorsicht zu verwenden, da andere Node-Prozesse die auf diesem System laufen ebenfalls terminiert werden.
+
+### Skript: start.sh
+
+Das Skript "start.sh" generiert einen zufälligen Graphen, der als Netzwerktopologie verwendet wird und starten für jeden
+Knoten des Graphen einen Netzwerkknoten-Prozess mit der entsprechenden ID. Sobald alle Prozesse gestartet wurden, wird
+automatisch die Verbreitung eines Gerüchtes initialisiert und anschließend die Prozesse beendet. Sobald alle Prozesse
+beendet wurden, beendet sich das Skript ebenso.
+
+> Hinweis: Da das Programm in der aktuellen Version die Terminierung der Ausbreitung von Gerüchten nicht feststellen kann, wird nach dem Initialisieren eine feste Zeit gewartet, bis die Prozesse beendet werden.
+
+    $ ./scripts/start.sh
+    ./scripts/start.sh n m c graphFilename rumor
+    
+Der Parameter "n" entspricht der Anzahl an Knoten, "m" bestimmt die Anzahl an Kanten, "c" entspricht Anzahl an *eingehenden*
+Gerüchten, bis das Gerücht *geglaubt* wird. Der vierte Parameter "graphFilename" gibt den Dateinamen der Datei an, in 
+der der erzeugte Graph gespeichert wird und "rumor" bestimmt das zu sendende Gerücht.
+
+### Skript: startTestSeries.sh
+
+Das Skript "startTestSeries.sh" führt eine gesamte Testreihe durch und legt das Ergebnis in einer neuen Datei unter
+"scripts/results" ab.
 
 ## Aufbau
 
@@ -144,35 +176,32 @@ werden soll.
 
 # Experimente
 
+Zur Durchführung der Experimente werden die oben beschriebenen Skripte "start.sh" sowie "startTestSeries.sh" verwendet.
+
 ## Beschreibung
 
 ## Auswertung
 
 
-
-
--- ist noch von Markus...
-
-| Nodes | Edges | BelieveCount c | Rumor | InitNode | Believers | Percentage | AvgNodeDeg |
-|-------|-------|----------------|-------|----------|-----------|------------|------------|
-| 10    | 15    | 2              | a.1   | 1        |           |            |            |
-| 10    | 15    | 2              | a.2   | 1        |           |            |            |
-| 10    | 15    | 2              | a.3   | 1        |           |            |            |
-| 10    | 15    | 3              | b.1   | 1        |           |            |            |
-| 10    | 15    | 3              | b.2   | 1        |           |            |            |
-| 10    | 15    | 3              | b.3   | 1        |           |            |            |
-| 10    | 15    | 6              | c.1   | 1        |           |            |            |
-| 10    | 15    | 6              | c.2   | 1        |           |            |            |
-| 10    | 15    | 6              | c.3   | 1        |           |            |            |
-| 10    | 20    | 3              | d.1   | 1        |           |            |            |
-| 10    | 20    | 3              | d.2   | 1        |           |            |            |
-| 10    | 20    | 3              | d.3   | 1        |           |            |            |
-| 50    | 51    | 5              | e.1   | 1        |           |            |            |
-| 50    | 51    | 5              | e.2   | 1        |           |            |            |
-| 50    | 51    | 5              | e.3   | 1        |           |            |            |
-| 50    | 90    | 5              | f.1   | 1        |           |            |            |
-| 50    | 90    | 5              | f.2   | 1        |           |            |            |
-| 50    | 90    | 5              | f.3   | 1        |           |            |            |
-| 100   | 190   | 5              | g.1   | 1        |           |            |            |
-| 100   | 190   | 5              | g.2   | 1        |           |            |            |
-| 100   | 190   | 5              | g.3   | 1        |           |            |            |
+| Nodes | Edges | BelieveCount c | Rumor | InitNode | Believers | Percentage |
+|-------|-------|----------------|-------|----------|-----------|------------|
+| 10    | 15    | 2              | a.1   | 1        | 7         | 70%        |
+| 10    | 15    | 2              | a.2   | 1        | 8         | 80%        |
+| 10    | 15    | 2              | a.3   | 1        | 7         | 70%        |
+| 10    | 15    | 3              | b.1   | 1        | 3         | 30%        | 
+| 10    | 15    | 3              | b.2   | 1        | 4         | 40%        |
+| 10    | 15    | 3              | b.3   | 1        | 3         | 30%        |            
+| 10    | 15    | 6              | c.1   | 1        | 2         | 20%        |            
+| 10    | 15    | 6              | c.2   | 1        | 0         |  0%        |            
+| 10    | 15    | 6              | c.3   | 1        | 1         | 10%        |            
+| 10    | 20    | 3              | d.1   | 1        | 5         | 50%        |            
+| 10    | 20    | 3              | d.2   | 1        | 8         | 80%        |            
+| 10    | 20    | 3              | d.3   | 1        | 4         | 40%        |            
+| 50    | 51    | 5              | e.1   | 1        | 5         | 10%        |            
+| 50    | 51    | 5              | e.2   | 1        | 3         | 60%        |            
+| 50    | 51    | 5              | e.3   | 1        | 6         | 12%        |            
+| 50    | 90    | 5              | f.1   | 1        | 15        | 30%        |            
+| 50    | 90    | 5              | f.2   | 1        | 16        | 32%        |            
+| 50    | 90    | 5              | f.3   | 1        | 14        | 28%        |            
+| 100   | 190   | 5              | g.1   | 1        | 14        | 14%        |            
+| 100   | 190   | 5              | g.2   | 1        | 13        | 13%        |            
