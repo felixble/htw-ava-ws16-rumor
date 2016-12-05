@@ -58,10 +58,13 @@ Interkation mit dem Nutzer ausgeführt werden kann. Der Parameter "-h" listet al
     $ npm run start -- -h
     Usage: node index.js
     
-          --endpointFilename=[ARG]  path to the endpoints file, leave blank to map ids to local ports
-      -g, --graphFilename=[ARG]     path to the graph file defining the network node topology
+          --endpointFilename=[ARG]  path to the endpoints file, leave 
+                                    blank to map ids to local ports
+      -g, --graphFilename=[ARG]     path to the graph file defining 
+                                    the network node topology
           --id=[ARG]                ID of this endpoint
-      -c, --count=[ARG]             number of receives until a rumor will be believed
+      -c, --count=[ARG]             number of receives until a rumor 
+                                    will be believed
       -h, --help                    Display this help
 
 So kann zum Beispiel ein Netzwerkknoten mit der ID 5 wie folgt gestartet werden:

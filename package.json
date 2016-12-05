@@ -9,6 +9,7 @@
     "start": "node build/index.js",
     "init": "node build/tools/init.js",
     "graphgen": "node build/tools/graphgen.js",
+    "generatePdf": "pandoc README.md -f markdown -t latex -s -o README.pdf",
     "test": "node ./node_modules/mocha/bin/mocha  --recursive ./tests/ --compilers js:babel-register"
   },
   "author": "Felix Blechschmitt",

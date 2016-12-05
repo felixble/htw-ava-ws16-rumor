@@ -34,7 +34,8 @@ export class ServerLogic {
                 await this._runAlgorithm(data, socket);
                 this.sem.leave();
             } catch(e) {
-                console.error(e);
+                if (!e.stack) console.error(e);
+                else console.error(e.stack)
             }
         };
     }
