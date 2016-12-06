@@ -9,7 +9,7 @@ export class HelloServer extends ServerLogic {
             if (!neighbor.contactedAlready) {
                 try {
                     neighbor.contactedAlready = true;
-                    let msg = {msg: 'My id: ' + this.endpointManager.getMyId()};
+                    let msg = {msg: 'My id: ' + this.endpointManager.getMyId(), type: 'rumor'};
                     let client = new Client(neighbor.host, neighbor.port);
                     await client.connect();
                     await client.send(msg);

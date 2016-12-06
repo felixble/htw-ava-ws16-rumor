@@ -1,5 +1,8 @@
 let net = require('net');
 
+/**
+ * Implementation of a simple tcp client.
+ */
 export class Client {
     constructor(host, port) {
         this.host = host;

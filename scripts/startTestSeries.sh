@@ -28,7 +28,7 @@ fi
 DATE=`date +%Y-%m-%d:%H:%M:%S`
 
 file=../config/testSeries
-graphFile=config/graph2.dot
+graphFile=../config/graph2.dot
 log=logs/testSeries.log
 out=results/testSeriesResult_${DATE}.log
 

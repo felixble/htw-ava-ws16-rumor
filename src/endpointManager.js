@@ -5,6 +5,11 @@ let endpointParser = require('./parser/endpointParser');
 
 const MIN_PORT = 4000;
 
+/**
+ * EndpointManager gives information about
+ * my local id, my neighbors as well as the
+ * other endpoints.
+ */
 export class EndpointManager {
 
     /**
@@ -19,6 +24,9 @@ export class EndpointManager {
         this.graphFilename = graphFilename;
     }
 
+    /**
+     * Initialize the endpoint manager.
+     */
     async init() {
         let rawGraphFile = await readFile(this.graphFilename);
         this.graphvizParser = new GraphvizParser();
