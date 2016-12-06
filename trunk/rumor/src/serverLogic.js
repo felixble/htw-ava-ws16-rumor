@@ -1,6 +1,15 @@
 import { Client } from './lib/client'
 import { Semaphore } from './lib/async-semaphore'
 
+/**
+ * Base class of the server logic,
+ * which can execute actions for given control
+ * messages and pass other incoming messages
+ * to a concrete implementation.
+ *
+ * With a semaphore we make sure that only one message
+ * will be handled at a specific time.
+ */
 export class ServerLogic {
 
     constructor(server, endpointManager) {
@@ -10,6 +19,12 @@ export class ServerLogic {
         this.killed = false;
     }
 
+    /**
+     * Returns a function which defines the
+     * handling of incoming messages.
+     *
+     * @returns {function(socket, data)}
+     */
     onReceiveData() {
         return async(socket, data) => {
             try {
@@ -22,16 +37,19 @@ export class ServerLogic {
                 }
 
                 this.logR(JSON.stringify(data));
-                if (data.msg === "STOP") {
-                    this.stop();
-                    return;
+                if (data.type === 'control') {
+                    if (data.msg === "STOP") {
+                        this.stop();
+                        return;
+                    }
+                    if (data.msg === "STOP ALL") {
+                        await this.sendStopSignalToNeighbors();
+                        this.stop();
+                        return;
+                    }
+                } else {
+                    await this._runAlgorithm(data, socket);
                 }
-                if (data.msg === "STOP ALL") {
-                    await this.sendStopSignalToNeighbors();
-                    this.stop();
-                    return;
-                }
-                await this._runAlgorithm(data, socket);
                 this.sem.leave();
             } catch(e) {
                 if (!e.stack) console.error(e);
@@ -50,7 +68,7 @@ export class ServerLogic {
         for (let i = 0; i < this.endpointManager.getMyNeighbors().length; i++) {
             let neighbor = this.endpointManager.getMyNeighbors()[i];
             try {
-                let msg = {msg: 'STOP ALL', from: this.endpointManager.getMyId()};
+                let msg = {msg: 'STOP ALL', from: this.endpointManager.getMyId(), type: 'control'};
                 let client = new Client(neighbor.host, neighbor.port);
                 await client.connect();
                 await client.send(msg);

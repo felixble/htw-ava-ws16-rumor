@@ -12,7 +12,7 @@ n=$1
 m=$2
 c=$3
 graphFileRelative=$4
-rumor=$4
+rumor=$5
 
 #-- Convert given relative path to absolute path --#
 
@@ -29,7 +29,7 @@ INIT_PORT=4000;
 LOGFILE=logs/out.log
 ERR_LOGFILE=logs/err.log
 
-rm ${LOGFILE} ${ERR_LOGFILE}
+rm ${LOGFILE} ${ERR_LOGFILE} 2> /dev/null
 
 #-- Check if build files are available otherwise build project --#
 

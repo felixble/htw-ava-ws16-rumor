@@ -14,18 +14,18 @@ let optionParser = require('node-getopt').create([
 let arg = optionParser.bindHelp().parseSystem();
 
 
-async function sendMsgClient(host, port, msg) {
+async function sendMsgClient(host, port, msg, type='control') {
     let client = new Client(host, port);
     await client.connect();
-    await client.send({msg: msg});
+    await client.send({msg: msg, type: type});
     client.close();
 }
 
-async function queryAddressSendMsg(msg) {
+async function queryAddressSendMsg(msg, type='control') {
     let host = arg.options.host || await readLine('Enter host:');
     let port = arg.options.port || await readLine('Enter port:');
     try {
-        await sendMsgClient(host, port, msg);
+        await sendMsgClient(host, port, msg, type);
     } catch (e) {
         console.log(`Could not send msg to host: ${host}:${port}`);
     }
@@ -42,7 +42,7 @@ async function execCommand(cmd) {
         case 'init':
         {
             let rumor = arg.options.rumor || await readLine('Enter rumor:');
-            await queryAddressSendMsg(rumor);
+            await queryAddressSendMsg(rumor, 'rumor');
             break;
         }
         case 'stop':

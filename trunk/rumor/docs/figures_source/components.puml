@@ -1,0 +1,48 @@
+@startuml
+!include style.puml
+
+EndpointManager --left---- ServerLogic
+Server --right---- ServerLogic
+
+ServerLogic <|-- HelloServer
+ServerLogic <|-- RumorServer
+
+EndpointParser -- EndpointManager
+GraphvizParser -- EndpointManager
+
+
+class EndpointManager {
+    myId
+    myEndpoint
+    myNeighbors
+    endpoints
+}
+
+class ServerLogic {
+    onReceiveData()
+    _runAlgorithm(data, socket)
+}
+
+class RumorServer {
+    _runAlgorithm(data, socket)
+}
+
+class HelloServer {
+    _runAlgorithm(data, socket)
+}
+
+class Server {
+    listen(callback)
+    close()
+}
+
+class EndpointParser {
+}
+
+class GraphvizParser {
+}
+
+
+
+
+@enduml
