@@ -7,9 +7,7 @@ Dieses Dokument enthält Informationen über den Aufbau und die Funktionen von r
 
 ## Build status (by [TravisCI](https://travis-ci.org))
 
-|Branch|  |
-|---|---|
-|master|[![Build Status](https://travis-ci.org/felixble/htw-ava-ws16-rumor.svg?branch=master)](https://travis-ci.org/felixble/htw-ava-ws16-rumor)|
+[![Build Status](https://travis-ci.org/felixble/htw-ava-ws16-rumor.svg?branch=master)](https://travis-ci.org/felixble/htw-ava-ws16-rumor)
 
 # Getting Started
 
@@ -192,7 +190,7 @@ verknüpft und der Netzwerkknoten gestartet.
 
 Das folgende UML-Klassendiagramm zeigt einen Überblick über die einzelnen Komponenten der Anwendung.
 
-![Komponenten der Anwendung](./docs/figures/components.png)
+![Komponenten der Anwendung](./docs/figures/components.svg)
 
 Die Klasse Server ist eine einfache Implementierung eines TCP-Servers, der bei eingehenden Nachrichten eine vorher definierte
 Funktion aufruft. Ein Aufruf der Methode "listen(callback)" startet den Server und registriert die übergebene Funktion
