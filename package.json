@@ -30,8 +30,11 @@
     "semaphore": "^1.0.5"
   },
   "repository": {
-    "type": "svn",
-    "url": "https://svn.femasrv.de/felix-ava/trunk/"
+    "type": "git",
+    "url": "https://github.com/felixble/htw-ava-ws16-rumor.git"
   },
-  "license": "UNLICENSED"
+  "bugs": {
+    "url": "https://github.com/felixble/htw-ava-ws16-rumor/issues"
+  },
+  "license": "MIT"
 }
