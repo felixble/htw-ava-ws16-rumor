@@ -5,6 +5,12 @@ Felix Blechschmitt
 
 Dieses Dokument enthält Informationen über den Aufbau und die Funktionen von rumor.
 
+## Build status (by [TravisCI](https://travis-ci.org))
+
+|Branch|  |
+|---|---|
+|master|[![Build Status](https://travis-ci.org/felixble/htw-ava-ws16.svg?branch=master)](https://travis-ci.org/felixble/htw-ava-ws16)|
+
 # Getting Started
 
 Das Projekt wurde in der Programmiersprache JavaScript nach dem Standard 
