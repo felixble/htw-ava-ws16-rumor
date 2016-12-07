@@ -9,7 +9,7 @@ Dieses Dokument enthält Informationen über den Aufbau und die Funktionen von r
 
 |Branch|  |
 |---|---|
-|master|[![Build Status](https://travis-ci.org/felixble/htw-ava-ws16.svg?branch=master)](https://travis-ci.org/felixble/htw-ava-ws16)|
+|master|[![Build Status](https://travis-ci.org/felixble/htw-ava-ws16-rumor.svg?branch=master)](https://travis-ci.org/felixble/htw-ava-ws16-rumor)|
 
 # Getting Started
 
