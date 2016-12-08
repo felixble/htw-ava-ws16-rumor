@@ -5,7 +5,7 @@ Felix Blechschmitt
 
 Dieses Dokument enthält Informationen über den Aufbau und die Funktionen von rumor.
 
-## Build status (by [TravisCI](https://travis-ci.org))
+## Build status (by [TravisCI][travis-ci])
 
 [![Build Status](https://travis-ci.org/felixble/htw-ava-ws16-rumor.svg?branch=master)](https://travis-ci.org/felixble/htw-ava-ws16-rumor)
 
@@ -269,6 +269,13 @@ des Projektordners.
 Die Tests können mithilfe des NPM-Skripts "test" ausgeführt werden:
 
     $ npm run test
+    
+## Continuous Integration
+
+Im Rahmen dieses Projekts wird [TravisCI][travis-ci] als Continuous Integration Lösung verwendet. Dieses System ist
+mit dem github repository verknüpft und sorgt bei jeder Änderung der Daten im Repository dafür, dass die Anwendung 
+erstellt wird und alle automatisierten Tests ausgeführt werden. Die Datei [.travis.yml](./.travis.yml) beschreibt
+die Konfiguration des Testservers und besagt welcher Interpreter in welcher Version verwendet werden soll.
 
 # Experimente
 
@@ -323,3 +330,4 @@ Graph erstellt wird.
 [babel]: https://babeljs.io/
 [source-map]: https://www.html5rocks.com/en/tutorials/developertools/sourcemaps/
 [json]: http://www.json.org/
+[travis-ci]: https://travis-ci.org
