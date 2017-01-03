@@ -5,9 +5,11 @@ Felix Blechschmitt
 
 Dieses Dokument enthält Informationen über den Aufbau und die Funktionen von rumor.
 
-## Build status (by [TravisCI][travis-ci])
-
-[![Build Status](https://travis-ci.org/felixble/htw-ava-ws16-rumor.svg?branch=master)](https://travis-ci.org/felixble/htw-ava-ws16-rumor)
+## Build status (by [TravisCI](https://travis-ci.org))
+|Branch|  |
+|---|---|
+|master|[![Build Status](https://travis-ci.org/felixble/htw-ava-ws16-rumor.svg?branch=master)](https://travis-ci.org/felixble/htw-ava-ws16-rumor)|
+|develop|[![Build Status](https://travis-ci.org/felixble/htw-ava-ws16-rumor.svg?branch=develop)](https://travis-ci.org/felixble/htw-ava-ws16-rumor)|
 
 # Getting Started
 
