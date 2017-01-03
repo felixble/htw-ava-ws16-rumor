@@ -1,5 +1,6 @@
-import { Client } from './lib/client'
-import { Semaphore } from './lib/async-semaphore'
+import { Client } from './lib/client';
+import { Semaphore } from './lib/async-semaphore';
+import { VectorClock } from './lib/vector-clock';
 
 /**
  * Base class of the server logic,
@@ -17,6 +18,7 @@ export class ServerLogic {
         this.endpointManager = endpointManager;
         this.sem = new Semaphore(1);
         this.killed = false;
+        this.myVectorTime = new VectorClock(endpointManager.getMyId());
     }
 
     /**
@@ -26,6 +28,9 @@ export class ServerLogic {
      * @returns {function(socket, data)}
      */
     onReceiveData() {
+        // "I am born"-tick ;-)
+        this.myVectorTime.tick();
+        this.logI('Hello! You can contact me at ' + JSON.stringify(this.endpointManager.getMyEndpoint()));
         return async(socket, data) => {
             try {
                 socket.write(JSON.stringify({}));
@@ -36,7 +41,13 @@ export class ServerLogic {
                     return;
                 }
 
+                this.myVectorTime.tick();
+                if (data.time) {
+                    this.myVectorTime.update(VectorClock.createFromJSON(data.time));
+                }
+
                 this.logR(JSON.stringify(data));
+
                 if (data.type === 'control') {
                     if (data.msg === "STOP") {
                         this.stop();
@@ -53,7 +64,8 @@ export class ServerLogic {
                 this.sem.leave();
             } catch(e) {
                 if (!e.stack) console.error(e);
-                else console.error(e.stack)
+                else console.error(e.stack);
+                this.sem.leave();
             }
         };
     }
@@ -68,12 +80,7 @@ export class ServerLogic {
         for (let i = 0; i < this.endpointManager.getMyNeighbors().length; i++) {
             let neighbor = this.endpointManager.getMyNeighbors()[i];
             try {
-                let msg = {msg: 'STOP ALL', from: this.endpointManager.getMyId(), type: 'control'};
-                let client = new Client(neighbor.host, neighbor.port);
-                await client.connect();
-                await client.send(msg);
-                client.close();
-                this.logS(msg.msg, neighbor);
+                this.sendMsgTo(neighbor, 'STOP ALL', 'control');
             } catch(e) {
                 this.logE('Could not contact neighbor: ' + JSON.stringify(neighbor));
             }
@@ -83,10 +90,25 @@ export class ServerLogic {
     async _runAlgorithm(incomingMsg, socket) {
     }
 
+    async sendMsgTo(neighbor, content, type) {
+        this.myVectorTime.tick();
+        let client = new Client(neighbor.host, neighbor.port);
+        await client.connect();
+        let msg = this.prepareMessage(content, type);
+        this.logS(msg.msg, neighbor);
+        await client.send(msg);
+        client.close();
+    }
+
+    prepareMessage(content, type) {
+        return {msg: content, from: this.endpointManager.getMyId(), type: type, time: this.myVectorTime.toJSON()};
+    }
+
     log(type, msg) {
         let date = new Date();
         let myId = this.endpointManager.getMyId();
-        console.log(`${type} (${myId}) (${date}): ${msg}`);
+        let vectorTime = this.myVectorTime.toString();
+        console.log(`${type} (${myId}) (${date}) (${vectorTime}): ${msg}`);
     }
 
     logR(msg) {

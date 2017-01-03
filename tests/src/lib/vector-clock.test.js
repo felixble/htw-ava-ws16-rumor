@@ -58,4 +58,18 @@ describe('VectorClock', function() {
         expect(vectorClock.getTimeFor(OTHER_ID_2), 'The 2nd other time should have not been updated').to.equal(1);
     });
 
+    it('can be converted to a json object and back to a VectorClock', function() {
+        vectorClock.tick();
+        vectorClock.tick();
+
+        let json = vectorClock.toJSON();
+        expect(json.myId, 'json-object should have the correct id value').to.equal(MY_ID);
+        expect(json.vector, 'json-object should have the correct vector array').to.equal(vectorClock.vector);
+        expect(json.tick, 'json-object should not contain methods').to.be.undefined;
+
+        let fromJson = VectorClock.createFromJSON(json);
+        expect(fromJson.myId, 'new-object should have the correct id value').to.equal(MY_ID);
+        expect(fromJson.vector, 'new-object should have the correct vector array').to.equal(vectorClock.vector);
+    });
+
 });

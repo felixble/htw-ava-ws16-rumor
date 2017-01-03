@@ -1,3 +1,4 @@
+import { _ } from 'underscore'
 
 export class VectorClock {
 
@@ -6,6 +7,12 @@ export class VectorClock {
      * @property id
      * @property {number} time
      */
+
+    static createFromJSON(json) {
+        let clock = new VectorClock(json.myId);
+        clock.vector = json.vector;
+        return clock;
+    }
 
     /**
      *
@@ -21,6 +28,14 @@ export class VectorClock {
     tick() {
         let i = this._getMyIndex();
         this.vector[i].time++;
+    }
+
+    toString() {
+        return JSON.stringify(this.vector);
+    }
+
+    toJSON() {
+        return _.extend({}, this);
     }
 
     /**
