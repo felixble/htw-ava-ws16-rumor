@@ -1,13 +1,15 @@
 
-Rumor: Implementierung von Übung 1 in Node (JavaScript)
+Rumor: Implementierung von Übung 2 in Node (JavaScript)
 ==========================================================
 Felix Blechschmitt
 
 Dieses Dokument enthält Informationen über den Aufbau und die Funktionen von rumor.
 
-## Build status (by [TravisCI][travis-ci])
-
-[![Build Status](https://travis-ci.org/felixble/htw-ava-ws16-rumor.svg?branch=master)](https://travis-ci.org/felixble/htw-ava-ws16-rumor)
+## Build status (by [TravisCI](https://travis-ci.org))
+|Branch|  |
+|---|---|
+|master|[![Build Status](https://travis-ci.org/felixble/htw-ava-ws16-rumor.svg?branch=master)](https://travis-ci.org/felixble/htw-ava-ws16-rumor)|
+|develop|[![Build Status](https://travis-ci.org/felixble/htw-ava-ws16-rumor.svg?branch=develop)](https://travis-ci.org/felixble/htw-ava-ws16-rumor)|
 
 # Getting Started
 
@@ -145,7 +147,7 @@ terminieren lassen.
 > Hinweis: Das Skript ist mit besonderer Vorsicht zu verwenden, da andere Node-Prozesse, die auf diesem System laufen, 
 ebenfalls terminiert werden.
 
-### Skript: start.sh
+#### Skript: start.sh
 
 Das Skript "start.sh" generiert einen zufälligen Graphen, der als Netzwerktopologie verwendet wird und startet für jeden
 Knoten des Graphen einen Netzwerkknoten-Prozess mit der entsprechenden ID. Sobald alle Prozesse gestartet wurden, wird
@@ -162,10 +164,16 @@ Der Parameter "n" entspricht der Anzahl an Knoten, "m" bestimmt die Anzahl an Ka
 Gerüchten, bis das Gerücht *geglaubt* wird. Der vierte Parameter "graphFilename" gibt den Dateinamen der Datei an, in 
 der der erzeugte Graph gespeichert wird und "rumor" bestimmt das zu sendende Gerücht.
 
-### Skript: startTestSeries.sh
+#### Skript: startTestSeries.sh
 
 Das Skript "startTestSeries.sh" führt eine gesamte Testreihe durch und legt das Ergebnis in einer neuen Datei unter
 "scripts/results" ab.
+
+#### Skript: demo-vektorzeit.sh
+
+Das Skript "demo-vektorzeit.sh" startet 4 Netzwerkknoten und sendet ein Gerücht aus. Während der Verbreitung des 
+Gerüchts werden alle von den jeweiligen Netzwerkknoten ausgegebenen Log-Nachrichten auf der Standard-Ausgabe
+ausgegeben.
 
 ## Aufbau
 
@@ -213,6 +221,23 @@ in der Basisklasse einfach mit einem leeren Rumpf definiert.
 die Bearbeitung einer eingehenden Nachricht als eine atomare Aktion ausgeführt werden soll. Um dies in node zu realisieren,
 wurde eine Semaphore verwendet, die alle anderen eingehenden Nachrichten blockiert, während eine Nachricht behandelt wird.
 
+### Vektorzeit
+
+Damit in der Ausgabe ersichtlich ist, in welcher Reihenfolge die -- teilweise parallel abgesetzen -- Nachrichten 
+gesendet wurden, wird eine logische Zeit eingeführt: Die Vektorzeit. Diese Zeiteinheit besteht aus n-Zählern, wobei
+n gerade der Anzahl an Netzwerkknoten entspricht. Die Vektorzeit ist Teil einer jeden Nachricht, die versendet wird.
+Der eigene Zähler wird genau dann erhöht, wenn ein lokales Ereignis passiert (beispielsweise das Senden oder Empfangen
+einer Nachricht). Beim Empfangen einer Nachricht werden außerdem die Werte aller Zähler verglichen und das Maximum
+übernommen.
+
+Implementiert wurde die Vektorzeit als eigenes Modul. Die Klasse VectorClock beinhaltet ein assoziatives Array, welches
+die Zähler für verschiedene Netzwerkknoten, die anhand einer eindeutigen ID identifiziert werden, speichert.
+Tritt ein lokales Ereignis auf, so wird der eigene Zähler mittels der Methode "tick(()" erhöht. Beim Empfangen einer
+Nachricht wird der darin übermittelte Vektor an die Methode "update(clock)" übergeben, was dafür sorgt, dass das 
+Maximum der jeweiligen Zähler übernommen wird. Im initialen Zustand kennt das Modul lediglich den eigenen Zählerstand.
+Das Vektorfeld wird mit jeder ankommenden Nachricht von einem vorher noch unbekannten Netzwerkknoten entsprechend
+angepasst und erweitert.
+
 ### Promise-Wrapper
 
 Ein bekanntes Problem bei Anwendungen in JavaScript ist der Umgang mit verschachtelten Callbacks, also Funktionsaufrufe,
@@ -236,6 +261,10 @@ Nachricht hat dabei folgende Komponenten:
 * type: Typ der Nachricht (rumor oder control)
 * msg: Inhalt der Nachricht
 * from: ID des Absenderknotens (optional)
+* time: Vektorzeit des Absenderknotens (optional)
+
+Die Vektorzeit ist optional, damit bei dem initialen Gerücht keine Zeit mitgesendet werden muss. Alle zwischen den 
+einzelnen Rumor-Knoten ausgetauschten Nachrichten beinhalten natürlich das Feld "time".
 
 Handelt es sich um eine Kontrollnachricht, so enthält das Messagefeld die Aktion ("STOP" zum Beenden des Knotens bzw.
 "STOP ALL" zum Senden der "STOP ALL" Nachricht an alle Nachbarn und zum anschließenden Beenden des Knotens).

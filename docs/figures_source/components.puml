@@ -4,6 +4,8 @@
 EndpointManager --left---- ServerLogic
 Server --right---- ServerLogic
 
+ServerLogic --- VectorClock
+
 ServerLogic <|-- HelloServer
 ServerLogic <|-- RumorServer
 
@@ -42,6 +44,15 @@ class EndpointParser {
 class GraphvizParser {
 }
 
+class VectorClock {
+    myId
+    vector : VectorTimeElement[]
+    constructor(myId)
+    tick()
+    update(clock)
+    getMyTime()
+    getTimeFor(id)
+}
 
 
 

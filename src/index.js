@@ -29,7 +29,6 @@ async function main() {
         /* Set up my own id */
         let myId = parseInt(arg.options.id || await readLine('Please insert the ID of this endpoint:'));
         endpointManager.setMyId(myId);
-        console.log(endpointManager.getMyEndpoint());
         let c = arg.options.count || undefined;
         /* initialize server */
         let myServer = new Server(endpointManager.getMyEndpoint().host, endpointManager.getMyEndpoint().port);
