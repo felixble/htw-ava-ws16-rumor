@@ -1,5 +1,9 @@
 import { _ } from 'underscore'
 
+/**
+ * Implementation of a vector clock which is a
+ * logical time.
+ */
 export class VectorClock {
 
     /**
@@ -15,8 +19,12 @@ export class VectorClock {
     }
 
     /**
+     * Creates a new vector clock and defines the
+     * id of the local node. The counter identified by
+     * this id will be increased whenever the {@link VectorClock#tick}
+     * method will be called.
      *
-     * @param myId
+     * @param myId identifier for this local node.
      */
     constructor(myId) {
         this.myId = myId;
@@ -25,6 +33,9 @@ export class VectorClock {
         this._addVectorTime(myId);
     }
 
+    /**
+     * Increases the local event counter.
+     */
     tick() {
         let i = this._getMyIndex();
         this.vector[i].time++;
@@ -50,11 +61,22 @@ export class VectorClock {
         }
     }
 
+    /**
+     * Gets the local event counter.
+     *
+     * @returns {number} current local event counter
+     */
     getMyTime() {
         let i = this._getMyIndex();
         return this.vector[i].time;
     }
 
+    /**
+     * Gets the event counter for a specific id.
+     *
+     * @param id identifier of the network node
+     * @returns {number} event counter for the given id.
+     */
     getTimeFor(id) {
         let i = this._findIndex(id);
         if (undefined === i) { return 0; }
