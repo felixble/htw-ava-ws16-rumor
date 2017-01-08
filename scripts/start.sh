@@ -12,7 +12,7 @@ n=$1
 m=$2
 c=$3
 graphFileRelative=$4
-rumor=$5
+rumor="$5"
 
 #-- Convert given relative path to absolute path --#
 
@@ -70,7 +70,7 @@ done
 echo "All nodes has been started"
 
 echo "Send rumor to node 1"
-npm run init -- -c init -r ${rumor} --host localhost --port ${INIT_PORT}
+npm run init -- -c init -r "${rumor}" --host localhost --port ${INIT_PORT}
 
 sleep 15
 
@@ -81,7 +81,7 @@ npm run init -- -c "stop all" --host localhost --port ${INIT_PORT}
 
 COUNTER=0
 MAX_WAIT=900
-until [ $(pgrep -f node | wc -l) -eq 0 ]; do
+until [ $(pgrep -f "node build" | wc -l) -eq 0 ]; do
     echo Not all nodes has been stopped... Waiting for ${COUNTER} seconds
     sleep 5
     COUNTER=$(($COUNTER+5))
@@ -98,6 +98,6 @@ echo ""
 
 believers=$(cat ${LOGFILE} | grep INFO | wc -l | tr -d '[:space:]')
 
-echo ${believers} nodes believe the rumor
+echo ${believers} nodes believe the rumor | tee -a ${LOGFILE}
 
 exit ${believers}

@@ -10,6 +10,7 @@
     "init": "node build/tools/init.js",
     "graphgen": "node build/tools/graphgen.js",
     "make-doku": "./scripts/make-doku.sh",
+    "demo-vektorzeit": "./scripts/demo-vektorzeit.sh",
     "test": "node ./node_modules/mocha/bin/mocha  --recursive ./tests/ --compilers js:babel-register"
   },
   "author": "Felix Blechschmitt",
@@ -27,7 +28,8 @@
     "mocha": "^3.1.2",
     "node-getopt": "^0.2.3",
     "prompt": "^1.0.0",
-    "semaphore": "^1.0.5"
+    "semaphore": "^1.0.5",
+    "underscore": "^1.8.3"
   },
   "repository": {
     "type": "git",

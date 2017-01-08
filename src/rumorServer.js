@@ -143,12 +143,7 @@ export class RumorServer extends ServerLogic {
      */
     async tellRumorTo(newRumor, neighbor) {
         try {
-            let msg = {msg: newRumor, from: this.endpointManager.getMyId(), type: 'rumor'};
-            let client = new Client(neighbor.host, neighbor.port);
-            await client.connect();
-            await client.send(msg);
-            client.close();
-            this.logS(msg.msg, neighbor);
+            await this.sendMsgTo(neighbor, newRumor, 'rumor');
         } catch(e) {
             this.logE('Could not contact neighbor: ' + JSON.stringify(neighbor));
         }
