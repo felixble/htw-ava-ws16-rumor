@@ -147,7 +147,7 @@ terminieren lassen.
 > Hinweis: Das Skript ist mit besonderer Vorsicht zu verwenden, da andere Node-Prozesse, die auf diesem System laufen, 
 ebenfalls terminiert werden.
 
-### Skript: start.sh
+#### Skript: start.sh
 
 Das Skript "start.sh" generiert einen zufälligen Graphen, der als Netzwerktopologie verwendet wird und startet für jeden
 Knoten des Graphen einen Netzwerkknoten-Prozess mit der entsprechenden ID. Sobald alle Prozesse gestartet wurden, wird
@@ -164,7 +164,7 @@ Der Parameter "n" entspricht der Anzahl an Knoten, "m" bestimmt die Anzahl an Ka
 Gerüchten, bis das Gerücht *geglaubt* wird. Der vierte Parameter "graphFilename" gibt den Dateinamen der Datei an, in 
 der der erzeugte Graph gespeichert wird und "rumor" bestimmt das zu sendende Gerücht.
 
-### Skript: startTestSeries.sh
+#### Skript: startTestSeries.sh
 
 Das Skript "startTestSeries.sh" führt eine gesamte Testreihe durch und legt das Ergebnis in einer neuen Datei unter
 "scripts/results" ab.
@@ -230,8 +230,8 @@ Der eigene Zähler wird genau dann erhöht, wenn ein lokales Ereignis passiert (
 einer Nachricht). Beim Empfangen einer Nachricht werden außerdem die Werte aller Zähler verglichen und das Maximum
 übernommen.
 
-Implementiert wurde die Vektorzeit als eigenes Module. Die Klasse VectorClock beinhaltet ein assoziatives Array, welches
-die Counter für verschiedene Netzwerkknoten, die anhand einer eindeutigen ID identifiziert werden, speichert.
+Implementiert wurde die Vektorzeit als eigenes Modul. Die Klasse VectorClock beinhaltet ein assoziatives Array, welches
+die Zähler für verschiedene Netzwerkknoten, die anhand einer eindeutigen ID identifiziert werden, speichert.
 Tritt ein lokales Ereignis auf, so wird der eigene Zähler mittels der Methode "tick(()" erhöht. Beim Empfangen einer
 Nachricht wird der darin übermittelte Vektor an die Methode "update(clock)" übergeben, was dafür sorgt, dass das 
 Maximum der jeweiligen Zähler übernommen wird. Im initialen Zustand kennt das Modul lediglich den eigenen Zählerstand.
@@ -263,8 +263,8 @@ Nachricht hat dabei folgende Komponenten:
 * from: ID des Absenderknotens (optional)
 * time: Vektorzeit des Absenderknotens (optional)
 
-Die Vektorzeit ist optional, da bei der Initialisierung keine Zeit mitgesendet wird. Alle zwischen den einzelnen
-Rumor-Knoten ausgetauschten Nachrichten beinhalten natürlich das Feld "time".
+Die Vektorzeit ist optional, damit bei dem initialen Gerücht keine Zeit mitgesendet werden muss. Alle zwischen den 
+einzelnen Rumor-Knoten ausgetauschten Nachrichten beinhalten natürlich das Feld "time".
 
 Handelt es sich um eine Kontrollnachricht, so enthält das Messagefeld die Aktion ("STOP" zum Beenden des Knotens bzw.
 "STOP ALL" zum Senden der "STOP ALL" Nachricht an alle Nachbarn und zum anschließenden Beenden des Knotens).
