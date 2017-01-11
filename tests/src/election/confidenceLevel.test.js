@@ -30,6 +30,95 @@ describe('ConfidenceLevel', function() {
 
     });
 
+    describe('#updateLevelOnNewChooseMeMsg', function() {
+
+        it('increases the value correctly', function() {
+            const SENDER = 2;
+            const INIT_VALUE = 65;
+            const EXPECTED_RESULT = 71.5;
+            let confidenceLevel = new ConfidenceLevel(false);
+
+            confidenceLevel._getLevelById(SENDER).value = INIT_VALUE;
+            confidenceLevel.updateLevelOnNewChooseMeMsg(SENDER);
+            expect(confidenceLevel._getLevelById(SENDER).value).to.equal(EXPECTED_RESULT);
+        });
+
+        it('does not overstep 100', function() {
+            const SENDER = 2;
+            const EXPECTED_RESULT = 100;
+            let confidenceLevel = new ConfidenceLevel(SENDER);
+
+            confidenceLevel.updateLevelOnNewChooseMeMsg(SENDER);
+            expect(confidenceLevel._getLevelById(SENDER).value).to.equal(EXPECTED_RESULT);
+        });
+
+    });
+
+    describe('updateLevelOnNewCampaign', function() {
+
+        const COMPETITOR = 1;
+        const FAVOURITE = 2;
+
+        let confidenceLevel;
+        let init = (favouriteValue, competitorValue) => {
+            confidenceLevel._getLevelById(FAVOURITE).value = favouriteValue;
+            confidenceLevel._getLevelById(COMPETITOR).value = competitorValue;
+        };
+
+        beforeEach(function() {
+            confidenceLevel = new ConfidenceLevel(false);
+        });
+
+        it('increases the value of the sender if he is my favourite candidate', function() {
+            const EXPECTED_RESULT_FAV = 66;
+            const EXPECTED_RESULT_COMPETITOR = 11;
+            const INIT_VALUE_FAV = 65;
+            const INIT_VALUE_COMPETITOR = 12;
+
+            init(INIT_VALUE_FAV, INIT_VALUE_COMPETITOR);
+
+            confidenceLevel.updateLevelOnNewCampaign(FAVOURITE);
+
+            expect(confidenceLevel._getLevelById(FAVOURITE).value, 'sender should be increased')
+                .to.equal(EXPECTED_RESULT_FAV);
+            expect(confidenceLevel._getLevelById(COMPETITOR).value, 'competitor should be decreased')
+                .to.equal(EXPECTED_RESULT_COMPETITOR);
+        });
+
+        it('decreases the value of the sender if he is NOT my favourite candidate', function() {
+            const EXPECTED_RESULT_FAV = 66;
+            const EXPECTED_RESULT_COMPETITOR = 11;
+            const INIT_VALUE_FAV = 65;
+            const INIT_VALUE_COMPETITOR = 12;
+
+            init(INIT_VALUE_FAV, INIT_VALUE_COMPETITOR);
+
+            confidenceLevel.updateLevelOnNewCampaign(COMPETITOR);
+
+            expect(confidenceLevel._getLevelById(FAVOURITE).value, 'my favourite should be increased')
+                .to.equal(EXPECTED_RESULT_FAV);
+            expect(confidenceLevel._getLevelById(COMPETITOR).value, 'competitor should be decreased')
+                .to.equal(EXPECTED_RESULT_COMPETITOR);
+        });
+
+        it('does nothing if both candidates have the same value', function() {
+            const EXPECTED_RESULT_FAV = 51;
+            const EXPECTED_RESULT_COMPETITOR = 51;
+            const INIT_VALUE_FAV = 51;
+            const INIT_VALUE_COMPETITOR = 51;
+
+            init(INIT_VALUE_FAV, INIT_VALUE_COMPETITOR);
+
+            confidenceLevel.updateLevelOnNewCampaign(COMPETITOR);
+
+            expect(confidenceLevel._getLevelById(FAVOURITE).value, 'value of candidate one should not have changed')
+                .to.equal(EXPECTED_RESULT_FAV);
+            expect(confidenceLevel._getLevelById(COMPETITOR).value, 'value of candidate two should not have changed')
+                .to.equal(EXPECTED_RESULT_COMPETITOR);
+        });
+
+    });
+
     describe('#_randomLevel', function() {
 
         it('generates a random number between 0 and 100 (inclusive)', function() {
