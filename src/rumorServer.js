@@ -1,5 +1,7 @@
+import { _ } from 'underscore';
 import { ServerLogic } from './serverLogic'
 import { Client } from './lib/client'
+import { RumorAlgorithm } from './lib/algorithm/rumorAlgorithm';
 
 /**
  * Default believe count, iff no
@@ -20,27 +22,20 @@ export class RumorServer extends ServerLogic {
         super(server, endpointManager);
         this.rumors = [];
         this.believeCount = (believeCount === -1) ? BELIEVE_COUNT : believeCount;
+        this.algorithm = new RumorAlgorithm(
+            this.endpointManager.getMyId(), this.endpointManager.getMyNeighbors(), _.bind(this.sendMsgTo, this));
+        this.algorithm.setOnMessageProcessed(_.bind(this.onMessageProcessed, this));
     }
 
     async _runAlgorithm(data, socket) {
-        let newRumor = data.msg;
         let from = data.from || this.endpointManager.getMyId();
+        await this.algorithm.processIncomingMessage(data.msg, from);
+    }
 
-        let alreadyKnown = this.isKnown(newRumor);
-        this.addRumor(newRumor, from);
-
-        if (!alreadyKnown) {
-            for (let i = 0; i < this.endpointManager.getMyNeighbors().length; i++) {
-                let neighbor = this.endpointManager.getMyNeighbors()[i];
-
-                if (!this.toldMe(newRumor, neighbor.id)) {
-                    await this.tellRumorTo(newRumor, neighbor);
-                }
-            }
-        }
-
-        if (!this.getRumorByText(newRumor).believe && this.doIbelieve(newRumor)) {
-            this.logI(`I believe the rumor: ${newRumor}`);
+    onMessageProcessed(msg) {
+        let rumor = this.algorithm.getRumorByText(msg);
+        if (!rumor.believe && this.doIbelieve(rumor)) {
+            this.logI(`I believe the rumor: ${msg}`);
         }
     }
 
@@ -48,92 +43,14 @@ export class RumorServer extends ServerLogic {
      * Checks wheather the node believes the
      * given rumor.
      *
-     * @param rumorText
+     * @param rumor
      * @returns {boolean|*}
      */
-    doIbelieve(rumorText) {
-        let rumor = this.getRumorByText(rumorText);
+    doIbelieve(rumor) {
         rumor.believe = rumor.from.length >= this.believeCount;
         return rumor.believe;
     }
 
-    /**
-     *  Checks wheather the given rumor is already known.
-     *
-     * @param rumorText
-     * @param id neighbor id
-     * @returns {boolean}
-     */
-    toldMe(rumorText, id) {
-        let index = this.getRumorIndexByText(rumorText);
-        if (index === undefined) {
-            return false;
-        }
-        let fromIndex = this.rumors[index].from.indexOf(id);
-        return (fromIndex !== -1);
-    }
-
-    /**
-     * Adds the given rumor to the list of known rumors.
-     *
-     * @param text
-     * @param from
-     */
-    addRumor(text, from) {
-        let rumorIndex = this.getRumorIndexByText(text);
-        if (rumorIndex !== undefined) { // is known already
-            let fromIndex = this.rumors[rumorIndex].from.indexOf(from);
-            if (fromIndex === -1) {
-                this.rumors[rumorIndex].from.push(from);
-            }
-        } else {
-            let fromArr = (from === undefined) ? [] : [from];
-            this.rumors.push({
-                text: text,
-                from: fromArr,
-                believe: false
-            });
-        }
-    }
-
-    /**
-     * Returns the rumor identified by the given message
-     * from the list of known rumors.
-     *
-     * @param text
-     * @returns {*}
-     */
-    getRumorByText(text) {
-        let index = this.getRumorIndexByText(text);
-        return this.rumors[index];
-    }
-
-    /**
-     * Returns the rumor index identified by the given message
-     * from the list of known rumors.
-     *
-     * @param text rumor message
-     * @returns {*} the index of the rumor or undefined iff the rumor was not found.
-     */
-    getRumorIndexByText(text) {
-        for (let i = 0; i < this.rumors.length; i++) {
-            if (this.rumors[i].text === text) {
-                return i;
-            }
-        }
-        return undefined;
-    }
-
-    /**
-     * Checks wheather the given rumor is already knwon.
-     *
-     * @param rumor
-     * @returns {boolean}
-     */
-    isKnown(rumor) {
-        let index = this.getRumorIndexByText(rumor);
-        return (index !== undefined);
-    }
 
     /**
      * Sends a given rumor to the designated neighbor.
@@ -142,10 +59,6 @@ export class RumorServer extends ServerLogic {
      * @param neighbor
      */
     async tellRumorTo(newRumor, neighbor) {
-        try {
-            await this.sendMsgTo(neighbor, newRumor, 'rumor');
-        } catch(e) {
-            this.logE('Could not contact neighbor: ' + JSON.stringify(neighbor));
-        }
+        await this.sendMsgTo(neighbor, newRumor, 'rumor');
     }
 }
