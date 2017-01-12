@@ -61,7 +61,11 @@ export class ConfidenceLevel {
     static _increaseLevelBy(amount, level) {
         let tmp = level.value + amount;
 
-        if (tmp >= 0 && tmp <= 100) {
+        if (tmp < 0) {
+            level.value = 0;
+        } else if (tmp > 100) {
+            level.value = 100;
+        } else {
             level.value = tmp;
         }
     }

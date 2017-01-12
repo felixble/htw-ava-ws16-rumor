@@ -46,7 +46,7 @@ describe('ConfidenceLevel', function() {
         it('does not overstep 100', function() {
             const SENDER = 2;
             const EXPECTED_RESULT = 100;
-            let confidenceLevel = new ConfidenceLevel(SENDER);
+            let confidenceLevel = new ConfidenceLevel(/*favourite candidate -> level = 100*/SENDER);
 
             confidenceLevel.updateLevelOnNewChooseMeMsg(SENDER);
             expect(confidenceLevel._getLevelById(SENDER).value).to.equal(EXPECTED_RESULT);
@@ -115,6 +115,42 @@ describe('ConfidenceLevel', function() {
                 .to.equal(EXPECTED_RESULT_FAV);
             expect(confidenceLevel._getLevelById(COMPETITOR).value, 'value of candidate two should not have changed')
                 .to.equal(EXPECTED_RESULT_COMPETITOR);
+        });
+
+    });
+
+    describe('#_increaseLevelBy', function() {
+
+        it('increases the value correctly', function() {
+            const INIT_VAL = 13;
+            const AMOUNT = 12;
+            let level = {value: INIT_VAL};
+            ConfidenceLevel._increaseLevelBy(AMOUNT, level);
+            expect(level.value).to.equal(INIT_VAL + AMOUNT);
+        });
+
+        it('decreases the value correctly', function() {
+            const INIT_VAL = 13;
+            const AMOUNT = -12;
+            let level = {value: INIT_VAL};
+            ConfidenceLevel._increaseLevelBy(AMOUNT, level);
+            expect(level.value).to.equal(INIT_VAL + AMOUNT);
+        });
+
+        it('does not overstep 100', function() {
+            const INIT_VAL = 93;
+            const AMOUNT = 10;
+            let level = {value: INIT_VAL};
+            ConfidenceLevel._increaseLevelBy(AMOUNT, level);
+            expect(level.value).to.equal(100);
+        });
+
+        it('does not fall below 0', function() {
+            const INIT_VAL = 12;
+            const AMOUNT = -14;
+            let level = {value: INIT_VAL};
+            ConfidenceLevel._increaseLevelBy(AMOUNT, level);
+            expect(level.value).to.equal(0);
         });
 
     });
