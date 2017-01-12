@@ -7,13 +7,24 @@
 export class RumorAlgorithm {
 
     /**
-     * @callback SendMsgCallback
-     * @param {object} neighbor
+     * @callback SendRumorCallback
      * @param {object} content
-     * @param {string} type
+     * @param {object} neighbor
      */
 
     /**
+     * Will be called when the algorithm
+     * processes a new unknown incoming rumor.
+     *
+     * @callback NewIncomingRumorCallback
+     * @param {string} rumor content
+     * @return {boolean} true, iff the rumor shall be distributed
+     */
+
+    /**
+     * Will be called after an incoming messsage
+     * was processed.
+     *
      * @callback OnMsgProcessedCallback
      * @param {string} rumor content
      */
@@ -22,16 +33,17 @@ export class RumorAlgorithm {
      *
      * @param myId
      * @param neighbors
-     * @param sendMsgCallback
+     * @param sendMsgCallback {SendRumorCallback}
      */
     constructor(myId, neighbors, sendMsgCallback) {
         this.myId = myId;
         this.neighbors = neighbors;
-        /** @type {SendMsgCallback} */
+        /** @type {SendRumorCallback} */
         this.sendMsgCallback = sendMsgCallback;
         /** @type {OnMsgProcessedCallback} */
         this.onMessageProcessed = null;
-
+        /** @type {NewIncomingRumorCallback} */
+        this.onNewIncomingRumor = null;
         this.rumors = [];
     }
 
@@ -41,6 +53,10 @@ export class RumorAlgorithm {
      */
     setOnMessageProcessed(onMessageProcessed) {
         this.onMessageProcessed = onMessageProcessed;
+    }
+
+    setOnNewIncomingRumorListener(onNewIncomingRumor) {
+        this.onNewIncomingRumor = onNewIncomingRumor;
     }
 
     /**
@@ -56,11 +72,17 @@ export class RumorAlgorithm {
         this.addRumor(msg, neighborId);
 
         if (!alreadyKnown) {
-            for (let i = 0; i < this.neighbors.length; i++) {
-                let neighbor = this.neighbors[i];
+            let distribute = true;
+            if (this.onNewIncomingRumor) {
+                distribute = this.onNewIncomingRumor();
+            }
+            if (distribute) {
+                for (let i = 0; i < this.neighbors.length; i++) {
+                    let neighbor = this.neighbors[i];
 
-                if (!this.toldMe(msg, neighbor.id)) {
-                    await this.tellRumorTo(msg, neighbor);
+                    if (!this.toldMe(msg, neighbor.id)) {
+                        await this.tellRumorTo(msg, neighbor);
+                    }
                 }
             }
         }
@@ -156,7 +178,7 @@ export class RumorAlgorithm {
      * @param neighbor
      */
     async tellRumorTo(newRumor, neighbor) {
-        await this.sendMsgCallback(neighbor, newRumor, 'rumor');
+        await this.sendMsgCallback(newRumor, neighbor);
     }
 
 }
