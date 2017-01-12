@@ -65,6 +65,16 @@ export class EndpointManager {
         return this.myNeighbors;
     }
 
+    findNeighborById(id) {
+        for(let i = 0; i < this.myNeighbors.length; i++) {
+            let n = this.myNeighbors[i];
+            if (n.id === id) {
+                return n;
+            }
+        }
+        return undefined;
+    }
+
     generateLocalEndpoints(min, max) {
         this.endpoints = [];
         let index = 0;

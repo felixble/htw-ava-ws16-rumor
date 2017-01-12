@@ -55,10 +55,10 @@ export class RumorServer extends ServerLogic {
     /**
      * Sends a given rumor to the designated neighbor.
      *
-     * @param newRumor
      * @param neighbor
+     * @param newRumor
      */
-    async sendRumorTo(newRumor, neighbor) {
+    async sendRumorTo(neighbor, newRumor) {
         await this.sendMsgTo(neighbor, newRumor, 'rumor');
     }
 }

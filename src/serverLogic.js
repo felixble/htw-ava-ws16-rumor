@@ -2,6 +2,7 @@ import { _ } from 'underscore';
 import { Client } from './lib/client';
 import { Semaphore } from './lib/async-semaphore';
 import { VectorClock } from './lib/vector-clock';
+import { MessageTypes } from './election/messageTypes'
 
 /**
  * Base class of the server logic,
@@ -61,7 +62,7 @@ export class ServerLogic {
 
             this.logR(JSON.stringify(data));
 
-            if (data.type === 'control') {
+            if (data.type === MessageTypes.CONTROL) {
                 if (data.msg === "STOP") {
                     this.stop();
                     return;
@@ -91,7 +92,7 @@ export class ServerLogic {
     async sendStopSignalToNeighbors() {
         for (let i = 0; i < this.endpointManager.getMyNeighbors().length; i++) {
             let neighbor = this.endpointManager.getMyNeighbors()[i];
-            this.sendMsgTo(neighbor, 'STOP ALL', 'control');
+            this.sendMsgTo(neighbor, 'STOP ALL', MessageTypes.CONTROL);
         }
     }
 

@@ -16,7 +16,7 @@ export class EchoAlgorithm {
 
     /**
      * @callback NewMessageListener
-     * @param {string} message
+     * @param {object} message content
      */
 
     /**
@@ -30,15 +30,20 @@ export class EchoAlgorithm {
         this.neighbors = neighbors;
         /** @type {SendMsgCallback} */
         this.sendMsgCallback = sendMsgCallback;
+        /** @type {NewMessageListener} */
         this.newMessageListener = null;
         this.sema = new Semaphore(1);
     }
 
+    /**
+     *
+     * @param {NewMessageListener} listener
+     */
     setNewMessageListener(listener) {
         this.newMessageListener = listener;
     }
 
-    async initEcho(content, onEchoDistributed) {
+    async initEcho(content, onEchoDistributed = false) {
         let id = generateId();
         let state = this.getState(id);
 

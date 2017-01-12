@@ -8,8 +8,8 @@ export class RumorAlgorithm {
 
     /**
      * @callback SendRumorCallback
-     * @param {object} content
      * @param {object} neighbor
+     * @param {object} content
      */
 
     /**
@@ -17,7 +17,7 @@ export class RumorAlgorithm {
      * processes a new unknown incoming rumor.
      *
      * @callback NewIncomingRumorCallback
-     * @param {string} rumor content
+     * @param {object} rumor
      * @return {boolean} true, iff the rumor shall be distributed
      */
 
@@ -55,6 +55,10 @@ export class RumorAlgorithm {
         this.onMessageProcessed = onMessageProcessed;
     }
 
+    /**
+     *
+     * @param {NewIncomingRumorCallback} onNewIncomingRumor
+     */
     setOnNewIncomingRumorListener(onNewIncomingRumor) {
         this.onNewIncomingRumor = onNewIncomingRumor;
     }
@@ -84,7 +88,7 @@ export class RumorAlgorithm {
         if (!alreadyKnown) {
             let distribute = true;
             if (this.onNewIncomingRumor) {
-                distribute = this.onNewIncomingRumor();
+                distribute = this.onNewIncomingRumor(msg);
             }
             if (distribute) {
                 await this.distributeRumor(msg, (id) => {
@@ -184,7 +188,7 @@ export class RumorAlgorithm {
      * @param neighbor
      */
     async tellRumorTo(newRumor, neighbor) {
-        await this.sendMsgCallback(newRumor, neighbor);
+        await this.sendMsgCallback(neighbor, newRumor);
     }
 
 }

@@ -1,4 +1,5 @@
 import { CandidateIdsManager } from './candidateIdsManager';
+import { Random } from '../lib/random';
 
 export class ConfidenceLevel {
 
@@ -9,6 +10,12 @@ export class ConfidenceLevel {
         this.myCandidate = myCandidate;
         this.level = [];
         this._init()
+    }
+
+    isFavourite(candidateId) {
+        let levelCandidate = this._getLevelById(candidateId);
+        let levelCompetitor = this._getLevelById(CandidateIdsManager.getCompetitorCandidate(candidateId));
+        return levelCandidate.value > levelCompetitor;
     }
 
     updateLevelOnNewChooseMeMsg(candidateId) {
@@ -71,9 +78,7 @@ export class ConfidenceLevel {
     }
 
     static _randomLevel() {
-        let min = 0,
-            max = 100;
-        return Math.floor(Math.random()*(max-min+1)+min);
+        return Random.randomNumber(0, 100);
     }
 
 }
