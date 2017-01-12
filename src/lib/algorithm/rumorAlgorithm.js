@@ -59,6 +59,16 @@ export class RumorAlgorithm {
         this.onNewIncomingRumor = onNewIncomingRumor;
     }
 
+    async distributeRumor(msg, sendMsgToNeighborWithId = false) {
+        for (let i = 0; i < this.neighbors.length; i++) {
+            let neighbor = this.neighbors[i];
+
+            if (sendMsgToNeighborWithId && sendMsgToNeighborWithId(neighbor.id)) {
+                await this.tellRumorTo(msg, neighbor);
+            }
+        }
+    }
+
     /**
      * Processes an incoming echo message.
      *
@@ -77,13 +87,9 @@ export class RumorAlgorithm {
                 distribute = this.onNewIncomingRumor();
             }
             if (distribute) {
-                for (let i = 0; i < this.neighbors.length; i++) {
-                    let neighbor = this.neighbors[i];
-
-                    if (!this.toldMe(msg, neighbor.id)) {
-                        await this.tellRumorTo(msg, neighbor);
-                    }
-                }
+                await this.distributeRumor(msg, (id) => {
+                    return !this.toldMe(msg, id);
+                });
             }
         }
 
