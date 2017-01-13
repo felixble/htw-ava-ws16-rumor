@@ -1,7 +1,17 @@
 
 
 export const MessageTypes = {
+    /*
+    * Control messages to control a network
+    * node such as STOP or STOP_ALL.
+    */
     CONTROL: 'control',
+
+    /*
+    * Initializes the
+    * candidate-process
+    */
+    INIT: 'init',
 
     CAMPAIGN: 'campaign',
     CHOOSE_ME: 'choose-me',

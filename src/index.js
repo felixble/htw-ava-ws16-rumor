@@ -20,7 +20,7 @@ let arg = optionParser.bindHelp().parseSystem();
 
 /* Set constants */
 const endpointFilename = arg.options.endpointFilename || null;
-const graphFilename = arg.options.graphFilename || './config/graph.dot';
+const graphFilename = arg.options.graphFilename || './config/graphElection.dot';
 
 
 async function main() {
@@ -31,7 +31,7 @@ async function main() {
         /* Set up my own id */
         let myId = parseInt(arg.options.id || await readLine('Please insert the ID of this endpoint:'));
         endpointManager.setMyId(myId);
-        let r = arg.options.receive || undefined;
+        let r = arg.options.receive || await readLine('Please insert the number of receives:');
         /* initialize server */
         let myServer = new Server(endpointManager.getMyEndpoint().host, endpointManager.getMyEndpoint().port);
         /* set up server logic */

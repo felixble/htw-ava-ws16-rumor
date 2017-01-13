@@ -1,5 +1,5 @@
 
-const pattern = /([0-9]+)\s*--\s*([0-9]+);/g;
+const pattern = /([0-9]+)\s*--\s*([0-9]+)/g;
 
 /**
  * Parser to read a graphviz file.

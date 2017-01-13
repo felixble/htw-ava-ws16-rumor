@@ -2,17 +2,15 @@
 
 #-- Check parameters and show usage, if necessary --#
 
-if [ $# -ne 5 ]
+if [ $# -ne 3 ]
     then
-        echo "$0 n m c graphFilename rumor"
+        echo "$0 n r graphFilename"
         exit -1
 fi
 
 n=$1
-m=$2
-c=$3
-graphFileRelative=$4
-rumor="$5"
+r=$2
+graphFileRelative=$3
 
 #-- Convert given relative path to absolute path --#
 
@@ -41,14 +39,14 @@ fi
 
 #-- Generate graph --#
 
-npm run graphgen -- -n ${n} -m ${m} -f ${graphFile}
-echo generated graph with ${n} nodes and ${m} edges
+#npm run graphgen -- -n ${n} -m ${m} -f ${graphFile}
+#echo generated graph with ${n} nodes and ${m} edges
 
 #-- Start nodes --#
 
-for ((i=1;i<=$n;i++))
+for ((i=1;i<=${n};i++))
 do
-     npm run start -- -g ${graphFile} --id ${i} -c ${c} >> ${LOGFILE} 2>> ${ERR_LOGFILE} &
+     npm run start -- -g ${graphFile} --id ${i} -r ${r} >> ${LOGFILE} 2>> ${ERR_LOGFILE} &
 done
 
 #-- Check if all nodes are started --#
@@ -69,35 +67,35 @@ done
 
 echo "All nodes has been started"
 
-echo "Send rumor to node 1"
-npm run init -- -c init -r "${rumor}" --host localhost --port ${INIT_PORT}
+#echo "Send rumor to node 1"
+#npm run init -- -c init -m "${rumor}" --host localhost --port ${INIT_PORT}
 
-sleep 15
+#sleep 15
 
-echo "\n\n" >> ${LOGFILE}
+#echo "\n\n" >> ${LOGFILE}
 
-echo "Stop all nodes"
-npm run init -- -c "stop all" --host localhost --port ${INIT_PORT}
+#echo "Stop all nodes"
+#npm run init -- -c "stop all" --host localhost --port ${INIT_PORT}
 
-COUNTER=0
-MAX_WAIT=900
-until [ $(pgrep -f "node build" | wc -l) -eq 0 ]; do
-    echo Not all nodes has been stopped... Waiting for ${COUNTER} seconds
-    sleep 5
-    COUNTER=$(($COUNTER+5))
+#COUNTER=0
+#MAX_WAIT=900
+#until [ $(pgrep -f "node build" | wc -l) -eq 0 ]; do
+#    echo Not all nodes has been stopped... Waiting for ${COUNTER} seconds
+#    sleep 5
+#    COUNTER=$(($COUNTER+5))
+#
+#    if [ ${COUNTER} -gt ${MAX_WAIT} ]; then
+#        echo Stopping all nodes takes too long, exiting. You can use ./kill-all.sh to kill them all.
+#        exit 1
+#    fi
+#done
 
-    if [ ${COUNTER} -gt ${MAX_WAIT} ]; then
-        echo Stopping all nodes takes too long, exiting. You can use ./kill-all.sh to kill them all.
-        exit 1
-    fi
-done
-
-echo ""
-echo ""
-echo ""
-
-believers=$(cat ${LOGFILE} | grep INFO | wc -l | tr -d '[:space:]')
-
-echo ${believers} nodes believe the rumor | tee -a ${LOGFILE}
-
-exit ${believers}
+#echo ""
+#echo ""
+#echo ""
+#
+#believers=$(cat ${LOGFILE} | grep INFO | wc -l | tr -d '[:space:]')
+#
+#echo ${believers} nodes believe the rumor | tee -a ${LOGFILE}
+#
+#exit ${believers}

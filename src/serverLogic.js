@@ -17,6 +17,7 @@ export class ServerLogic {
 
     constructor(server, endpointManager) {
         this.server = server;
+        /** @type {EndpointManager} */
         this.endpointManager = endpointManager;
         this.sem = new Semaphore(1);
         this.killed = false;
@@ -38,7 +39,8 @@ export class ServerLogic {
     getMessageProcessor() {
         // "I am born"-tick ;-)
         this.myVectorTime.tick();
-        this.logI('Hello! You can contact me at ' + JSON.stringify(this.endpointManager.getMyEndpoint()));
+        this.logI('Hello! You can contact me at ' + JSON.stringify(this.endpointManager.getMyEndpoint())
+                    + ' My direct neighbors are: ' + JSON.stringify(this.endpointManager.getMyNeighbors()));
         return _.bind(this.onReceiveData, this);
     }
 

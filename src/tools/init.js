@@ -7,7 +7,8 @@ let optionParser = require('node-getopt').create([
     ['c', 'cmd=[ARG]', 'Command: "init" | "stop" | "stop all"'],
     ['', 'host=[ARG]', 'host'],
     ['', 'port=[ARG]', 'port'],
-    ['r', 'rumor=[ARG]', 'the rumor which should be sent'],
+    ['m', 'msg=[ARG]', 'the message content which should be sent'],
+    ['t', 'type=[ARG]', 'the message type of the message which should be sent'],
     ['h', 'help', 'Display this help']
 ]);
 
@@ -41,8 +42,15 @@ async function execCommand(cmd) {
     switch (cmd) {
         case 'init':
         {
-            let rumor = arg.options.rumor || await readLine('Enter rumor:');
+            let rumor = arg.options.msg || await readLine('Enter rumor:');
             await queryAddressSendMsg(rumor, 'rumor');
+            break;
+        }
+        case 'msg':
+        {
+            let msgType = arg.options.type || await readLine('Enter message type:');
+            let msg = arg.options.msg || await readLine('Enter message content:');
+            await queryAddressSendMsg(msg, msgType);
             break;
         }
         case 'stop':
