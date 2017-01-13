@@ -14,7 +14,7 @@ export class HelloServer extends ServerLogic {
                     await client.connect();
                     await client.send(msg);
                     client.close();
-                    this.constructor.logS(msg.msg, neighbor);
+                    this.logS(msg.msg, neighbor);
                 } catch(e) {
                     neighbor.contactedAlready = false;
                     console.log('Could not contact neighbor: ' + JSON.stringify(neighbor));

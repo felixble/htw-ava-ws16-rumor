@@ -1,5 +1,4 @@
 import { EchoStates } from './echoStates';
-import { Semaphore } from '../async-semaphore'
 let randomstring = require('randomstring');
 
 let generateId = function () {
@@ -32,7 +31,6 @@ export class EchoAlgorithm {
         this.sendMsgCallback = sendMsgCallback;
         /** @type {NewMessageListener} */
         this.newMessageListener = null;
-        this.sema = new Semaphore(1);
     }
 
     /**
@@ -63,7 +61,6 @@ export class EchoAlgorithm {
      *                      who sent the message
      */
     async processIncomingMsg(msg, neighborId) {
-        await this.sema.take();
         let content = msg.content;
         let msgId = msg.id;
         let state = this.getState(msgId);
@@ -93,7 +90,6 @@ export class EchoAlgorithm {
                 await this.sendEchoTo(state.getFirstNeighborId(), msgId);
             }
         }
-        this.sema.leave();
     }
 
     async sendExplorer(id, content, skip = null) {

@@ -79,6 +79,10 @@ export class ServerLogic {
             }
             this.sem.leave();
         } catch(e) {
+            try {
+                let myId = this.endpointManager.getMyId();
+                console.error(`Unknown error occurred on node ${myId}`);
+            } catch(ignored) {}
             if (!e.stack) console.error(e);
             else console.error(e.stack);
             this.sem.leave();
@@ -132,6 +136,9 @@ export class ServerLogic {
 
     logS(msg, node) {
         let nodeStr = JSON.stringify(node);
+        if (msg.hasOwnProperty('msg') && msg.hasOwnProperty('type')) {
+            msg = `${msg.msg} of type ${msg.type}`;
+        }
         this.log('SEND   ', `${msg} to ${nodeStr}`);
     }
 

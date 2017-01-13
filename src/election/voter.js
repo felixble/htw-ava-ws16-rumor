@@ -11,22 +11,26 @@ export class Voter extends ElectionNode {
         let neighborCandidates = this.endpointManager.getMyNeighbors().filter(neighbor => {
             return CandidateIdsManager.amIACandidate(neighbor.id);
         });
-        this.myCandidate = (neighborCandidates.length === 0) ? false : neighborCandidates[0];
-        this.confidenceLevel = new ConfidenceLevel(this.myCandidate);
+        this.myCandidatesId = (neighborCandidates.length === 0) ? false : neighborCandidates[0].id;
+        this.confidenceLevel = new ConfidenceLevel(this.myCandidatesId);
         this.chooseMeAlgorithm.setOnNewIncomingRumorListener(_.bind(this.onNewIncomingChooseMeMsg, this));
         this.campaignAlgorithm.setNewMessageListener(_.bind(this.onNewIncomingCampaignMsg, this));
     }
 
     onNewIncomingChooseMeMsg(candidateId) {
         this.confidenceLevel.updateLevelOnNewChooseMeMsg(candidateId);
-        let isFavourite = this.confidenceLevel.isFavourite(candidateId);
-        if (isFavourite) {
-            this.sendKeepItUp(candidateId); // this is async !
-
+        let isFavorite = this.confidenceLevel.isFavorite(candidateId);
+        let feedbackPromise;
+        if (isFavorite) {
+            feedbackPromise = this.sendKeepItUp(candidateId); // this is async !
         } else {
-            this.sendNotYou(candidateId); // this is async !
+            feedbackPromise = this.sendNotYou(candidateId); // this is async !
         }
-        return isFavourite;
+        feedbackPromise.catch(e => {
+            if (!e.stack) console.error(e);
+            else console.error(e.stack);
+        });
+        return isFavorite;
     }
 
     onNewIncomingCampaignMsg(candidateId) {
@@ -42,6 +46,6 @@ export class Voter extends ElectionNode {
     }
 
     async sendMsgToCandidate(candidateId, type) {
-        await this.sendMsgTo(this.endpointManager.findNeighborById(candidateId), '', type);
+        await this.sendMsgTo(this.endpointManager.findEndpointById(candidateId), '', type);
     }
 }

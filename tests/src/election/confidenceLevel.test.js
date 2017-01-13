@@ -30,6 +30,17 @@ describe('ConfidenceLevel', function() {
 
     });
 
+    describe('#isFavorite', function() {
+
+        it('returns true for the candidate I am a supporter', function() {
+            const MY_CANDIDATE = 1;
+            let confidenceLevel = new ConfidenceLevel(MY_CANDIDATE);
+
+            expect(confidenceLevel.isFavorite(MY_CANDIDATE)).to.be.true;
+        });
+
+    });
+
     describe('#updateLevelOnNewChooseMeMsg', function() {
 
         it('increases the value correctly', function() {

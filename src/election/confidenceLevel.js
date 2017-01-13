@@ -7,15 +7,17 @@ export class ConfidenceLevel {
         if (!myCandidate) {
             myCandidate = false;
         }
-        this.myCandidate = myCandidate;
+        this.myCandidatesId = myCandidate;
         this.level = [];
         this._init()
     }
 
-    isFavourite(candidateId) {
+    isFavorite(candidateId) {
+        console.log('#isFavorite');
+        console.log(JSON.stringify(this.level));
         let levelCandidate = this._getLevelById(candidateId);
         let levelCompetitor = this._getLevelById(CandidateIdsManager.getCompetitorCandidate(candidateId));
-        return levelCandidate.value > levelCompetitor;
+        return levelCandidate.value > levelCompetitor.value;
     }
 
     updateLevelOnNewChooseMeMsg(candidateId) {
@@ -37,9 +39,9 @@ export class ConfidenceLevel {
     }
 
     _init() {
-        if (this.myCandidate) {
-            this._addCandidate(this.myCandidate, 100);
-            this._addCandidate(CandidateIdsManager.getCompetitorCandidate(this.myCandidate), 0);
+        if (this.myCandidatesId) {
+            this._addCandidate(this.myCandidatesId, 100);
+            this._addCandidate(CandidateIdsManager.getCompetitorCandidate(this.myCandidatesId), 0);
         } else {
             CandidateIdsManager.getCandidateIds().forEach(candidate => {
                 this._addCandidate(candidate, this.constructor._randomLevel());
@@ -54,8 +56,8 @@ export class ConfidenceLevel {
                 return level;
             }
         }
-
-        throw new Error('illegal-state' , `Unknown candidate id ${id}`);
+        console.log(JSON.stringify(this.level));
+        throw new Error('illegal-state' + `Unknown candidate id ${id}`);
     }
 
     _addCandidate(id, level) {

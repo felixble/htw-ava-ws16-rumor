@@ -67,7 +67,7 @@ export class RumorAlgorithm {
         for (let i = 0; i < this.neighbors.length; i++) {
             let neighbor = this.neighbors[i];
 
-            if (sendMsgToNeighborWithId && sendMsgToNeighborWithId(neighbor.id)) {
+            if (!sendMsgToNeighborWithId || sendMsgToNeighborWithId(neighbor.id)) {
                 await this.tellRumorTo(msg, neighbor);
             }
         }

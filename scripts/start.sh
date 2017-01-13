@@ -46,26 +46,26 @@ fi
 
 for ((i=1;i<=${n};i++))
 do
-     npm run start -- -g ${graphFile} --id ${i} -r ${r} >> ${LOGFILE} 2>> ${ERR_LOGFILE} &
+     npm run start -- -g ${graphFile} --id ${i} -r ${r} & #>> ${LOGFILE} 2>> ${ERR_LOGFILE} &
 done
 
 #-- Check if all nodes are started --#
 
-MIN_LINES=$((4 * $n + $n))
-COUNTER=0
-MAX_WAIT=900
-until [ $(cat ${LOGFILE} | wc -l) -ge ${MIN_LINES} ]; do
-    echo Not all nodes has been started... Waiting for ${COUNTER} seconds
-    sleep 5
-    COUNTER=$(($COUNTER+5))
+#MIN_LINES=$((4 * $n + $n))
+#COUNTER=0
+#MAX_WAIT=900
+#until [ $(cat ${LOGFILE} | wc -l) -ge ${MIN_LINES} ]; do
+#    echo Not all nodes has been started... Waiting for ${COUNTER} seconds
+#    sleep 5
+#    COUNTER=$(($COUNTER+5))
+#
+#    if [ ${COUNTER} -gt ${MAX_WAIT} ]; then
+#        echo Starting all nodes takes too long, exiting.
+#        exit 1
+#    fi
+#done
 
-    if [ ${COUNTER} -gt ${MAX_WAIT} ]; then
-        echo Starting all nodes takes too long, exiting.
-        exit 1
-    fi
-done
-
-echo "All nodes has been started"
+#echo "All nodes has been started"
 
 #echo "Send rumor to node 1"
 #npm run init -- -c init -m "${rumor}" --host localhost --port ${INIT_PORT}
