@@ -79,7 +79,9 @@ export class ServerLogic {
                     return;
                 }
             } else {
-                await this._runAlgorithm(data, socket);
+                if (!this._isFinished()) {
+                    await this._runAlgorithm(data, socket);
+                }
             }
             this.sem.leave();
         } catch(e) {
@@ -117,6 +119,10 @@ export class ServerLogic {
     }
 
     async _runAlgorithm(incomingMsg, socket) {
+    }
+
+    _isFinished() {
+        return this.killed;
     }
 
     async sendMsgTo(neighbor, content, type) {

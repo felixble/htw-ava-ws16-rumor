@@ -2,15 +2,16 @@
 
 #-- Check parameters and show usage, if necessary --#
 
-if [ $# -ne 3 ]
+if [ $# -ne 4 ]
     then
-        echo "$0 n r graphFilename"
+        echo "$0 n r electionTime graphFilename"
         exit -1
 fi
 
 n=$1
 r=$2
-graphFileRelative=$3
+electionTime=$3
+graphFileRelative=$4
 
 #-- Convert given relative path to absolute path --#
 
@@ -46,7 +47,7 @@ fi
 
 for ((i=1;i<=${n};i++))
 do
-     npm run start -- -g ${graphFile} --id ${i} -r ${r} & #>> ${LOGFILE} 2>> ${ERR_LOGFILE} &
+     npm run start -- -g ${graphFile} --id ${i} -r ${r} --electionTime ${electionTime} & #>> ${LOGFILE} 2>> ${ERR_LOGFILE} &
 done
 
 #-- Check if all nodes are started --#
