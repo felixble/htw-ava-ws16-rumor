@@ -49,7 +49,11 @@ export class ServerLogic {
      */
     async onReceiveData(socket, data) {
         try {
-            socket.write(JSON.stringify({}));
+            if (data.type === MessageTypes.GET_STATUS) {
+                socket.write(JSON.stringify(this._getStatus()));
+            } else {
+                socket.write(JSON.stringify({}));
+            }
             await this.sem.take();
 
             if (this.killed) {
@@ -102,6 +106,16 @@ export class ServerLogic {
         }
     }
 
+    _getStatus() {
+        let status = (this.killed) ? 'dead' : 'ok';
+        return {
+            myId: this.endpointManager.getMyId(),
+            neighbors: this.endpointManager.getMyNeighbors().map(n => { return n.id }),
+            semaProcessMsg: this.sem.currentValue(),
+            status: status
+        }
+    }
+
     async _runAlgorithm(incomingMsg, socket) {
     }
 
@@ -111,7 +125,7 @@ export class ServerLogic {
             let client = new Client(neighbor.host, neighbor.port);
             await client.connect();
             let msg = this.prepareMessage(content, type);
-            this.logS(msg.msg, neighbor);
+            this.logS(JSON.stringify(msg), neighbor);
             await client.send(msg);
             client.close();
         } catch(e) {
@@ -136,9 +150,9 @@ export class ServerLogic {
 
     logS(msg, node) {
         let nodeStr = JSON.stringify(node);
-        if (msg.hasOwnProperty('msg') && msg.hasOwnProperty('type')) {
-            msg = `${msg.msg} of type ${msg.type}`;
-        }
+        //if (msg.hasOwnProperty('msg') && msg.hasOwnProperty('type')) {
+        //    msg = `${msg.msg} of type ${msg.type}`;
+        //}
         this.log('SEND   ', `${msg} to ${nodeStr}`);
     }
 

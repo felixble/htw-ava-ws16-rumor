@@ -20,7 +20,8 @@ async function sendMsgClient(host, port, msg, type='control') {
     try {
         let client = new Client(host, port);
         await client.connect();
-        await client.send({msg: msg, type: type});
+        let response = await client.send({msg: msg, type: type});
+        console.log(JSON.stringify(response));
         client.close();
     } catch (e) {
         console.log(`Could not send msg to host: ${host}:${port}`);

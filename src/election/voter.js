@@ -17,6 +17,19 @@ export class Voter extends ElectionNode {
         this.campaignAlgorithm.setNewMessageListener(_.bind(this.onNewIncomingCampaignMsg, this));
     }
 
+    _getStatus() {
+        let status = super._getStatus();
+        if (this.myCandidatesId) {
+            status.type = 'supporter';
+            status.supports = this.myCandidatesId;
+        } else {
+            status.type = 'voter';
+        }
+        status.confidenceLevel = this.confidenceLevel.level;
+
+        return status;
+    }
+
     onNewIncomingChooseMeMsg(candidateId) {
         this.confidenceLevel.updateLevelOnNewChooseMeMsg(candidateId);
         let isFavorite = this.confidenceLevel.isFavorite(candidateId);

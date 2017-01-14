@@ -7,6 +7,8 @@ export const MessageTypes = {
     */
     CONTROL: 'control',
 
+    GET_STATUS: 'get-status',
+
     /*
     * Initializes the
     * candidate-process

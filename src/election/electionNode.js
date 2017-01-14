@@ -25,6 +25,10 @@ export class ElectionNode extends ServerLogic {
             _.bind(this.sendChooseMeMsgTo, this));
     }
 
+    _getStatus() {
+        return super._getStatus();
+    }
+
     async _runAlgorithm(data, socket) {
         let type = data.type;
         let msg = data.msg;
