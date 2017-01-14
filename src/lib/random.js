@@ -1,3 +1,4 @@
+let randomstring = require('randomstring');
 
 export class Random {
 
@@ -7,6 +8,10 @@ export class Random {
 
     static randomBoolean() {
         return !!Random.randomNumber(0, 1);
+    }
+
+    static generateId() {
+        return randomstring.generate(7);
     }
 
 }

@@ -1,9 +1,5 @@
 import { EchoStates } from './echoStates';
-let randomstring = require('randomstring');
-
-let generateId = function () {
-    return randomstring.generate(7);
-};
+import { Random } from '../random';
 
 export class EchoAlgorithm {
 
@@ -42,7 +38,7 @@ export class EchoAlgorithm {
     }
 
     async initEcho(content, onEchoDistributed = false) {
-        let id = generateId();
+        let id = Random.generateId();
         let state = this.getState(id);
 
         state.onEchoDistributed = onEchoDistributed;

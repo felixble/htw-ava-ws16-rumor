@@ -1,3 +1,5 @@
+import { Random } from '../random';
+
 /**
  * This algorithm receives an incoming
  * message and distributes the message
@@ -63,12 +65,13 @@ export class RumorAlgorithm {
         this.onNewIncomingRumor = onNewIncomingRumor;
     }
 
-    async distributeRumor(msg, sendMsgToNeighborWithId = false) {
+    async distributeRumor(msg, sendMsgToNeighborWithId = false, id = false) {
+        id = (!id) ? Random.generateId() : id;
         for (let i = 0; i < this.neighbors.length; i++) {
             let neighbor = this.neighbors[i];
 
             if (!sendMsgToNeighborWithId || sendMsgToNeighborWithId(neighbor.id)) {
-                await this.tellRumorTo(msg, neighbor);
+                await this.tellRumorTo(msg, id, neighbor);
             }
         }
     }
@@ -76,29 +79,36 @@ export class RumorAlgorithm {
     /**
      * Processes an incoming echo message.
      *
-     * @param msg           the incoming message
+     * @param msg          the incoming message
      * @param neighborId    the id of the neighbor
      *                      who sent the message
      */
     async processIncomingMessage(msg, neighborId) {
+        let rumorId = (msg.hasOwnProperty('id')) ? msg.id : msg;
+        let content = (msg.hasOwnProperty('content')) ? msg.content : msg;
 
-        let alreadyKnown = this.isKnown(msg);
-        this.addRumor(msg, neighborId);
+
+        let alreadyKnown = this.isKnown(rumorId);
+        this.addRumor(rumorId, neighborId);
 
         if (!alreadyKnown) {
             let distribute = true;
             if (this.onNewIncomingRumor) {
-                distribute = this.onNewIncomingRumor(msg);
+                distribute = this.onNewIncomingRumor(content);
             }
             if (distribute) {
-                await this.distributeRumor(msg, (id) => {
-                    return !this.toldMe(msg, id);
-                });
+                await this.distributeRumor(
+                    content,
+                    (id) => {
+                        return !this.toldMe(rumorId, id);
+                    },
+                    rumorId
+                );
             }
         }
 
         if (this.onMessageProcessed) {
-            this.onMessageProcessed(msg);
+            this.onMessageProcessed(rumorId);
         }
     }
 
@@ -185,10 +195,11 @@ export class RumorAlgorithm {
      * Sends a given rumor to the designated neighbor.
      *
      * @param newRumor
+     * @param id
      * @param neighbor
      */
-    async tellRumorTo(newRumor, neighbor) {
-        await this.sendMsgCallback(neighbor, newRumor);
+    async tellRumorTo(newRumor, id, neighbor) {
+        await this.sendMsgCallback(neighbor, { content: newRumor, id: id });
     }
 
 }
