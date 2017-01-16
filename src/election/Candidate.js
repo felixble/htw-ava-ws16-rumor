@@ -1,6 +1,7 @@
 import { ElectionNode } from './electionNode';
 import { MessageTypes } from './messageTypes';
 import { Random } from '../lib/random';
+import { Semaphore } from '../lib/async-semaphore';
 
 export class Candidate extends ElectionNode {
 
@@ -11,6 +12,18 @@ export class Candidate extends ElectionNode {
 
         this.campaignCounter = 0;
         this.chooseMeCounter = 0;
+        this.semaFeedbackCounter = new Semaphore(1);
+        this.selfConfidence = 0;
+    }
+
+    _getStatus() {
+        let status = super._getStatus();
+        status.receives = this.receives;
+        status.feedbackCounter = this.feedbackCounter;
+        status.campaignCounter = this.campaignCounter;
+        status.chooseMeCounter = this.chooseMeCounter;
+        status.semaFeedbackCounter = this.semaFeedbackCounter.currentValue();
+        return status;
     }
 
     async _runAlgorithm(data, socket) {
@@ -19,12 +32,13 @@ export class Candidate extends ElectionNode {
             let type = data.type;
             switch (type) {
                 case MessageTypes.NOT_YOU:
+                {
+                    await this.incFeedbackCounter(-1);
+                    break;
+                }
                 case MessageTypes.KEEP_IT_UP:
                 {
-                    this.incFeedbackCounter();
-                    if (this.reachedFeedbackThreshold()) {
-                        await this.startCampaignOrChooseMeRumor();
-                    }
+                    await this.incFeedbackCounter(1);
                     break;
                 }
                 case MessageTypes.INIT:
@@ -36,32 +50,44 @@ export class Candidate extends ElectionNode {
         }
     }
 
-    incFeedbackCounter() {
+    async incFeedbackCounter(positiveFeedback = 1) {
+        await this.semaFeedbackCounter.take();
+        this.selfConfidence += positiveFeedback;
         this.feedbackCounter++;
-    }
-
-    reachedFeedbackThreshold() {
-        if (this.feedbackCounter >= this.receives) {
-            this.feedbackCounter = 0;
-            return true;
+        if (this.feedbackCounter % this.receives === 0) {
+            await this.startCampaignOrChooseMeRumor();
         }
-        return false;
+        this.semaFeedbackCounter.leave();
     }
 
     async startCampaignOrChooseMeRumor() {
-        let campaign = Random.randomBoolean();
-        if (campaign) {
+        if (this.shouldISentACampaign()) {
             this.campaignCounter++;
             this.logI(`Start my ${this.campaignCounter}. campaign`);
             let currCampaignCounter = this.campaignCounter;
-            await this.campaignAlgorithm.initEcho(this.endpointManager.getMyId(), () => {
+            await this.campaignAlgorithm.initEcho(this.endpointManager.getMyId(), async () => {
                 this.logI(`Campaign ${currCampaignCounter} distributed successfully`);
+                await this.incFeedbackCounter(1);
             });
         } else {
             this.chooseMeCounter++;
             this.logI(`Start my ${this.chooseMeCounter}. choose-me rumor distribution`);
             await this.chooseMeAlgorithm.distributeRumor(this.endpointManager.getMyId());
         }
+    }
+
+    shouldISentACampaign() {
+        // I check my self-confidence level:
+        // positive: send a choose-me-message
+        // negative: send a campaign
+        // then reset the self-confidence level
+        let campaign = this.selfConfidence < 0;
+        this.selfConfidence = 0;
+        return campaign;
+
+        // send a campaign every third time starting by a choose-me-rumor.
+        //let totalCounter = this.chooseMeCounter + this.campaignCounter;
+        //return (totalCounter % 3 === 2);
     }
 
 }
