@@ -17,9 +17,9 @@ export class GraphvizParser {
      */
     parse(string) {
         let match = pattern.exec(string);
-        while (match != null) {
-            let nodeA = parseInt(match[1]);
-            let nodeB = parseInt(match[2]);
+        while (match !== null) {
+            let nodeA = parseInt(match[1], /*basis*/ 10);
+            let nodeB = parseInt(match[2], 10);
             this.addEdge(nodeA, nodeB);
             match = pattern.exec(string);
         }
@@ -38,12 +38,12 @@ export class GraphvizParser {
     addEdge(nodeA, nodeB) {
         let nodeAIndex = this.getNodeIndex(nodeA);
         let nodeBIndex = this.getNodeIndex(nodeB);
-        if (undefined == nodeAIndex) { nodeAIndex = this.addNode(nodeA) }
-        if (undefined == nodeBIndex) { nodeBIndex = this.addNode(nodeB) }
+        if (undefined === nodeAIndex) { nodeAIndex = this.addNode(nodeA) }
+        if (undefined === nodeBIndex) { nodeBIndex = this.addNode(nodeB) }
 
         this.nodes[nodeAIndex].neighbors.push(nodeB);
         this.nodes[nodeBIndex].neighbors.push(nodeA);
-    };
+    }
 
     /**
      * Adds a new node to the nodes array.
@@ -91,21 +91,7 @@ export class GraphvizParser {
      * @returns {*}
      */
     getNodeWithSmallestId() {
-        let min = Number.MAX_VALUE;
-        let index = -1;
-        for (let i = 0; i < this.nodes.length; i++) {
-            let id = this.nodes[i].id;
-            if (id <= min) {
-                index = i;
-                min = id;
-            }
-        }
-
-        if (index !== -1) {
-            return this.nodes[index];
-        }
-
-        return undefined;
+        return this._getNodeWithEdgeCaseId(Number.MAX_VALUE, (id, min) => {return id <= min});
     }
 
     /**
@@ -113,20 +99,20 @@ export class GraphvizParser {
      * @returns {*}
      */
     getNodeWithBiggestId() {
-        let max = 0;
+        return this._getNodeWithEdgeCaseId(0, (id, max) => {return id >= max});
+    }
+
+    _getNodeWithEdgeCaseId(startValue, checkIsEdgeCase) {
+        let tmp = startValue;
         let index = -1;
         for (let i = 0; i < this.nodes.length; i++) {
             let id = this.nodes[i].id;
-            if (id >= max) {
+            if (checkIsEdgeCase(id, tmp)) {
+                tmp = id;
                 index = i;
-                max = id;
             }
         }
 
-        if (index !== -1) {
-            return this.nodes[index];
-        }
-
-        return undefined;
+        return (index !== -1) ? this.nodes[index] : undefined;
     }
 }

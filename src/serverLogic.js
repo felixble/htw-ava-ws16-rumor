@@ -1,3 +1,4 @@
+import { _ } from 'underscore';
 import { Client } from './lib/client';
 import { Semaphore } from './lib/async-semaphore';
 import { VectorClock } from './lib/vector-clock';
@@ -22,52 +23,63 @@ export class ServerLogic {
     }
 
     /**
+     * @callback MessageProcessor
+     * @param socket
+     * @param data
+     */
+
+    /**
      * Returns a function which defines the
      * handling of incoming messages.
      *
-     * @returns {function(socket, data)}
+     * @returns {MessageProcessor}
      */
-    onReceiveData() {
+    getMessageProcessor() {
         // "I am born"-tick ;-)
         this.myVectorTime.tick();
         this.logI('Hello! You can contact me at ' + JSON.stringify(this.endpointManager.getMyEndpoint()));
-        return async(socket, data) => {
-            try {
-                socket.write(JSON.stringify({}));
-                await this.sem.take();
+        return _.bind(this.onReceiveData, this);
+    }
 
-                if (this.killed) {
-                    this.sem.leave();
+    /**
+     * Processes an incoming message.
+     */
+    async onReceiveData(socket, data) {
+        try {
+            socket.write(JSON.stringify({}));
+            await this.sem.take();
+
+            if (this.killed) {
+                this.sem.leave();
+                return;
+            }
+
+            this.myVectorTime.tick();
+            if (data.time) {
+                this.myVectorTime.update(VectorClock.createFromJSON(data.time));
+            }
+
+            this.logR(JSON.stringify(data));
+
+            if (data.type === 'control') {
+                if (data.msg === "STOP") {
+                    this.stop();
                     return;
                 }
-
-                this.myVectorTime.tick();
-                if (data.time) {
-                    this.myVectorTime.update(VectorClock.createFromJSON(data.time));
+                if (data.msg === "STOP ALL") {
+                    await this.sendStopSignalToNeighbors();
+                    this.stop();
+                    return;
                 }
-
-                this.logR(JSON.stringify(data));
-
-                if (data.type === 'control') {
-                    if (data.msg === "STOP") {
-                        this.stop();
-                        return;
-                    }
-                    if (data.msg === "STOP ALL") {
-                        await this.sendStopSignalToNeighbors();
-                        this.stop();
-                        return;
-                    }
-                } else {
-                    await this._runAlgorithm(data, socket);
-                }
-                this.sem.leave();
-            } catch(e) {
-                if (!e.stack) console.error(e);
-                else console.error(e.stack);
-                this.sem.leave();
+            } else {
+                await this._runAlgorithm(data, socket);
             }
-        };
+            this.sem.leave();
+        } catch(e) {
+            if (!e.stack) console.error(e);
+            else console.error(e.stack);
+            this.sem.leave();
+        }
     }
 
     stop() {
@@ -79,11 +91,7 @@ export class ServerLogic {
     async sendStopSignalToNeighbors() {
         for (let i = 0; i < this.endpointManager.getMyNeighbors().length; i++) {
             let neighbor = this.endpointManager.getMyNeighbors()[i];
-            try {
-                this.sendMsgTo(neighbor, 'STOP ALL', 'control');
-            } catch(e) {
-                this.logE('Could not contact neighbor: ' + JSON.stringify(neighbor));
-            }
+            this.sendMsgTo(neighbor, 'STOP ALL', 'control');
         }
     }
 
@@ -91,13 +99,17 @@ export class ServerLogic {
     }
 
     async sendMsgTo(neighbor, content, type) {
-        this.myVectorTime.tick();
-        let client = new Client(neighbor.host, neighbor.port);
-        await client.connect();
-        let msg = this.prepareMessage(content, type);
-        this.logS(msg.msg, neighbor);
-        await client.send(msg);
-        client.close();
+        try {
+            this.myVectorTime.tick();
+            let client = new Client(neighbor.host, neighbor.port);
+            await client.connect();
+            let msg = this.prepareMessage(content, type);
+            this.logS(msg.msg, neighbor);
+            await client.send(msg);
+            client.close();
+        } catch(e) {
+            this.logE('Could not contact neighbor: ' + JSON.stringify(neighbor));
+        }
     }
 
     prepareMessage(content, type) {
