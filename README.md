@@ -1,15 +1,11 @@
 
 Rumor: Implementierung von Übung 2 in Node (JavaScript)
 ==========================================================
+[![Build Status](https://travis-ci.org/felixble/htw-ava-ws16-rumor.svg?branch=master)](https://travis-ci.org/felixble/htw-ava-ws16-rumor)
+[![Code Climate](https://codeclimate.com/github/felixble/htw-ava-ws16-rumor/badges/gpa.svg)](https://codeclimate.com/github/felixble/htw-ava-ws16-rumor)
 Felix Blechschmitt
 
 Dieses Dokument enthält Informationen über den Aufbau und die Funktionen von rumor.
-
-## Build status (by [TravisCI](https://travis-ci.org))
-|Branch|  |
-|---|---|
-|master|[![Build Status](https://travis-ci.org/felixble/htw-ava-ws16-rumor.svg?branch=master)](https://travis-ci.org/felixble/htw-ava-ws16-rumor)|
-|develop|[![Build Status](https://travis-ci.org/felixble/htw-ava-ws16-rumor.svg?branch=develop)](https://travis-ci.org/felixble/htw-ava-ws16-rumor)|
 
 # Getting Started
 
