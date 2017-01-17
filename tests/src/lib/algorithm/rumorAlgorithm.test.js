@@ -70,8 +70,54 @@ describe('RumorAlgorithm', function() {
             expect(sendMsgCallback.calledOnce).to.be.true;
         });
 
+        it('calls the onMessageProcessed-Callback', async function() {
+            const MSG = 'hello';
+            let listener = sinon.stub();
+            algorithm.setOnNewIncomingRumorListener(listener);
+            await algorithm.processIncomingMessage(MSG, 2);
+            expect(listener.calledOnce).to.be.true;
+            expect(listener.calledWithExactly(MSG)).to.be.true;
+            listener.reset();
+        });
+
     });
 
+    describe('#getRumorByText', function() {
+
+        it('returns a specific rumor', function() {
+            const RUMOR = 'rumor';
+            sinon.stub(algorithm, 'getRumorIndexByText');
+            algorithm.getRumorIndexByText.returns(0);
+
+            algorithm.rumors.push(RUMOR);
+            expect(algorithm.getRumorByText(RUMOR)).to.equal(RUMOR);
+            expect(algorithm.getRumorIndexByText.calledOnce).to.be.true;
+            expect(algorithm.getRumorIndexByText.calledWithExactly(RUMOR)).to.be.true;
+
+            algorithm.getRumorIndexByText.restore();
+        });
+
+    });
+
+    describe('#addRumor', function() {
+
+        it('does not add an already known rumor but adds the source id instead', function() {
+            const RUMOR = 'rumor';
+            algorithm.addRumor(RUMOR, 'me');
+            algorithm.addRumor(RUMOR, 'you');
+            expect(algorithm.rumors).to.have.length(1);
+            expect(algorithm.rumors[0].from).to.have.length(2);
+        });
+
+    });
+
+    describe('#toldMe', function() {
+
+        it('returns false for unknown rumors', function() {
+            expect(algorithm.toldMe('unknown', 'source')).to.be.false;
+        });
+
+    });
 
 
 });

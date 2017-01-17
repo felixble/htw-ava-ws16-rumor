@@ -30,6 +30,34 @@ describe('ConfidenceLevel', function() {
 
     });
 
+    describe('#_getLevelById', function() {
+
+        const LEVELS = [{id: 1, value: 1}, {id: 2, value: 2}];
+        let confidenceLevel;
+
+        beforeEach(function() {
+            confidenceLevel = new ConfidenceLevel();
+            confidenceLevel.level = LEVELS;
+        });
+
+        it('returns the correct level object', function() {
+            let level = confidenceLevel._getLevelById(2);
+            expect(level.id).to.equal(2);
+            expect(level.value).to.equal(2);
+        });
+
+        it('throws for unknown ids', function() {
+            let thrown = false;
+            try {
+                confidenceLevel._getLevelById(3);
+            } catch (e) {
+                thrown = true;
+            }
+            expect(thrown).to.be.true;
+        });
+
+    });
+
     describe('#isFavorite', function() {
 
         it('returns true for the candidate I am a supporter', function() {

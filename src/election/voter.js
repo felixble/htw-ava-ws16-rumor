@@ -22,7 +22,7 @@ export class Voter extends ElectionNode {
     }
 
     _isFinished() {
-        return super._isFinished() || this.myVectorTime.getMyTime() > this.electionTime;
+        return super._isFinished() || this.myVectorTime.getMyTime() > this.electionTime;
     }
 
     _getStatus() {

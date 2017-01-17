@@ -1,3 +1,5 @@
+import { Random } from '../../lib/random';
+
 export class EdgeGenerator {
 
     constructor(n, m) {
@@ -38,7 +40,8 @@ export class EdgeGenerator {
             let b = node[1];
             result += `${a} -- ${b};\n`;
         });
-        return result += '}';
+        result += '}';
+        return result;
     }
 
     static _assert(bed, message) {
@@ -52,6 +55,7 @@ export class EdgeGenerator {
     }
 
     static _randInt(min, max) {
+        Random.randomNumber(min, max);
         return Math.floor(Math.random()*(max-min+1)+min);
     }
 

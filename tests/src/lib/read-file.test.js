@@ -18,4 +18,14 @@ describe('read-file', function() {
             });
     });
 
+    it('throws an error if the file does not exists', async function() {
+        let errorThrown = false;
+        try {
+            await readFile('file-does-not-exists');
+        } catch(e) {
+            errorThrown = true;
+        }
+        expect(errorThrown).to.be.true;
+    });
+
 });

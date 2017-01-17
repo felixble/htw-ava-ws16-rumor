@@ -65,4 +65,14 @@ describe('EdgeGenerator', function() {
         expect(edgeGenerator._containsEdge([5,2])).to.be.false;
     });
 
+    it('throws if the condition of _assert does not match', function() {
+        let thrown = false;
+        try {
+            EdgeGenerator._assert(5 < 3, 'fail');
+        } catch(e) {
+            thrown = true;
+        }
+        expect(thrown).to.be.true;
+    });
+
 });

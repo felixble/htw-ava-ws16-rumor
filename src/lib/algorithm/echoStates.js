@@ -53,12 +53,9 @@ export class EchoStates {
     }
 
     add(id) {
-        let l = this.states.push(new EchoState());
-        let l2 = this.map.push(id);
-        if (l !== l2) {
-            throw new Error('illegal-state', 'length of states and map array is not equal');
-        }
-        return (l-1);
+        this.states.push(new EchoState());
+        this.map.push(id);
+        return (this.states.length - 1);
     }
 
     /**

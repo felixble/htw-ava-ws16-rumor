@@ -1,3 +1,4 @@
+import { ArrayHelpers } from './lib/array-helpers';
 import { GraphvizParser } from './parser/graphvizParser';
 
 let readFile = require('./lib/read-file');
@@ -66,23 +67,11 @@ export class EndpointManager {
     }
 
     findEndpointById(id) {
-        for(let i = 0; i < this.endpoints.length; i++) {
-            let n = this.endpoints[i];
-            if (n.id === id) {
-                return n;
-            }
-        }
-        return undefined;
+        return ArrayHelpers.findElementById(this.endpoints, id);
     }
 
     findNeighborById(id) {
-        for(let i = 0; i < this.myNeighbors.length; i++) {
-            let n = this.myNeighbors[i];
-            if (n.id === id) {
-                return n;
-            }
-        }
-        return undefined;
+        return ArrayHelpers.findElementById(this.myNeighbors, id);
     }
 
     generateLocalEndpoints(min, max) {

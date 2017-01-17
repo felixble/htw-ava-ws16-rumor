@@ -57,7 +57,7 @@ export class ConfidenceLevel {
             }
         }
         console.log(JSON.stringify(this.level));
-        throw new Error('illegal-state' + `Unknown candidate id ${id}`);
+        throw new Error(`illegal-state: Unknown candidate id ${id}`);
     }
 
     _addCandidate(id, level) {

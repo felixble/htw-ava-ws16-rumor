@@ -30,7 +30,7 @@ async function main() {
         let endpointManager = new EndpointManager(endpointFilename, graphFilename);
         await endpointManager.init();
         /* Set up my own id */
-        let myId = parseInt(arg.options.id || await readLine('Please insert the ID of this endpoint:'));
+        let myId = parseInt(arg.options.id || await readLine('Please insert the ID of this endpoint:'), /*base*/10);
         endpointManager.setMyId(myId);
         let r = arg.options.receive || await readLine('Please insert the number of receives:');
         let electionTime = arg.options.electionTime || undefined;
