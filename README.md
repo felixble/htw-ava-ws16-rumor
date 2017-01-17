@@ -3,6 +3,7 @@ Rumor: Implementierung von Übung 2 in Node (JavaScript)
 ==========================================================
 [![Build Status](https://travis-ci.org/felixble/htw-ava-ws16-rumor.svg?branch=master)](https://travis-ci.org/felixble/htw-ava-ws16-rumor)
 [![Code Climate](https://codeclimate.com/github/felixble/htw-ava-ws16-rumor/badges/gpa.svg)](https://codeclimate.com/github/felixble/htw-ava-ws16-rumor)
+[![Test Coverage](https://codeclimate.com/github/felixble/htw-ava-ws16-rumor/badges/coverage.svg)](https://codeclimate.com/github/felixble/htw-ava-ws16-rumor/coverage)
 
 Felix Blechschmitt
 
