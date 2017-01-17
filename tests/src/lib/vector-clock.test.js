@@ -72,4 +72,19 @@ describe('VectorClock', function() {
         expect(fromJson.vector, 'new-object should have the correct vector array').to.equal(vectorClock.vector);
     });
 
+    it('can return its value as a string', function() {
+        expect(vectorClock.toString()).to.include(MY_ID);
+    });
+
+    it('throws when own index is not set', function() {
+        vectorClock.vector = [];
+        let thrown = false;
+        try {
+            vectorClock._getMyIndex();
+        } catch(e){
+            thrown = true;
+        }
+        expect(thrown).to.be.true;
+    });
+
 });
