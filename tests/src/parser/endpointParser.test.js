@@ -32,4 +32,14 @@ describe('endpointParser', function() {
         expect(endpoint.port).to.equal('port-1');
     });
 
+    it('can return all endpoints for a given list of ids', function() {
+        const ALL_ENDPOINTS = [
+            {id: 3, host: "host-3", port: "port-3"},
+            {id: 1, host: "host-1", port: "port-1"},
+            {id: 2, host: "host-2", port: "port-2"}
+        ];
+        let endpoints = endpointParser.getEndpoints([2, 1], ALL_ENDPOINTS);
+        expect(endpoints).to.have.length(2);
+    });
+
 });

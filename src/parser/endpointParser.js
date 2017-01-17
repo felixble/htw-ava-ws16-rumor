@@ -54,23 +54,6 @@ let getEndpointById = function(id, endpoints) {
 };
 
 /**
- * Returns all endpoints except the
- * one identified by the given id.
- *
- * This function was used in the
- * first version (hello server)
- *
- * @param id
- * @param endpoints
- * @returns {Array.<T>|Array|*}
- */
-let getNeightbors = function(id, endpoints) {
-    return endpoints.filter(endpoint => {
-        return endpoint.id !== id;
-    })
-};
-
-/**
  * Returns the endpoints identified by the
  * given ids.
  *
@@ -87,6 +70,5 @@ let getEndpoints = function(ids, endpoints) {
 module.exports = {
     parse: parse,
     getEndpointById: getEndpointById,
-    getNeighbors: getNeightbors,
     getEndpoints: getEndpoints
 };
