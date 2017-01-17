@@ -15,8 +15,8 @@ async function readArguments(args) {
     let n, m, filename;
     let gotInput = false;
     while(!gotInput) {
-        n = parseInt(args.n || await readLine('Please enter the number of nodes:'));
-        m = parseInt(args.m || await readLine('Please enter the number of edges:'));
+        n = parseInt(args.n || await readLine('Please enter the number of nodes:'), 10);
+        m = parseInt(args.m || await readLine('Please enter the number of edges:'), 10);
         if (m > n) {
             gotInput = true;
         } else {

@@ -32,7 +32,7 @@ async function queryAddressSendMsg(msg, type='control') {
     if (arg.options.host && arg.options.host) {
         await sendMsgClient(arg.options.host, arg.options.port, msg, type);
     } else {
-        let addresses = (arg.options.addresses || await readLine('Enter addresses <host:port;...;host:port>:')).split(';');
+        let addresses = (arg.options.addresses || await readLine('Enter addresses <host:port;...;host:port>:')).split(';');
         for(let i=0; i<addresses.length; i++) {
             let address = addresses[i];
             let hostPort = address.split(':');

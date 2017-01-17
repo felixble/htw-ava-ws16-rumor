@@ -1,4 +1,5 @@
-import { _ } from 'underscore'
+import { _ } from 'underscore';
+import { ArrayHelpers } from './array-helpers';
 
 /**
  * Implementation of a vector clock which is a
@@ -105,13 +106,7 @@ export class VectorClock {
     }
 
     _findIndex(id) {
-        for (let i=0; i<this.vector.length; i++) {
-            let o = this.vector[i];
-            if (o.id === id) {
-                return i;
-            }
-        }
-        return undefined;
+        return ArrayHelpers.getElementIndexById(this.vector, id);
 
     }
 

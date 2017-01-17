@@ -19,8 +19,8 @@ let parse = function(string) {
         let id, host, port;
 
         let match = pattern.exec(line);
-        while (match != null) {
-            id = parseInt(match[1]);
+        while (match !== null) {
+            id = parseInt(match[1], /*base*/10);
             host = match[2];
             port = match[3];
             match = pattern.exec(line);
