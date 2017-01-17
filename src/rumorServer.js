@@ -23,7 +23,7 @@ export class RumorServer extends ServerLogic {
         this.rumors = [];
         this.believeCount = (believeCount === -1) ? BELIEVE_COUNT : believeCount;
         this.algorithm = new RumorAlgorithm(
-            this.endpointManager.getMyId(), this.endpointManager.getMyNeighbors(), _.bind(this.sendMsgTo, this));
+            this.endpointManager.getMyId(), this.endpointManager.getMyNeighbors(), _.bind(this.sendRumorTo, this));
         this.algorithm.setOnMessageProcessed(_.bind(this.onMessageProcessed, this));
     }
 
@@ -40,7 +40,7 @@ export class RumorServer extends ServerLogic {
     }
 
     /**
-     * Checks wheather the node believes the
+     * Checks whether the node believes the
      * given rumor.
      *
      * @param rumor
@@ -55,10 +55,10 @@ export class RumorServer extends ServerLogic {
     /**
      * Sends a given rumor to the designated neighbor.
      *
-     * @param newRumor
      * @param neighbor
+     * @param newRumor
      */
-    async tellRumorTo(newRumor, neighbor) {
+    async sendRumorTo(neighbor, newRumor) {
         await this.sendMsgTo(neighbor, newRumor, 'rumor');
     }
 }

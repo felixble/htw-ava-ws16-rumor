@@ -2,6 +2,7 @@ import { _ } from 'underscore';
 import { Client } from './lib/client';
 import { Semaphore } from './lib/async-semaphore';
 import { VectorClock } from './lib/vector-clock';
+import { MessageTypes } from './election/messageTypes'
 
 /**
  * Base class of the server logic,
@@ -16,6 +17,7 @@ export class ServerLogic {
 
     constructor(server, endpointManager) {
         this.server = server;
+        /** @type {EndpointManager} */
         this.endpointManager = endpointManager;
         this.sem = new Semaphore(1);
         this.killed = false;
@@ -37,7 +39,8 @@ export class ServerLogic {
     getMessageProcessor() {
         // "I am born"-tick ;-)
         this.myVectorTime.tick();
-        this.logI('Hello! You can contact me at ' + JSON.stringify(this.endpointManager.getMyEndpoint()));
+        this.logI('Hello! You can contact me at ' + JSON.stringify(this.endpointManager.getMyEndpoint())
+                    + ' My direct neighbors are: ' + JSON.stringify(this.endpointManager.getMyNeighbors()));
         return _.bind(this.onReceiveData, this);
     }
 
@@ -46,7 +49,11 @@ export class ServerLogic {
      */
     async onReceiveData(socket, data) {
         try {
-            socket.write(JSON.stringify({}));
+            if (data.type === MessageTypes.GET_STATUS) {
+                socket.write(JSON.stringify(this._getStatus()));
+            } else {
+                socket.write(JSON.stringify({}));
+            }
             await this.sem.take();
 
             if (this.killed) {
@@ -61,7 +68,7 @@ export class ServerLogic {
 
             this.logR(JSON.stringify(data));
 
-            if (data.type === 'control') {
+            if (data.type === MessageTypes.CONTROL) {
                 if (data.msg === "STOP") {
                     this.stop();
                     return;
@@ -72,10 +79,16 @@ export class ServerLogic {
                     return;
                 }
             } else {
-                await this._runAlgorithm(data, socket);
+                if (!this._isFinished()) {
+                    await this._runAlgorithm(data, socket);
+                }
             }
             this.sem.leave();
         } catch(e) {
+            try {
+                let myId = this.endpointManager.getMyId();
+                console.error(`Unknown error occurred on node ${myId}`);
+            } catch(ignored) {}
             if (!e.stack) console.error(e);
             else console.error(e.stack);
             this.sem.leave();
@@ -91,11 +104,25 @@ export class ServerLogic {
     async sendStopSignalToNeighbors() {
         for (let i = 0; i < this.endpointManager.getMyNeighbors().length; i++) {
             let neighbor = this.endpointManager.getMyNeighbors()[i];
-            this.sendMsgTo(neighbor, 'STOP ALL', 'control');
+            this.sendMsgTo(neighbor, 'STOP ALL', MessageTypes.CONTROL);
+        }
+    }
+
+    _getStatus() {
+        let status = (this.killed) ? 'dead' : 'ok';
+        return {
+            myId: this.endpointManager.getMyId(),
+            neighbors: this.endpointManager.getMyNeighbors().map(n => { return n.id }),
+            semaProcessMsg: this.sem.currentValue(),
+            status: status
         }
     }
 
     async _runAlgorithm(incomingMsg, socket) {
+    }
+
+    _isFinished() {
+        return this.killed;
     }
 
     async sendMsgTo(neighbor, content, type) {
@@ -104,7 +131,7 @@ export class ServerLogic {
             let client = new Client(neighbor.host, neighbor.port);
             await client.connect();
             let msg = this.prepareMessage(content, type);
-            this.logS(msg.msg, neighbor);
+            this.logS(JSON.stringify(msg), neighbor);
             await client.send(msg);
             client.close();
         } catch(e) {
@@ -129,6 +156,9 @@ export class ServerLogic {
 
     logS(msg, node) {
         let nodeStr = JSON.stringify(node);
+        //if (msg.hasOwnProperty('msg') && msg.hasOwnProperty('type')) {
+        //    msg = `${msg.msg} of type ${msg.type}`;
+        //}
         this.log('SEND   ', `${msg} to ${nodeStr}`);
     }
 

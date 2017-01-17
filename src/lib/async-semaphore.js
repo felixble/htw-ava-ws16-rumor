@@ -15,4 +15,8 @@ export class Semaphore {
         this.sem.leave();
     }
 
+    currentValue() {
+        return this.sem.current;
+    }
+
 }

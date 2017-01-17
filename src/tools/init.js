@@ -7,7 +7,9 @@ let optionParser = require('node-getopt').create([
     ['c', 'cmd=[ARG]', 'Command: "init" | "stop" | "stop all"'],
     ['', 'host=[ARG]', 'host'],
     ['', 'port=[ARG]', 'port'],
-    ['r', 'rumor=[ARG]', 'the rumor which should be sent'],
+    ['', 'addresses=[ARG]', 'destination addresses format: <host:port>'],
+    ['m', 'msg=[ARG]', 'the message content which should be sent'],
+    ['t', 'type=[ARG]', 'the message type of the message which should be sent'],
     ['h', 'help', 'Display this help']
 ]);
 
@@ -15,19 +17,27 @@ let arg = optionParser.bindHelp().parseSystem();
 
 
 async function sendMsgClient(host, port, msg, type='control') {
-    let client = new Client(host, port);
-    await client.connect();
-    await client.send({msg: msg, type: type});
-    client.close();
+    try {
+        let client = new Client(host, port);
+        await client.connect();
+        let response = await client.send({msg: msg, type: type});
+        console.log(JSON.stringify(response));
+        client.close();
+    } catch (e) {
+        console.log(`Could not send msg to host: ${host}:${port}`);
+    }
 }
 
 async function queryAddressSendMsg(msg, type='control') {
-    let host = arg.options.host || await readLine('Enter host:');
-    let port = arg.options.port || await readLine('Enter port:');
-    try {
-        await sendMsgClient(host, port, msg, type);
-    } catch (e) {
-        console.log(`Could not send msg to host: ${host}:${port}`);
+    if (arg.options.host && arg.options.host) {
+        await sendMsgClient(arg.options.host, arg.options.port, msg, type);
+    } else {
+        let addresses = (arg.options.addresses || await readLine('Enter addresses <host:port;...;host:port>:')).split(';');
+        for(let i=0; i<addresses.length; i++) {
+            let address = addresses[i];
+            let hostPort = address.split(':');
+            await sendMsgClient(hostPort[0], hostPort[1], msg, type);
+        }
     }
 }
 
@@ -41,8 +51,15 @@ async function execCommand(cmd) {
     switch (cmd) {
         case 'init':
         {
-            let rumor = arg.options.rumor || await readLine('Enter rumor:');
+            let rumor = arg.options.msg || await readLine('Enter rumor:');
             await queryAddressSendMsg(rumor, 'rumor');
+            break;
+        }
+        case 'msg':
+        {
+            let msgType = arg.options.type || await readLine('Enter message type:');
+            let msg = arg.options.msg || await readLine('Enter message content:');
+            await queryAddressSendMsg(msg, msgType);
             break;
         }
         case 'stop':

@@ -1,10 +1,5 @@
 import { EchoStates } from './echoStates';
-import { Semaphore } from '../async-semaphore'
-let randomstring = require('randomstring');
-
-let generateId = function () {
-    return randomstring.generate(7);
-};
+import { Random } from '../random';
 
 export class EchoAlgorithm {
 
@@ -16,7 +11,7 @@ export class EchoAlgorithm {
 
     /**
      * @callback NewMessageListener
-     * @param {string} message
+     * @param {object} message content
      */
 
     /**
@@ -30,16 +25,20 @@ export class EchoAlgorithm {
         this.neighbors = neighbors;
         /** @type {SendMsgCallback} */
         this.sendMsgCallback = sendMsgCallback;
+        /** @type {NewMessageListener} */
         this.newMessageListener = null;
-        this.sema = new Semaphore(1);
     }
 
+    /**
+     *
+     * @param {NewMessageListener} listener
+     */
     setNewMessageListener(listener) {
         this.newMessageListener = listener;
     }
 
-    async initEcho(content, onEchoDistributed) {
-        let id = generateId();
+    async initEcho(content, onEchoDistributed = false) {
+        let id = Random.generateId();
         let state = this.getState(id);
 
         state.onEchoDistributed = onEchoDistributed;
@@ -58,7 +57,6 @@ export class EchoAlgorithm {
      *                      who sent the message
      */
     async processIncomingMsg(msg, neighborId) {
-        await this.sema.take();
         let content = msg.content;
         let msgId = msg.id;
         let state = this.getState(msgId);
@@ -88,7 +86,6 @@ export class EchoAlgorithm {
                 await this.sendEchoTo(state.getFirstNeighborId(), msgId);
             }
         }
-        this.sema.leave();
     }
 
     async sendExplorer(id, content, skip = null) {

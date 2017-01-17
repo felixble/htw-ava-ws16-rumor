@@ -1,3 +1,5 @@
+import { Random } from '../random';
+
 /**
  * This algorithm receives an incoming
  * message and distributes the message
@@ -7,13 +9,24 @@
 export class RumorAlgorithm {
 
     /**
-     * @callback SendMsgCallback
+     * @callback SendRumorCallback
      * @param {object} neighbor
      * @param {object} content
-     * @param {string} type
      */
 
     /**
+     * Will be called when the algorithm
+     * processes a new unknown incoming rumor.
+     *
+     * @callback NewIncomingRumorCallback
+     * @param {object} rumor
+     * @return {boolean} true, iff the rumor shall be distributed
+     */
+
+    /**
+     * Will be called after an incoming messsage
+     * was processed.
+     *
      * @callback OnMsgProcessedCallback
      * @param {string} rumor content
      */
@@ -22,16 +35,17 @@ export class RumorAlgorithm {
      *
      * @param myId
      * @param neighbors
-     * @param sendMsgCallback
+     * @param sendMsgCallback {SendRumorCallback}
      */
     constructor(myId, neighbors, sendMsgCallback) {
         this.myId = myId;
         this.neighbors = neighbors;
-        /** @type {SendMsgCallback} */
+        /** @type {SendRumorCallback} */
         this.sendMsgCallback = sendMsgCallback;
         /** @type {OnMsgProcessedCallback} */
         this.onMessageProcessed = null;
-
+        /** @type {NewIncomingRumorCallback} */
+        this.onNewIncomingRumor = null;
         this.rumors = [];
     }
 
@@ -44,29 +58,57 @@ export class RumorAlgorithm {
     }
 
     /**
+     *
+     * @param {NewIncomingRumorCallback} onNewIncomingRumor
+     */
+    setOnNewIncomingRumorListener(onNewIncomingRumor) {
+        this.onNewIncomingRumor = onNewIncomingRumor;
+    }
+
+    async distributeRumor(msg, sendMsgToNeighborWithId = false, id = false) {
+        id = (!id) ? Random.generateId() : id;
+        for (let i = 0; i < this.neighbors.length; i++) {
+            let neighbor = this.neighbors[i];
+
+            if (!sendMsgToNeighborWithId || sendMsgToNeighborWithId(neighbor.id)) {
+                await this.tellRumorTo(msg, id, neighbor);
+            }
+        }
+    }
+
+    /**
      * Processes an incoming echo message.
      *
-     * @param msg           the incoming message
+     * @param msg          the incoming message
      * @param neighborId    the id of the neighbor
      *                      who sent the message
      */
     async processIncomingMessage(msg, neighborId) {
+        let rumorId = (msg.hasOwnProperty('id')) ? msg.id : msg;
+        let content = (msg.hasOwnProperty('content')) ? msg.content : msg;
 
-        let alreadyKnown = this.isKnown(msg);
-        this.addRumor(msg, neighborId);
+
+        let alreadyKnown = this.isKnown(rumorId);
+        this.addRumor(rumorId, neighborId);
 
         if (!alreadyKnown) {
-            for (let i = 0; i < this.neighbors.length; i++) {
-                let neighbor = this.neighbors[i];
-
-                if (!this.toldMe(msg, neighbor.id)) {
-                    await this.tellRumorTo(msg, neighbor);
-                }
+            let distribute = true;
+            if (this.onNewIncomingRumor) {
+                distribute = this.onNewIncomingRumor(content);
+            }
+            if (distribute) {
+                await this.distributeRumor(
+                    content,
+                    (id) => {
+                        return !this.toldMe(rumorId, id);
+                    },
+                    rumorId
+                );
             }
         }
 
         if (this.onMessageProcessed) {
-            this.onMessageProcessed(msg);
+            this.onMessageProcessed(rumorId);
         }
     }
 
@@ -153,10 +195,11 @@ export class RumorAlgorithm {
      * Sends a given rumor to the designated neighbor.
      *
      * @param newRumor
+     * @param id
      * @param neighbor
      */
-    async tellRumorTo(newRumor, neighbor) {
-        await this.sendMsgCallback(neighbor, newRumor, 'rumor');
+    async tellRumorTo(newRumor, id, neighbor) {
+        await this.sendMsgCallback(neighbor, { content: newRumor, id: id });
     }
 
 }
