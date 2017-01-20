@@ -41,8 +41,7 @@ async function main() {
             (CandidateIdsManager.amIACandidate(myId))
                 ? new Candidate(myServer, endpointManager, r)
                 : new Voter(myServer, endpointManager, electionTime);
-        //let serverLogic = new RumorServer(myServer, endpointManager, r);
-        /* start server and waits until server is closed */
+        /* start server and wait until server is closed */
         await myServer.listen(serverLogic.getMessageProcessor());
         console.log('exit node ' + myId);
     } catch (e) {
