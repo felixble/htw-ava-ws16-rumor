@@ -51,7 +51,7 @@ export class ServerLogic {
         try {
             if (data.type === MessageTypes.GET_STATUS) {
                 socket.write(JSON.stringify(this._getStatus()));
-            } else {
+            } else if (MessageTypes.doSendEmptyResponse(data.type)) {
                 socket.write(JSON.stringify({}));
             }
             await this.sem.take();

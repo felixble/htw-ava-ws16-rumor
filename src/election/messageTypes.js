@@ -9,6 +9,8 @@ export const MessageTypes = {
 
     GET_STATUS: 'get-status',
 
+    SNAPSHOT: 'snapshot',
+
     /*
     * Initializes the
     * candidate-process
@@ -18,5 +20,9 @@ export const MessageTypes = {
     CAMPAIGN: 'campaign',
     CHOOSE_ME: 'choose-me',
     NOT_YOU: 'not-you',
-    KEEP_IT_UP: 'keep-it-up'
+    KEEP_IT_UP: 'keep-it-up',
+
+    doSendEmptyResponse: function(type) {
+        return type !== this.SNAPSHOT;
+    }
 };

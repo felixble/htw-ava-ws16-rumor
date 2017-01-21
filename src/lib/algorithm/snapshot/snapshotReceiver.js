@@ -7,6 +7,7 @@ export class SnapshotReceiver {
      */
     constructor(vectorClock) {
         this.vectorClock = vectorClock;
+        this.snapshotTaker = null;
         this.snapshotTimestamp = Number.MAX_VALUE;
     }
 
@@ -22,6 +23,9 @@ export class SnapshotReceiver {
      */
     processIncomingMessage(msg) {
         let content = msg.content;
+        if (msg.snapshotTaker !== null) {
+            this.snapshotTaker = msg.snapshotTaker;
+        }
         switch (msg.type) {
             case SnapshotMessageType.GET_LOCAL_VECTOR_TIMESTAMP:
                 return this._getLocalVectorTimestamp();

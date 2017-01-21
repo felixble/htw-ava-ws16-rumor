@@ -2,6 +2,7 @@ import { _ } from 'underscore';
 import { ServerLogic } from '../serverLogic';
 import { EchoAlgorithm } from '../lib/algorithm/echoAlgorithm';
 import { RumorAlgorithm } from '../lib/algorithm/rumorAlgorithm';
+import { SnapshotReceiver } from '../lib/algorithm/snapshot/snapshotReceiver';
 import { MessageTypes } from './messageTypes';
 import { CandidateIdsManager } from './candidateIdsManager';
 
@@ -23,6 +24,8 @@ export class ElectionNode extends ServerLogic {
             this.endpointManager.getMyId(),
             friends,
             _.bind(this.sendChooseMeMsgTo, this));
+        /** @type {SnapshotReceiver} */
+        this.snapshotReceiver = new SnapshotReceiver(this.myVectorTime);
     }
 
     _getStatus() {
@@ -43,6 +46,12 @@ export class ElectionNode extends ServerLogic {
             case MessageTypes.CHOOSE_ME:
             {
                 await this.chooseMeAlgorithm.processIncomingMessage(msg, senderId);
+                break;
+            }
+            case MessageTypes.SNAPSHOT:
+            {
+                let response = this.snapshotReceiver.processIncomingMessage(msg);
+                socket.write(response);
                 break;
             }
             default: return false;
