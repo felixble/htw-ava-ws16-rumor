@@ -58,7 +58,16 @@ export class VectorClock {
         let vector = (clock.hasOwnProperty('vector')) ? clock.vector : clock;
         for(let i=0; i<vector.length; i++) {
             let o = vector[i];
-            this._setMax(o.id, o.time);
+            this.updateTimeForId(o.id, o.time);
+        }
+    }
+
+    updateTimeForId(id, cmpTime) {
+        let i = this._findIndex(id);
+        if (undefined === i) {
+            this._addVectorTime(id, cmpTime);
+        } else {
+            this.vector[i].time = Math.max(this.vector[i].time, cmpTime);
         }
     }
 
@@ -94,15 +103,6 @@ export class VectorClock {
 
     _addVectorTime(id, initialValue = 0) {
         this.vector.push({id: id, time: initialValue});
-    }
-
-    _setMax(id, cmpTime) {
-        let i = this._findIndex(id);
-        if (undefined === i) {
-            this._addVectorTime(id, cmpTime);
-        } else {
-            this.vector[i].time = Math.max(this.vector[i].time, cmpTime);
-        }
     }
 
     _findIndex(id) {
