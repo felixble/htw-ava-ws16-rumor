@@ -7,7 +7,7 @@ export class SnapshotAlgorithm {
 
     /**
      * @callback SendMsgCallback
-     * @param {object} nod
+     * @param {object} node
      * @param node.host {string}
      * @param node.port {string|number}
      * @param {object} msg
