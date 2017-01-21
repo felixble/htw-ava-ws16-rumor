@@ -58,7 +58,7 @@ export class SnapshotAlgorithm {
     async _collectVectorTimestamps() {
         for(let i=0; i<this.nodes.length; i++) {
             let node = this.nodes[i];
-            node.timestamp = await this._fetchLocalVectorTimestamp(node);
+            node.timestamp = parseInt(await this._fetchLocalVectorTimestamp(node), 10);
         }
     }
 
