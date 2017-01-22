@@ -49,9 +49,7 @@ export class SnapshotAlgorithm {
             await this._calculateAndDistributeSnapshotTimestamp();
             this._increaseConstantFactor();
         }
-        let promise = this._forceTakingSnapshotByManipulatingAllClocks();
-        promise.then(() => {console.log('finished taking snapshot')})
-            .catch(err => {console.error(`error taking snapshot: ` + err)});
+        await this._forceTakingSnapshotByManipulatingAllClocks();
     }
 
     _isTimestampSuccessfullyCalculated() {
