@@ -8,6 +8,7 @@
     "build": "npm run clean && babel -d build ./src -s",
     "start": "node build/index.js",
     "init": "node build/tools/init.js",
+    "observer": "node build/tools/startObserver.js",
     "graphgen": "node build/tools/graphgen.js",
     "make-doku": "./scripts/make-doku.sh",
     "demo-vektorzeit": "./scripts/demo-vektorzeit.sh",

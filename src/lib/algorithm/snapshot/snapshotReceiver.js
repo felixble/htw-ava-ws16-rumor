@@ -4,11 +4,13 @@ export class SnapshotReceiver {
 
     /**
      * @param vectorClock {VectorClock}
+     * @param takeSnapshotCallback
      */
-    constructor(vectorClock) {
+    constructor(vectorClock, takeSnapshotCallback) {
         this.vectorClock = vectorClock;
         this.snapshotTaker = null;
         this.snapshotTimestamp = Number.MAX_VALUE;
+        this.takeSnapshotCallback = takeSnapshotCallback;
     }
 
     /**
@@ -32,7 +34,7 @@ export class SnapshotReceiver {
             case SnapshotMessageType.TAKE_SNAPSHOT_AT:
                 return this._takeSnapshotAt(content);
             case SnapshotMessageType.UPDATE_VECTOR_CLOCK:
-                return SnapshotReceiver._updateVectorClock();
+                return this._updateVectorClock();
             default:
                 return {error: `unknown message type ${msg.type}`};
         }
@@ -43,11 +45,19 @@ export class SnapshotReceiver {
     }
 
     _takeSnapshotAt(content) {
-        this.snapshotTimestamp = parseInt(content, 10);
-        return {};
+        let timestamp = parseInt(content, 10);
+        if (timestamp > this.vectorClock.getMyTime()) {
+            this.snapshotTimestamp = timestamp;
+            return SnapshotMessageResponse.VALID_SNAPSHOT_TIMESTAMP;
+        } else {
+            return SnapshotMessageResponse.INVALID_SNAPSHOT_TIMESTAMP;
+        }
     }
 
-    static _updateVectorClock() {
+    _updateVectorClock() {
+        if (this.takeSnapshotCallback) {
+            this.takeSnapshotCallback(this.snapshotTaker);
+        }
         return {};
     }
 }

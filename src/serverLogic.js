@@ -22,6 +22,7 @@ export class ServerLogic {
         this.sem = new Semaphore(1);
         this.killed = false;
         this.myVectorTime = new VectorClock(endpointManager.getMyId());
+        this.finishedTimestamp = -1;
     }
 
     /**
@@ -79,8 +80,13 @@ export class ServerLogic {
                     return;
                 }
             } else {
-                if (!this._isFinished()) {
+                if (this._isFinished()) {
+                    this._saveFinishedTimestamp();
+                }
+                if (!this._isFinished() || data.type === MessageTypes.SNAPSHOT) {
                     await this._runAlgorithm(data, socket);
+                } else {
+                    this.logE(`I am finished. Cannot process incoming msg of type ${data.type}`);
                 }
             }
             this.sem.leave();
@@ -114,11 +120,19 @@ export class ServerLogic {
             myId: this.endpointManager.getMyId(),
             neighbors: this.endpointManager.getMyNeighbors().map(n => { return n.id }),
             semaProcessMsg: this.sem.currentValue(),
+            myLocalTime: this.myVectorTime.getMyTime(),
+            finishedTimestamp: this.finishedTimestamp,
             status: status
         }
     }
 
     async _runAlgorithm(incomingMsg, socket) {
+    }
+
+    _saveFinishedTimestamp() {
+        if (this.finishedTimestamp === -1) {
+            this.finishedTimestamp = this.myVectorTime.getMyTime();
+        }
     }
 
     _isFinished() {
@@ -132,11 +146,13 @@ export class ServerLogic {
             await client.connect();
             let msg = this.prepareMessage(content, type);
             this.logS(JSON.stringify(msg), neighbor);
-            await client.send(msg);
+            let response = await client.send(msg);
             client.close();
+            return response;
         } catch(e) {
             this.logE('Could not contact neighbor: ' + JSON.stringify(neighbor));
         }
+        return null;
     }
 
     prepareMessage(content, type) {

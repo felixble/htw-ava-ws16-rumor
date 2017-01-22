@@ -1,7 +1,8 @@
 import { SnapshotMessageType } from './snapshotMessageTypes';
 import { SnapshotMessageResponse } from './snapshotMessageTypes';
 
-const CONSTANT_START_VALUE = 20;
+const CONSTANT_START_VALUE = 10000;
+const FACTOR_TO_INCREASE_CONSTANT = 2;
 
 export class SnapshotAlgorithm {
 
@@ -48,7 +49,9 @@ export class SnapshotAlgorithm {
             await this._calculateAndDistributeSnapshotTimestamp();
             this._increaseConstantFactor();
         }
-        await this._forceTakingSnapshotByManipulatingAllClocks();
+        let promise = this._forceTakingSnapshotByManipulatingAllClocks();
+        promise.then(() => {console.log('finished taking snapshot')})
+            .catch(err => {console.error(`error taking snapshot: ` + err)});
     }
 
     _isTimestampSuccessfullyCalculated() {
@@ -86,16 +89,19 @@ export class SnapshotAlgorithm {
         for(let i=0; i<this.nodes.length; i++) {
             let node = this.nodes[i];
             let response = await this._sendMsg(node, SnapshotMessageType.TAKE_SNAPSHOT_AT, this.snapshotTimestamp);
-            let success = (response === SnapshotMessageResponse.VALID_SNAPSHOT_TIMESTAMP);
-            if (!success) {
-                return;
+            if (response !== SnapshotMessageResponse.VALID_SNAPSHOT_TIMESTAMP) {
+                if (response === SnapshotMessageResponse.INVALID_SNAPSHOT_TIMESTAMP) {
+                    return;
+                } else {
+                    throw new Error('illegal-response');
+                }
             }
         }
         this.calculatedSnapshotTimestampSuccessfully = true;
     }
 
     _increaseConstantFactor() {
-        this.constantFactorToAddToMaxTimestamp *= 2;
+        this.constantFactorToAddToMaxTimestamp *= FACTOR_TO_INCREASE_CONSTANT;
     }
 
     async _forceTakingSnapshotByManipulatingAllClocks() {

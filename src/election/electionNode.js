@@ -25,7 +25,16 @@ export class ElectionNode extends ServerLogic {
             friends,
             _.bind(this.sendChooseMeMsgTo, this));
         /** @type {SnapshotReceiver} */
-        this.snapshotReceiver = new SnapshotReceiver(this.myVectorTime);
+        this.snapshotReceiver = new SnapshotReceiver(this.myVectorTime, _.bind(this.sendMyStatusToSnapshotTakerOnce, this));
+        this.statusSentToSnapshotTaker = false;
+    }
+
+    _isFinished() {
+        return this._isSnapshotTimeReached();
+    }
+
+    _isSnapshotTimeReached() {
+        return (this.myVectorTime.getMyTime() >= this.snapshotReceiver.snapshotTimestamp);
     }
 
     _getStatus() {
@@ -51,7 +60,7 @@ export class ElectionNode extends ServerLogic {
             case MessageTypes.SNAPSHOT:
             {
                 let response = this.snapshotReceiver.processIncomingMessage(msg);
-                socket.write(response);
+                socket.write(JSON.stringify(response));
                 break;
             }
             default: return false;
@@ -65,6 +74,17 @@ export class ElectionNode extends ServerLogic {
 
     async sendChooseMeMsgTo(neighbor, msg) {
         await this.sendMsgTo(neighbor, msg, MessageTypes.CHOOSE_ME);
+    }
+
+    sendMyStatusToSnapshotTakerOnce(snapshotTaker) {
+        if (!this.statusSentToSnapshotTaker) {
+            this._sendStatusToSnapshotTaker(snapshotTaker);
+            this.statusSentToSnapshotTaker = true;
+        }
+    }
+
+    _sendStatusToSnapshotTaker(snapshotTaker) {
+        this.sendMsgTo(snapshotTaker, this._getStatus(), MessageTypes.MY_STATUS);
     }
 
 }

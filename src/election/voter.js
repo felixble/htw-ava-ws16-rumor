@@ -21,10 +21,6 @@ export class Voter extends ElectionNode {
         this.electionTime = electionTime;
     }
 
-    _isFinished() {
-        return super._isFinished() || this.myVectorTime.getMyTime() > this.electionTime;
-    }
-
     _getStatus() {
         let status = super._getStatus();
         if (this.myCandidatesId) {
