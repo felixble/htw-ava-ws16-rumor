@@ -30,6 +30,12 @@ describe('HakimiGraphGenerator', function() {
             expect(hakimiGenerator.graph.getNodeDegreeFor(8)).to.equal(3);
         });
 
+        it('can generate a huge graph', function() {
+            let hakimiGenerator = HakimiGraphGenerator.withEqualDegrees(80, 3, 3);
+            hakimiGenerator.generate();
+            expect(Object.keys(hakimiGenerator.graph.nodes)).to.have.length(80);
+        });
+
     });
 
     describe('#sortDegreesDescending', function() {

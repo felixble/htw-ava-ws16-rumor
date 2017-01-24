@@ -38,6 +38,7 @@ export class HakimiGraphGenerator {
             this.connectFirstNodeWithFollowingNodes();
         }
         this.checkPostconditions();
+        return this.graph;
     }
 
     checkPreconditions() {

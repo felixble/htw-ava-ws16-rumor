@@ -1,4 +1,4 @@
-
+let connectedCommponents = require('connected-components');
 
 export class Graph {
 
@@ -12,11 +12,13 @@ export class Graph {
 
     constructor() {
         this.nodes = {};
+        this.edges = [];
     }
 
     addBidirectionalEdge(nodeId1, nodeId2) {
         this.addEdge(nodeId1, nodeId2);
         this.addEdge(nodeId2, nodeId1);
+        this.edges.push([nodeId1, nodeId2]);
     }
 
     addEdge(sourceNodeId, targetNodeId) {
@@ -30,10 +32,6 @@ export class Graph {
         return !!this.nodes[nodeId];
     }
 
-    getNeighborsForNode(nodeId) {
-        return this.nodes[nodeId].edges;
-    }
-
     getNodeDegreeFor(nodeId) {
         return this.nodes[nodeId].edges.length;
     }
@@ -43,6 +41,21 @@ export class Graph {
             id: nodeId,
             edges: []
         };
+    }
+
+    getAdjacencyList(nodeIdOffset = 0) {
+        let list = [];
+        Object.keys(this.nodes).forEach(key => {
+            let edges = this.nodes[key].edges.map(id => {
+                return id - nodeIdOffset;
+            });
+            list.push(edges);
+        });
+        return list;
+    }
+
+    isStronglyConnected(nodeIdOffset = 0) {
+        return connectedCommponents(this.getAdjacencyList(nodeIdOffset)).length === 1;
     }
 
     calcNodeDegreeRange() {
