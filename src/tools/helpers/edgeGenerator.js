@@ -33,11 +33,11 @@ export class EdgeGenerator {
         return this.edges;
     }
 
-    generateGraphvizData() {
+    generateGraphvizData(nodeIdOffset = 0) {
         let result = 'graph G {\n';
         this.edges.forEach(node => {
-            let a = node[0];
-            let b = node[1];
+            let a = node[0] + nodeIdOffset;
+            let b = node[1] + nodeIdOffset;
             result += `${a} -- ${b};\n`;
         });
         result += '}';
