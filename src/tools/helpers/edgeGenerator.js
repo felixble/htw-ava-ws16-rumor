@@ -1,4 +1,5 @@
 import { Random } from '../../lib/random';
+import { GraphvizWriter } from './graphvizWriter';
 
 export class EdgeGenerator {
 
@@ -33,15 +34,8 @@ export class EdgeGenerator {
         return this.edges;
     }
 
-    generateGraphvizData() {
-        let result = 'graph G {\n';
-        this.edges.forEach(node => {
-            let a = node[0];
-            let b = node[1];
-            result += `${a} -- ${b};\n`;
-        });
-        result += '}';
-        return result;
+    generateGraphvizData(nodeIdOffset = 0) {
+        return GraphvizWriter.edgesArrayToGraphvizData(this.edges, nodeIdOffset);
     }
 
     static _assert(bed, message) {

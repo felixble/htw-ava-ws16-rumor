@@ -52,8 +52,16 @@ describe('EdgeGenerator', function() {
         const edges = [[1,2],[3,2],[4,2],[4,3],[5,1],[5,3]];
         edgeGenerator = new EdgeGenerator(4, 5);
         edgeGenerator.edges = edges;
-        let data = edgeGenerator.generateGraphvizData(edges);
+        let data = edgeGenerator.generateGraphvizData();
         expect(data).to.equal('graph G {\n1 -- 2;\n3 -- 2;\n4 -- 2;\n4 -- 3;\n5 -- 1;\n5 -- 3;\n}');
+    });
+
+    it('generates the graphviz data from a nodes array and adds a given offset to each node id', function() {
+        const edges = [[1,2],[3,2],[4,2],[4,3],[5,1],[5,3]];
+        edgeGenerator = new EdgeGenerator(4, 5);
+        edgeGenerator.edges = edges;
+        let data = edgeGenerator.generateGraphvizData(2);
+        expect(data).to.equal('graph G {\n3 -- 4;\n5 -- 4;\n6 -- 4;\n6 -- 5;\n7 -- 3;\n7 -- 5;\n}');
     });
 
     it('checks if an edge-arrays contains an edge correctly', function() {
