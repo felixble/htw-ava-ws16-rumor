@@ -14,4 +14,10 @@ export class Random {
         return randomstring.generate(7);
     }
 
+    static getRandomElementFromArray(array) {
+        let maxIndex = array.length - 1;
+        let randomIndex = Random.randomNumber(0, maxIndex);
+        return array[randomIndex];
+    }
+
 }
