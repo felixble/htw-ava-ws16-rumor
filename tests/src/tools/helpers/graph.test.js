@@ -25,12 +25,12 @@ describe('Graph', function() {
         it('calculates the degree range of each node', function() {
             let graph = new Graph();
             graph.nodes = {
-                1: [3,5,8],
-                3: [1,5],
-                5: [1,3,6,7],
-                8: [1],
-                6: [5],
-                7: [5]
+                1: {edges: [3,5,8]},
+                3: {edges: [1,5]},
+                5: {edges: [1,3,6,7]},
+                8: {edges: [1]},
+                6: {edges: [5]},
+                7: {edges: [5]}
             };
             let res = graph.calcNodeDegreeRange();
             expect(res.min).to.equal(1);

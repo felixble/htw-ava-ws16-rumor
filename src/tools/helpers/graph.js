@@ -34,8 +34,13 @@ export class Graph {
         return this.nodes[nodeId].edges;
     }
 
+    getNodeDegreeFor(nodeId) {
+        return this.nodes[nodeId].edges.length;
+    }
+
     addNode(nodeId) {
         this.nodes[nodeId] = {
+            id: nodeId,
             edges: []
         };
     }
@@ -44,7 +49,7 @@ export class Graph {
         let min = Number.MAX_VALUE,
             max = 0;
         Object.keys(this.nodes).forEach(id => {
-            let length = this.nodes[id].length;
+            let length = this.getNodeDegreeFor(id);
             if (length > max) {
                 max = length;
             }
