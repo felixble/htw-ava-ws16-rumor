@@ -4,21 +4,12 @@ import { CandidateIdsManager } from './candidateIdsManager';
 import { SnapshotAlgorithm } from '../lib/algorithm/snapshot/snapshotAlgorithm';
 import { MessageTypes } from './messageTypes';
 
-const MY_ENDPOINT = {
-    id: 0,
-    host: 'localhost',
-    port: 3999
-};
-
-let nodes = [1,2,3,4,5,6,7,8].map(id => {
-    return {id: id, host: 'localhost', port: (3999+id) };
-});
-
 export class ObserverNode extends ServerLogic {
 
     constructor(server, endpointManager) {
         super(server, endpointManager);
-        this.snapshotAlgorithm = new SnapshotAlgorithm(MY_ENDPOINT, nodes, this.myVectorTime);
+        this.snapshotAlgorithm = new SnapshotAlgorithm(
+            endpointManager.getMyEndpoint(), endpointManager.getMyNeighbors(), this.myVectorTime);
         this.snapshotAlgorithm.setSendMsgCallback(_.bind(this.sendSnapshotMsg, this))
     }
 

@@ -47,7 +47,7 @@ fi
 
 for ((i=1;i<=${n};i++))
 do
-     npm run start -- -g ${graphFile} --id ${i} -r ${r} --electionTime ${electionTime} & #>> ${LOGFILE} 2>> ${ERR_LOGFILE} &
+     npm run start -- -g ${graphFile} --id ${i} -r ${r} & #>> ${LOGFILE} 2>> ${ERR_LOGFILE} &
 done
 
 #-- Check if all nodes are started --#

@@ -91,7 +91,7 @@ export class SnapshotAlgorithm {
                 if (response === SnapshotMessageResponse.INVALID_SNAPSHOT_TIMESTAMP) {
                     return;
                 } else {
-                    throw new Error('illegal-response');
+                    throw new Error('illegal-response: ' + response);
                 }
             }
         }

@@ -4,7 +4,12 @@ import { GraphvizParser } from './parser/graphvizParser';
 let readFile = require('./lib/read-file');
 let endpointParser = require('./parser/endpointParser');
 
-const MIN_PORT = 4000;
+const MIN_PORT = 4001;
+const OBSERVER_ENDPOINT = {
+    id: 0,
+    host: 'localhost',
+    port: 4000
+};
 
 /**
  * EndpointManager gives information about
@@ -47,11 +52,17 @@ export class EndpointManager {
     setMyId(id) {
         this.myId = id;
         this.myEndpoint = endpointParser.getEndpointById(this.myId, this.endpoints);
-        let myNode = this.graphvizParser.getNode(this.myId);
-        if (myNode === undefined) {
-            throw new Error(`Illegal state - the Id ${id} is not a node in the given graph`);
+        if (id === OBSERVER_ENDPOINT.id) {
+            this.myNeighbors = this.endpoints.filter(endpoint => {
+                return endpoint.id !== this.myId;
+            });
+        } else {
+            let myNode = this.graphvizParser.getNode(this.myId);
+            if (myNode === undefined) {
+                throw new Error(`Illegal state - the Id ${id} is not a node in the given graph`);
+            }
+            this.myNeighbors = endpointParser.getEndpoints(myNode.neighbors, this.endpoints);
         }
-        this.myNeighbors = endpointParser.getEndpoints(myNode.neighbors, this.endpoints);
     }
 
     getMyId() {
@@ -74,16 +85,22 @@ export class EndpointManager {
         return ArrayHelpers.findElementById(this.myNeighbors, id);
     }
 
+    getAllOtherEndpoints() {
+        return this.endpoints.filter(endpoint => {
+            return endpoint.id !== this.myId;
+        })
+    }
+
     generateLocalEndpoints(min, max) {
-        this.endpoints = [];
+        this.endpoints = [OBSERVER_ENDPOINT];
         let index = 0;
         let port = MIN_PORT;
         for (let id = min; id <= max; id++) {
-            this.endpoints[index] = {
+            this.endpoints.push({
                 id: id,
                 host: 'localhost',
                 port: port
-            };
+            });
             index++;
             port++;
         }

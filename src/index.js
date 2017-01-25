@@ -1,6 +1,7 @@
 import { Server } from './lib/server';
 import { Candidate } from './election/candidate'
 import { Voter } from './election/voter'
+import { ObserverNode } from './election/observerNode'
 import { EndpointManager } from './endpointManager'
 import { CandidateIdsManager } from './election/candidateIdsManager'
 
@@ -12,7 +13,7 @@ let optionParser = require('node-getopt').create([
     ['g', 'graphFilename=[ARG]', 'path to the graph file defining the network node topology'],
     ['', 'id=[ARG]', 'ID of this endpoint'],
     ['r', 'receive=[ARG]', 'number of receives until a candidate starts a new call (e.g. campaign)'],
-    ['', 'electionTime=[ARG]', 'vector time point when the election is over'],
+    ['', 'observer', 'start observer node'],
     ['h', 'help', 'Display this help']
 ]);
 
@@ -33,14 +34,18 @@ async function main() {
         let myId = parseInt(arg.options.id || await readLine('Please insert the ID of this endpoint:'), /*base*/10);
         endpointManager.setMyId(myId);
         let r = arg.options.receive || await readLine('Please insert the number of receives:');
-        let electionTime = arg.options.electionTime || undefined;
         /* initialize server */
         let myServer = new Server(endpointManager.getMyEndpoint().host, endpointManager.getMyEndpoint().port);
         /* set up server logic */
-        let serverLogic =
-            (CandidateIdsManager.amIACandidate(myId))
-                ? new Candidate(myServer, endpointManager, r)
-                : new Voter(myServer, endpointManager, electionTime);
+        let serverLogic;
+        if (arg.options.observer) {
+            serverLogic = new ObserverNode(myServer, endpointManager);
+        } else {
+            serverLogic =
+                (CandidateIdsManager.amIACandidate(myId))
+                    ? new Candidate(myServer, endpointManager, r)
+                    : new Voter(myServer, endpointManager);
+        }
         /* start server and wait until server is closed */
         await myServer.listen(serverLogic.getMessageProcessor());
         console.log('exit node ' + myId);

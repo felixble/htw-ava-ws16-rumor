@@ -6,11 +6,8 @@ import { CandidateIdsManager } from './candidateIdsManager'
 
 export class Voter extends ElectionNode {
 
-    constructor(server, endpointManager, electionTime = undefined) {
+    constructor(server, endpointManager) {
         super(server, endpointManager);
-        if (!electionTime) {
-            electionTime = Number.MAX_VALUE;
-        }
         let neighborCandidates = this.endpointManager.getMyNeighbors().filter(neighbor => {
             return CandidateIdsManager.amIACandidate(neighbor.id);
         });
@@ -18,7 +15,6 @@ export class Voter extends ElectionNode {
         this.confidenceLevel = new ConfidenceLevel(this.myCandidatesId);
         this.chooseMeAlgorithm.setOnNewIncomingRumorListener(_.bind(this.onNewIncomingChooseMeMsg, this));
         this.campaignAlgorithm.setNewMessageListener(_.bind(this.onNewIncomingCampaignMsg, this));
-        this.electionTime = electionTime;
     }
 
     _getStatus() {
@@ -30,7 +26,6 @@ export class Voter extends ElectionNode {
             status.type = 'voter';
         }
         status.confidenceLevel = this.confidenceLevel.level;
-        status.electionTime = this.electionTime;
 
         return status;
     }
