@@ -31,7 +31,7 @@ describe('SnapshotReceiver', function() {
 
         it('overwrites the snapshotTaker on every incoming msg', function() {
             let types = [
-                SnapshotMessageType.GET_LOCAL_VECTOR_TIMESTAMP,
+                SnapshotMessageType.REQUEST_LOCAL_VECTOR_TIMESTAMP,
                 SnapshotMessageType.TAKE_SNAPSHOT_AT,
                 SnapshotMessageType.UPDATE_VECTOR_CLOCK
             ];
@@ -44,13 +44,13 @@ describe('SnapshotReceiver', function() {
 
         it('does not overwrite the snapshotTaker if the incoming msg does not provide one', function() {
             snapshotReceiver.snapshotTaker = SNAPSHOT_TAKER;
-            let msg = {content: '', snapshotTaker: null, type: SnapshotMessageType.GET_LOCAL_VECTOR_TIMESTAMP};
+            let msg = {content: '', snapshotTaker: null, type: SnapshotMessageType.REQUEST_LOCAL_VECTOR_TIMESTAMP};
             snapshotReceiver.processIncomingMessage(msg);
             expect(snapshotReceiver.snapshotTaker).to.equal(SNAPSHOT_TAKER);
         });
 
         it('should handle a get-local-vector-timestamp msg correctly', function() {
-            let type = SnapshotMessageType.GET_LOCAL_VECTOR_TIMESTAMP;
+            let type = SnapshotMessageType.REQUEST_LOCAL_VECTOR_TIMESTAMP;
             let msg = {content: '', snapshotTaker: SNAPSHOT_TAKER, type: type};
             let result = snapshotReceiver.processIncomingMessage(msg);
             expect(result).to.deep.equal(MY_TIME);

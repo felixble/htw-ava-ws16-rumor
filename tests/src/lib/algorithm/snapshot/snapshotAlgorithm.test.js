@@ -48,7 +48,7 @@ describe('SnapshotAlgorithm', function() {
         it('should send query the local timestamp of each node', async function() {
             await snapshot._collectVectorTimestamps();
             expect(snapshot._sendMsg.callCount).to.equal(NODES.length);
-            expect(snapshot._sendMsg.alwaysCalledWithMatch(sinon.match.any, SnapshotMessageType.GET_LOCAL_VECTOR_TIMESTAMP))
+            expect(snapshot._sendMsg.alwaysCalledWithMatch(sinon.match.any, SnapshotMessageType.REQUEST_LOCAL_VECTOR_TIMESTAMP))
                 .to.be.true;
         });
 
@@ -96,16 +96,6 @@ describe('SnapshotAlgorithm', function() {
             expect(snapshot._sendMsg.callCount).to.equal(NODES.length);
             expect(snapshot._sendMsg.alwaysCalledWithMatch(sinon.match.any, SnapshotMessageType.TAKE_SNAPSHOT_AT, SNAPSHOT_TIMESTAMP))
                 .to.be.true;
-            expect(snapshot.calculatedSnapshotTimestampSuccessfully).to.be.true;
-        });
-
-        it('stops distributing the snapshot timestamp if any nodes returns that the timestamp is invalid', async function() {
-            snapshot._sendMsg.returns(SnapshotMessageResponse.INVALID_SNAPSHOT_TIMESTAMP);
-            await snapshot._distributeSnapshotTimestamp();
-            expect(snapshot._sendMsg.callCount).to.equal(1);
-            expect(snapshot._sendMsg.alwaysCalledWithMatch(sinon.match.any, SnapshotMessageType.TAKE_SNAPSHOT_AT, SNAPSHOT_TIMESTAMP))
-                .to.be.true;
-            expect(snapshot.calculatedSnapshotTimestampSuccessfully).to.be.false;
         });
 
     });

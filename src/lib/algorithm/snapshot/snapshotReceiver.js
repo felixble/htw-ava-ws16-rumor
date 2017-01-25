@@ -29,7 +29,7 @@ export class SnapshotReceiver {
             this.snapshotTaker = msg.snapshotTaker;
         }
         switch (msg.type) {
-            case SnapshotMessageType.GET_LOCAL_VECTOR_TIMESTAMP:
+            case SnapshotMessageType.REQUEST_LOCAL_VECTOR_TIMESTAMP:
                 return this._getLocalVectorTimestamp();
             case SnapshotMessageType.TAKE_SNAPSHOT_AT:
                 return this._takeSnapshotAt(content);

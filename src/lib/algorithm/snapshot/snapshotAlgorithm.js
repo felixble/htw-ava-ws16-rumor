@@ -1,5 +1,6 @@
 import { SnapshotMessageType } from './snapshotMessageTypes';
 import { SnapshotMessageResponse } from './snapshotMessageTypes';
+import { SnapshotState, STATES } from './snapshotState';
 
 const CONSTANT_START_VALUE = 10000;
 const FACTOR_TO_INCREASE_CONSTANT = 2;
@@ -34,6 +35,7 @@ export class SnapshotAlgorithm {
         this.constantFactorToAddToMaxTimestamp = CONSTANT_START_VALUE;
         this.calculatedSnapshotTimestampSuccessfully = false;
         this.snapshotTimestamp = 0;
+        this.state = new SnapshotState();
     }
 
     /**
@@ -44,27 +46,65 @@ export class SnapshotAlgorithm {
     }
 
     async takeSnapshot() {
-        while (!this._isTimestampSuccessfullyCalculated()) {
-            await this._collectVectorTimestamps();
-            await this._calculateAndDistributeSnapshotTimestamp();
-            this._increaseConstantFactor();
-        }
-        await this._forceTakingSnapshotByManipulatingAllClocks();
-    }
-
-    _isTimestampSuccessfullyCalculated() {
-        return this.calculatedSnapshotTimestampSuccessfully;
+        await this._collectVectorTimestamps();
     }
 
     async _collectVectorTimestamps() {
-        for(let i=0; i<this.nodes.length; i++) {
-            let node = this.nodes[i];
-            node.timestamp = parseInt(await this._fetchLocalVectorTimestamp(node), 10);
-        }
+        this._sendMsgToAllNodes(SnapshotMessageType.REQUEST_LOCAL_VECTOR_TIMESTAMP);
     }
 
     async _fetchLocalVectorTimestamp(node) {
-        return await this._sendMsg(node, SnapshotMessageType.GET_LOCAL_VECTOR_TIMESTAMP);
+        try {
+            await this._trySendMsg(node, SnapshotMessageType.REQUEST_LOCAL_VECTOR_TIMESTAMP);
+        } catch (e) {
+            return false;
+        }
+        return true;
+    }
+
+    async processIncomingMessage(content, senderId) {
+        let reset = false;
+        if (this.state.isReceivingTimestamps()) {
+            this._setTimestampForNode(content, senderId);
+        }
+        if (this.state.isReceivingAcknowledgments()) {
+            reset = !this._isAcknowledgement(content);
+        }
+        this.state.incomingResponse(reset);
+        await this._performActionForCurrentState();
+    }
+
+    _setTimestampForNode(timestamp, nodeId) {
+        this.nodes.forEach(node => {
+            if (node.id === nodeId) {
+                node.timestamp = timestamp;
+            }
+        })
+    }
+
+    _isAcknowledgement(content) {
+        let success = (content === SnapshotMessageResponse.VALID_SNAPSHOT_TIMESTAMP);
+        if (!success) {
+            this._increaseConstantFactor();
+        }
+        return success;
+    }
+
+    _increaseConstantFactor() {
+        this.constantFactorToAddToMaxTimestamp *= FACTOR_TO_INCREASE_CONSTANT;
+    }
+
+    async _performActionForCurrentState() {
+        if (this.state.isWaiting()) {
+            return;
+        }
+
+        if (this.state.isCalculateSnapshotTimestamp()) {
+            await this._calculateAndDistributeSnapshotTimestamp();
+        }
+        if (this.state.isTimestampDistributed()) {
+            await this._forceTakingSnapshotByManipulatingAllClocks();
+        }
     }
 
     async _calculateAndDistributeSnapshotTimestamp() {
@@ -84,22 +124,7 @@ export class SnapshotAlgorithm {
     }
 
     async _distributeSnapshotTimestamp() {
-        for(let i=0; i<this.nodes.length; i++) {
-            let node = this.nodes[i];
-            let response = await this._sendMsg(node, SnapshotMessageType.TAKE_SNAPSHOT_AT, this.snapshotTimestamp);
-            if (response !== SnapshotMessageResponse.VALID_SNAPSHOT_TIMESTAMP) {
-                if (response === SnapshotMessageResponse.INVALID_SNAPSHOT_TIMESTAMP) {
-                    return;
-                } else {
-                    throw new Error('illegal-response: ' + response);
-                }
-            }
-        }
-        this.calculatedSnapshotTimestampSuccessfully = true;
-    }
-
-    _increaseConstantFactor() {
-        this.constantFactorToAddToMaxTimestamp *= FACTOR_TO_INCREASE_CONSTANT;
+        await this._sendMsgToAllNodes(SnapshotMessageType.TAKE_SNAPSHOT_AT, this.snapshotTimestamp);
     }
 
     async _forceTakingSnapshotByManipulatingAllClocks() {
@@ -115,16 +140,36 @@ export class SnapshotAlgorithm {
     }
 
     async _distributeManipulatedTimestamp() {
+        await this._sendMsgToAllNodes(SnapshotMessageType.UPDATE_VECTOR_CLOCK);
+    }
+
+    async _sendMsgToAllNodes(type, content = '') {
+        let contactedNodesCount = 0;
         for(let i=0; i<this.nodes.length; i++) {
             let node = this.nodes[i];
-            await this._sendMsg(node, SnapshotMessageType.UPDATE_VECTOR_CLOCK);
+            let success = await this._sendMsg(node,type, content);
+            if (success) {
+                contactedNodesCount++;
+            }
         }
+        this.state.waitForResponses(contactedNodesCount);
     }
 
     async _sendMsg(node, type, content = '') {
+        try {
+            this._trySendMsg(node, type, content);
+        } catch(e) {
+            // TODO: LOG ERROR!
+            return false;
+        }
+        return true;
+    }
+
+    async _trySendMsg(node, type, content = '') {
         if (!this.sendMsgCallback) {
             throw new Error('invalid-state: sendMsgCallback is not set!');
         }
+
         return await this.sendMsgCallback(
             node,
             {
@@ -134,4 +179,5 @@ export class SnapshotAlgorithm {
             }
         );
     }
+
 }
