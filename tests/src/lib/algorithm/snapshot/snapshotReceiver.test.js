@@ -49,13 +49,6 @@ describe('SnapshotReceiver', function() {
             expect(snapshotReceiver.snapshotTaker).to.equal(SNAPSHOT_TAKER);
         });
 
-        it('should handle a get-local-vector-timestamp msg correctly', function() {
-            let type = SnapshotMessageType.REQUEST_LOCAL_VECTOR_TIMESTAMP;
-            let msg = {content: '', snapshotTaker: SNAPSHOT_TAKER, type: type};
-            let result = snapshotReceiver.processIncomingMessage(msg);
-            expect(result).to.deep.equal(MY_TIME);
-        });
-
         it('should handle a take-snapshot-at msg correctly', function() {
             let type = SnapshotMessageType.TAKE_SNAPSHOT_AT;
             let msg = {content: SNAPSHOT_TIMESTAMP.toString(), snapshotTaker: SNAPSHOT_TAKER, type: type};
@@ -69,13 +62,6 @@ describe('SnapshotReceiver', function() {
             let msg = {content: '', snapshotTaker: SNAPSHOT_TAKER, type: type};
             let result = snapshotReceiver.processIncomingMessage(msg);
             expect(result).to.be.not.false;
-        });
-
-        it('should return an error by unknown message types', function() {
-            let type = 'unknown';
-            let msg = {content: '', snapshotTaker: SNAPSHOT_TAKER, type: type};
-            let result = snapshotReceiver.processIncomingMessage(msg);
-            expect(result).to.have.ownProperty('error');
         });
 
     });

@@ -8,6 +8,7 @@ export class ObserverNode extends ServerLogic {
 
     constructor(server, endpointManager) {
         super(server, endpointManager);
+        this.logI('Starting observer node');
         this.snapshotAlgorithm = new SnapshotAlgorithm(
             endpointManager.getMyEndpoint(), endpointManager.getMyNeighbors(), this.myVectorTime);
         this.snapshotAlgorithm.setSendMsgCallback(_.bind(this.sendSnapshotMsg, this))
@@ -18,10 +19,11 @@ export class ObserverNode extends ServerLogic {
         switch(type) {
             case 'take-snapshot':
                 await this.takeSnapshot();
-                this.logI('Taken snapshot successfully, waiting for messages from nodes');
+                break;
+            case MessageTypes.SNAPSHOT:
+                await this.snapshotAlgorithm.processIncomingMessage(data.msg, data.from);
                 break;
             case MessageTypes.MY_STATUS:
-
                 console.log(data.msg);
                 break;
 

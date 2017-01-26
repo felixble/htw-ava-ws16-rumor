@@ -8,6 +8,7 @@ export class Voter extends ElectionNode {
 
     constructor(server, endpointManager) {
         super(server, endpointManager);
+        this.logI('Starting voter node');
         let neighborCandidates = this.endpointManager.getMyNeighbors().filter(neighbor => {
             return CandidateIdsManager.amIACandidate(neighbor.id);
         });

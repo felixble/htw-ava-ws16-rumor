@@ -7,6 +7,7 @@ export class Candidate extends ElectionNode {
 
     constructor(server, endpointManager, receives) {
         super(server, endpointManager);
+        this.logI('Starting candidate node');
         this.receives = receives;
         this.feedbackCounter = 0;
 

@@ -52,7 +52,7 @@ export class SnapshotReceiver {
                 await this._takeSnapshotAt(content);
                 break;
             case SnapshotMessageType.UPDATE_VECTOR_CLOCK:
-                this._updateVectorClock();
+                await this._updateVectorClock();
                 break;
             default:
                 return {error: `unknown message type ${msg.type}`};
@@ -76,9 +76,9 @@ export class SnapshotReceiver {
         await this._sendMsg(this.snapshotTaker, SnapshotMessageType.RESPONSE, response);
     }
 
-    _updateVectorClock() {
+    async _updateVectorClock() {
         if (this.takeSnapshotCallback) {
-            this.takeSnapshotCallback(this.snapshotTaker);
+            await this.takeSnapshotCallback(this.snapshotTaker);
         }
     }
 
@@ -87,7 +87,7 @@ export class SnapshotReceiver {
             throw new Error('invalid-state: sendMsgCallback is not set!');
         }
 
-        return await this.sendMsgCallback(
+        await this.sendMsgCallback(
             node,
             {
                 content: content,

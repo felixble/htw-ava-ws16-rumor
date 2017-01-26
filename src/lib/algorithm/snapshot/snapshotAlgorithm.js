@@ -2,7 +2,7 @@ import { SnapshotMessageType } from './snapshotMessageTypes';
 import { SnapshotMessageResponse } from './snapshotMessageTypes';
 import { SnapshotState, STATES } from './snapshotState';
 
-const CONSTANT_START_VALUE = 10000;
+const CONSTANT_START_VALUE_PER_NODE = 125;
 const FACTOR_TO_INCREASE_CONSTANT = 2;
 
 export class SnapshotAlgorithm {
@@ -32,7 +32,7 @@ export class SnapshotAlgorithm {
         this.nodes = nodes;
         this.vectorClock = vectorClock;
         this.sendMsgCallback = null;
-        this.constantFactorToAddToMaxTimestamp = CONSTANT_START_VALUE;
+        this.constantFactorToAddToMaxTimestamp = CONSTANT_START_VALUE_PER_NODE * nodes.length;
         this.calculatedSnapshotTimestampSuccessfully = false;
         this.snapshotTimestamp = 0;
         this.state = new SnapshotState();
@@ -62,7 +62,8 @@ export class SnapshotAlgorithm {
         return true;
     }
 
-    async processIncomingMessage(content, senderId) {
+    async processIncomingMessage(msg, senderId) {
+        let content = msg.content;
         let reset = false;
         if (this.state.isReceivingTimestamps()) {
             this._setTimestampForNode(content, senderId);
