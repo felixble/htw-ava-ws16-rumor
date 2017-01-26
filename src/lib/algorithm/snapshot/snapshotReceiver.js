@@ -3,6 +3,15 @@ import { SnapshotMessageType, SnapshotMessageResponse} from './snapshotMessageTy
 export class SnapshotReceiver {
 
     /**
+     * @callback SendMsgCallback
+     * @param {object} node
+     * @param node.host {string}
+     * @param node.port {string|number}
+     * @param {object} msg
+     * @return {object} response
+     */
+
+    /**
      * @param vectorClock {VectorClock}
      * @param takeSnapshotCallback
      */
@@ -11,6 +20,13 @@ export class SnapshotReceiver {
         this.snapshotTaker = null;
         this.snapshotTimestamp = Number.MAX_VALUE;
         this.takeSnapshotCallback = takeSnapshotCallback;
+    }
+
+    /**
+     * @param sendMsgCallback {SendMsgCallback}
+     */
+    setSendMsgCallback(sendMsgCallback) {
+        this.sendMsgCallback = sendMsgCallback;
     }
 
     /**
@@ -23,41 +39,61 @@ export class SnapshotReceiver {
      * @param msg.snapshotTaker.port {string|number}
      * @param msg.type {object}
      */
-    processIncomingMessage(msg) {
+    async processIncomingMessage(msg) {
         let content = msg.content;
         if (msg.snapshotTaker !== null) {
             this.snapshotTaker = msg.snapshotTaker;
         }
         switch (msg.type) {
             case SnapshotMessageType.REQUEST_LOCAL_VECTOR_TIMESTAMP:
-                return this._getLocalVectorTimestamp();
+                await this._sendLocalTimestampToSnapshotTaker();
+                break;
             case SnapshotMessageType.TAKE_SNAPSHOT_AT:
-                return this._takeSnapshotAt(content);
+                await this._takeSnapshotAt(content);
+                break;
             case SnapshotMessageType.UPDATE_VECTOR_CLOCK:
-                return this._updateVectorClock();
+                this._updateVectorClock();
+                break;
             default:
                 return {error: `unknown message type ${msg.type}`};
         }
     }
 
-    _getLocalVectorTimestamp() {
-        return this.vectorClock.getMyTime();
+    async _sendLocalTimestampToSnapshotTaker() {
+        let myLocalTime = this.vectorClock.getMyTime();
+        await this._sendMsg(this.snapshotTaker, SnapshotMessageType.RESPONSE, myLocalTime);
     }
 
-    _takeSnapshotAt(content) {
+    async _takeSnapshotAt(content) {
+        let response;
         let timestamp = parseInt(content, 10);
         if (timestamp > this.vectorClock.getMyTime()) {
             this.snapshotTimestamp = timestamp;
-            return SnapshotMessageResponse.VALID_SNAPSHOT_TIMESTAMP;
+            response = SnapshotMessageResponse.VALID_SNAPSHOT_TIMESTAMP;
         } else {
-            return SnapshotMessageResponse.INVALID_SNAPSHOT_TIMESTAMP;
+            response = SnapshotMessageResponse.INVALID_SNAPSHOT_TIMESTAMP;
         }
+        await this._sendMsg(this.snapshotTaker, SnapshotMessageType.RESPONSE, response);
     }
 
     _updateVectorClock() {
         if (this.takeSnapshotCallback) {
             this.takeSnapshotCallback(this.snapshotTaker);
         }
-        return {};
+    }
+
+    async _sendMsg(node, type, content = '') {
+        if (!this.sendMsgCallback) {
+            throw new Error('invalid-state: sendMsgCallback is not set!');
+        }
+
+        return await this.sendMsgCallback(
+            node,
+            {
+                content: content,
+                snapshotTaker: this.myEndpoint,
+                type: type
+            }
+        );
     }
 }
