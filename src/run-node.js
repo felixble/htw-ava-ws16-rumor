@@ -33,7 +33,6 @@ async function main() {
         /* Set up my own id */
         let myId = parseInt(arg.options.id || await readLine('Please insert the ID of this endpoint:'), /*base*/10);
         endpointManager.setMyId(myId);
-        let r = arg.options.receive || await readLine('Please insert the number of receives:');
         /* initialize server */
         let myServer = new Server(endpointManager.getMyEndpoint().host, endpointManager.getMyEndpoint().port);
         /* set up server logic */
@@ -41,6 +40,7 @@ async function main() {
         if (arg.options.observer) {
             serverLogic = new ObserverNode(myServer, endpointManager);
         } else {
+            let r = arg.options.receive || await readLine('Please insert the number of receives:');
             serverLogic =
                 (CandidateIdsManager.amIACandidate(myId))
                     ? new Candidate(myServer, endpointManager, r)

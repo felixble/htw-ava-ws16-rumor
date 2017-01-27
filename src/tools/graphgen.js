@@ -5,22 +5,25 @@ import { GraphvizWriter } from './helpers/graphvizWriter';
 
 let optionParser = require('node-getopt').create([
         ['n', 'n=[ARG]', 'Number of nodes'],
-        ['m', 'm=[ARG]', 'Number of edges'],
-        ['f', 'filename=[ARG]', 'Filename'],
+        ['s', 'supporter=[ARG]', 'Number of supporters'],
+        ['f', 'friends=[ARG]', 'Number of friends'],
+        ['o', 'out=[ARG]', 'Output filename'],
         ['h', 'help', 'Display this help']
     ]);
 
 let arg = optionParser.bindHelp().parseSystem();
 
 async function readArguments(args) {
-    let n, m, filename;
+    let n, supporter, friends, out;
     n = parseInt(args.n || await readLine('Please enter the number of nodes:'), 10);
-    m = parseInt(args.m || await readLine('Please enter the degree for each node:'), 10);
-    filename = args.filename || await readLine('Please enter a filename:');
+    supporter = parseInt(args.supporter || await readLine('Please enter the degree for each candidate node:'), 10);
+    friends = parseInt(args.friends || await readLine('Please enter the degree for each voter node:'), 10);
+    out = args.out || await readLine('Please enter a filename:');
     return {
         n: n,
-        m: m,
-        filename: filename
+        supporter: supporter,
+        friends: friends,
+        out: out
     }
 }
 
@@ -29,17 +32,18 @@ async function main() {
     try {
         let args = {
             n: arg.options.n,
-            m: arg.options.m,
-            filename: arg.options.filename
+            supporter: arg.options.supporter,
+            friends: arg.options.friends,
+            out: arg.options.out
         };
 
         args = await readArguments(args);
 
-        let electionGraph = new ElectionGraph(args.n, 2, args.m);
+        let electionGraph = new ElectionGraph(args.n, args.supporter, args.friends);
         let graph = electionGraph.generate();
         let data = GraphvizWriter.edgesArrayToGraphvizData(graph.edges);
         try {
-            await writeFile(args.filename, data);
+            await writeFile(args.out, data);
         } catch (e) {
             console.log(e);
         }

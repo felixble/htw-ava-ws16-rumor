@@ -15,7 +15,6 @@ export class ElectionGraph {
 
     generate() {
         this.graph = this.generateVotersGraph();
-        console.log(this.graph);
         this.addCandidates();
         let supporters = this.determineSupporters();
         this.addSupporterEdgesToGraph(supporters);
