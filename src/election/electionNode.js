@@ -1,5 +1,5 @@
 import { _ } from 'underscore';
-import { ServerLogic } from '../serverLogic';
+import { ServerLogic } from '../network-core/serverLogic';
 import { EchoAlgorithm } from '../lib/algorithm/echoAlgorithm';
 import { RumorAlgorithm } from '../lib/algorithm/rumorAlgorithm';
 import { SnapshotReceiver } from '../lib/algorithm/snapshot/snapshotReceiver';

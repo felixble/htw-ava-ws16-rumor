@@ -1,5 +1,5 @@
 import { _ } from 'underscore';
-import { ServerLogic } from '../serverLogic';
+import { ServerLogic } from '../network-core/serverLogic';
 import { CandidateIdsManager } from './candidateIdsManager';
 import { SnapshotAlgorithm } from '../lib/algorithm/snapshot/snapshotAlgorithm';
 import { MessageTypes } from './messageTypes';

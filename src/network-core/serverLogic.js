@@ -1,8 +1,8 @@
 import { _ } from 'underscore';
-import { Client } from './lib/client';
-import { Semaphore } from './lib/async-semaphore';
-import { VectorClock } from './lib/vector-clock';
-import { MessageTypes } from './election/messageTypes'
+import { Client } from './../lib/client';
+import { Semaphore } from './../lib/async-semaphore';
+import { VectorClock } from './../lib/vector-clock';
+import { MessageTypes } from './../election/messageTypes'
 
 /**
  * Base class of the server logic,

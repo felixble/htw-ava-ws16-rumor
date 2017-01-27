@@ -2,7 +2,7 @@ import { Server } from './lib/server';
 import { Candidate } from './election/candidate'
 import { Voter } from './election/voter'
 import { ObserverNode } from './election/observerNode'
-import { EndpointManager } from './endpointManager'
+import { EndpointManager } from './network-core/endpointManager'
 import { CandidateIdsManager } from './election/candidateIdsManager'
 
 let readLine = require('./lib/read-line');
