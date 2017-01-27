@@ -186,4 +186,8 @@ export class ServerLogic {
         this.log('ERROR  ', msg);
     }
 
+    logF(msg) {
+        this.log('FINISH ', msg);
+    }
+
 }

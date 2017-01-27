@@ -1,7 +1,7 @@
 import {_} from 'underscore';
 let spawn = require('child-process-promise').spawn;
 
-const NUMBER_OUTPUT_LINES_PER_PROCESS = 3;
+const NUMBER_OUTPUT_LINES_PER_PROCESS = 4;
 
 export class SpawnElectionNodes {
 
@@ -13,6 +13,11 @@ export class SpawnElectionNodes {
         this.numberOfStartedNodes = 0;
         this.resolveSpawn = null;
         this.rejectSpawn = null;
+        this.finishedElectionCallback = null;
+    }
+
+    setFinishedElectionCallback(finishedElectionCallback) {
+        this.finishedElectionCallback = finishedElectionCallback;
     }
 
     async spawnObserver() {
@@ -59,13 +64,23 @@ export class SpawnElectionNodes {
         return `--id ${nodeId} -r ${this.numberOfReceives}`.split(' ')
     }
 
-    _readProcessStdOut(data) {
-        this.childStdOutLineCount++;
+    async _readProcessStdOut(data) {
+        let text = data.toString();
+        this.childStdOutLineCount += SpawnElectionNodes.countNonEmptyLines(text);
         if (this._allChildsStarted()) {
             this.childStdOutLineCount = 0;
             this.resolveSpawn();
         }
-        console.log(data.toString());
+        console.log(text);
+
+        if (text.startsWith('FINISH') && this.finishedElectionCallback) {
+            let result = JSON.parse(text.split(/\s+/)[10]);
+            this.finishedElectionCallback(result);
+        }
+    }
+
+    static countNonEmptyLines(text) {
+        return text.split('\n').filter(line => { return line.trim() !== '' }).length;
     }
 
     _allChildsStarted() {

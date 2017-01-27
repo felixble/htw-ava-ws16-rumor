@@ -1,7 +1,6 @@
 import { SpawnElectionNodes } from './process-helpers/spawn-election-nodes';
 
 let exec = require('child-process-promise').exec;
-let spawn = require('child-process-promise').spawn;
 
 /* Define parameters */
 let optionParser = require('node-getopt').create([
@@ -27,10 +26,10 @@ async function main() {
     await generateGraph(numberOfNodes, numberOfSupporters, numberOfFriends, graphFile);
 
     let spawnElectionNodes = new SpawnElectionNodes(numberOfNodes, numberOfReceives, graphFile);
+    spawnElectionNodes.setFinishedElectionCallback(onElectionFinished);
     await spawnElectionNodes.spawn();
-    //await spawnElectionNodes.spawnObserver();
-
-
+    console.log('stated all election nodes');
+    await spawnElectionNodes.spawnObserver();
 }
 
 async function generateGraph(numberOfNodes, numberOfSupporters, numberOfFriends, graphFile) {
@@ -42,6 +41,11 @@ async function generateGraph(numberOfNodes, numberOfSupporters, numberOfFriends,
     } catch (e) {
         console.error(e);
     }
+}
+
+function onElectionFinished(result) {
+    console.log(result);
+    process.exit();
 }
 
 

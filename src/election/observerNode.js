@@ -61,15 +61,14 @@ export class ObserverNode extends ServerLogic {
                 }
             }
         });
-        this.logI(`Result: ${abstinetions} abstinentions, ${proCandidate1} pro 1, ${proCandidate2} pro 2`);
-        console.log();
-        if (proCandidate1 > proCandidate2) {
-            this.logI('The winner is candidate 1');
-        } else if (proCandidate1 < proCandidate2) {
-            this.logI('The winner is candidate 2');
-        } else {
-            this.logI('We have no winner');
-        }
+
+        let result = {
+            abstinentions: abstinetions,
+            proCandidate1: proCandidate1,
+            proCandidate2: proCandidate2
+        };
+
+        this.logF(JSON.stringify(result));
         this.stop();
     }
 
