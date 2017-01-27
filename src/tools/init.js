@@ -4,7 +4,7 @@ let readLine = require('./../lib/read-line');
 
 
 let optionParser = require('node-getopt').create([
-    ['c', 'cmd=[ARG]', 'Command: "init" | "stop" | "stop all"'],
+    ['c', 'cmd=[ARG]', 'Command: "init" | "stop" | "stop all" | "msg"'],
     ['', 'host=[ARG]', 'host'],
     ['', 'port=[ARG]', 'port'],
     ['', 'addresses=[ARG]', 'destination addresses format: <host:port>'],
