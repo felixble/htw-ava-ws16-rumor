@@ -35,6 +35,8 @@ export class SnapshotAlgorithm {
         this.constantFactorToAddToMaxTimestamp = CONSTANT_START_VALUE_PER_NODE * nodes.length;
         this.snapshotTimestamp = 0;
         this.state = new SnapshotState();
+        this.nodeFinishedStates = [];
+        this.finishedCallback = null;
     }
 
     /**
@@ -42,6 +44,10 @@ export class SnapshotAlgorithm {
      */
     setSendMsgCallback(sendMsgCallback) {
         this.sendMsgCallback = sendMsgCallback;
+    }
+
+    setFinishedCallback(finishedCallback) {
+        this.finishedCallback = finishedCallback;
     }
 
     async takeSnapshot() {
@@ -69,6 +75,9 @@ export class SnapshotAlgorithm {
         }
         if (this.state.isReceivingAcknowledgments()) {
             reset = !this._isAcknowledgement(content);
+        }
+        if (this.state.isReceivingStates()) {
+            this.nodeFinishedStates.push(content);
         }
         this.state.incomingResponse(reset);
         await this._performActionForCurrentState();
@@ -104,6 +113,9 @@ export class SnapshotAlgorithm {
         }
         if (this.state.isTimestampDistributed()) {
             await this._forceTakingSnapshotByManipulatingAllClocks();
+        }
+        if (this.state.isFinished() && this.finishedCallback) {
+            this.finishedCallback(this.nodeFinishedStates);
         }
     }
 

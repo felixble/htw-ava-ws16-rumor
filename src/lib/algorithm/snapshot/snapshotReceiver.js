@@ -13,13 +13,14 @@ export class SnapshotReceiver {
 
     /**
      * @param vectorClock {VectorClock}
-     * @param takeSnapshotCallback
+     * @param getStatusCallback
      */
-    constructor(vectorClock, takeSnapshotCallback) {
+    constructor(vectorClock, getStatusCallback) {
         this.vectorClock = vectorClock;
         this.snapshotTaker = null;
         this.snapshotTimestamp = Number.MAX_VALUE;
-        this.takeSnapshotCallback = takeSnapshotCallback;
+        this.getStatusCallback = getStatusCallback;
+        this.statusAlreadySent = false;
     }
 
     /**
@@ -77,9 +78,11 @@ export class SnapshotReceiver {
     }
 
     async _updateVectorClock() {
-        if (this.takeSnapshotCallback) {
-            await this.takeSnapshotCallback(this.snapshotTaker);
+        if (this.statusAlreadySent) {
+            return;
         }
+        this.statusAlreadySent = true;
+        await this._sendMsg(this.snapshotTaker, SnapshotMessageType.RESPONSE, this.getStatusCallback());
     }
 
     async _sendMsg(node, type, content = '') {

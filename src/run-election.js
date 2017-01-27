@@ -28,7 +28,7 @@ async function main() {
 
     let spawnElectionNodes = new SpawnElectionNodes(numberOfNodes, numberOfReceives, graphFile);
     await spawnElectionNodes.spawn();
-    await spawnElectionNodes.spawnObserver();
+    //await spawnElectionNodes.spawnObserver();
 
 
 }
