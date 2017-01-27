@@ -7,6 +7,7 @@ import { SnapshotMessageResponse } from '../../../../../src/lib/algorithm/snapsh
 
 class VectorClock {
     updateTimeForId() {}
+    getMaxTimestamp() {}
 }
 
 describe('SnapshotAlgorithm', function() {
@@ -52,6 +53,7 @@ describe('SnapshotAlgorithm', function() {
 
         const MAX_TIMESTAMP = NODES.length * 2,
               CONSTANT_FACTOR = 10;
+        let stubVectorClockMaxTimestamp;
 
         beforeEach(function() {
             snapshot.nodes = NODES.map((node, i) => {
@@ -59,9 +61,11 @@ describe('SnapshotAlgorithm', function() {
                 return {id: node.id, timestamp: timestamp};
             });
             snapshot.constantFactorToAddToMaxTimestamp = CONSTANT_FACTOR;
+            stubVectorClockMaxTimestamp = sinon.stub(vectorClock, 'getMaxTimestamp').returns(MAX_TIMESTAMP);
         });
         afterEach(function() {
             snapshot.nodes = NODES;
+            stubVectorClockMaxTimestamp.restore();
         });
 
         it('should add a constant value to the maximum value of the local timestamps of each node', function() {

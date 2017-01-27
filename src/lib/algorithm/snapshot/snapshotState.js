@@ -44,6 +44,7 @@ export class SnapshotState {
         this.state = STATES.IDLE;
         this.responseCount = 0;
         this.expectedResponsesCount = 0;
+        this.receivedAtLeastOneNegativeResult = false;
     }
 
     incomingResponse(reset) {
@@ -53,12 +54,16 @@ export class SnapshotState {
             throw new Error(`Illegal-state - cannot process incoming response in state ${this.state}`);
         }
 
-        if (reset)  {
-            this.responseCount = 0;
-            this._prevState();
-        } else {
-            this.responseCount++;
-            if (this.responseCount === this.expectedResponsesCount) {
+        if (reset) {
+            this.receivedAtLeastOneNegativeResult = true;
+        }
+
+        this.responseCount++;
+        if (this.responseCount === this.expectedResponsesCount) {
+            if (this.receivedAtLeastOneNegativeResult) {
+                this.receivedAtLeastOneNegativeResult = false;
+                this._prevState();
+            } else {
                 this._nextState();
             }
         }

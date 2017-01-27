@@ -71,6 +71,17 @@ export class VectorClock {
         }
     }
 
+    getMaxTimestamp() {
+        let maxTimestamp = 0;
+        for(let i=0; i<this.vector.length; i++) {
+            let time = this.vector[i].time;
+            if (time > maxTimestamp) {
+                maxTimestamp = time;
+            }
+        }
+        return maxTimestamp;
+    }
+
     /**
      * Gets the local event counter.
      *

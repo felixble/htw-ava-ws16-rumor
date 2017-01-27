@@ -125,13 +125,7 @@ export class SnapshotAlgorithm {
     }
 
     _calculateSnapshotTimestamp() {
-        let maxTimestamp = 0;
-        for(let i=0; i<this.nodes.length; i++) {
-            let node = this.nodes[i];
-            if (node.timestamp > maxTimestamp) {
-                maxTimestamp = node.timestamp;
-            }
-        }
+        let maxTimestamp = this.vectorClock.getMaxTimestamp();
         this.snapshotTimestamp = maxTimestamp + this.constantFactorToAddToMaxTimestamp;
     }
 

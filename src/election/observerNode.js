@@ -45,7 +45,9 @@ export class ObserverNode extends ServerLogic {
     onFinishedSnapshot(nodeStates) {
         let abstinetions = 0,
             proCandidate1 = 0,
-            proCandidate2 = 0;
+            proCandidate2 = 0,
+            voterCount = nodeStates.length,
+            winner;
         nodeStates.forEach((state) => {
             let levelProId = {};
             if (state.hasOwnProperty('confidenceLevel')) {
@@ -62,10 +64,25 @@ export class ObserverNode extends ServerLogic {
             }
         });
 
+        let forWinner = proCandidate1 / voterCount;
+        let against = proCandidate2 / voterCount;
+        if (proCandidate1 === proCandidate2) {
+            winner = 'tie';
+        } else if (proCandidate1 > proCandidate2) {
+            winner = '1';
+        } else {
+            forWinner = proCandidate2 / voterCount;
+            against = proCandidate1 / voterCount;
+            winner = '2';
+        }
+
         let result = {
+            winner: winner,
             abstinentions: abstinetions,
-            proCandidate1: proCandidate1,
-            proCandidate2: proCandidate2
+            forWinner: forWinner,
+            against: against,
+            count1: proCandidate1,
+            count2: proCandidate2
         };
 
         this.logF(JSON.stringify(result));
