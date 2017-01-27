@@ -33,7 +33,6 @@ export class SnapshotAlgorithm {
         this.vectorClock = vectorClock;
         this.sendMsgCallback = null;
         this.constantFactorToAddToMaxTimestamp = CONSTANT_START_VALUE_PER_NODE * nodes.length;
-        this.calculatedSnapshotTimestampSuccessfully = false;
         this.snapshotTimestamp = 0;
         this.state = new SnapshotState();
     }
@@ -50,7 +49,7 @@ export class SnapshotAlgorithm {
     }
 
     async _collectVectorTimestamps() {
-        this._sendMsgToAllNodes(SnapshotMessageType.REQUEST_LOCAL_VECTOR_TIMESTAMP);
+        await this._sendMsgToAllNodes(SnapshotMessageType.REQUEST_LOCAL_VECTOR_TIMESTAMP);
     }
 
     async _fetchLocalVectorTimestamp(node) {
@@ -157,13 +156,19 @@ export class SnapshotAlgorithm {
     }
 
     async _sendMsg(node, type, content = '') {
-        try {
-            this._trySendMsg(node, type, content);
-        } catch(e) {
-            // TODO: LOG ERROR!
-            return false;
+        if (!this.sendMsgCallback) {
+            throw new Error('invalid-state: sendMsgCallback is not set!');
         }
-        return true;
+
+        let result = await this.sendMsgCallback(
+            node,
+            {
+                content: content,
+                snapshotTaker: this.myEndpoint,
+                type: type
+            }
+        );
+        return (result !== null);
     }
 
     async _trySendMsg(node, type, content = '') {

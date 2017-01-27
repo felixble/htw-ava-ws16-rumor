@@ -60,8 +60,7 @@ export class ElectionNode extends ServerLogic {
             }
             case MessageTypes.SNAPSHOT:
             {
-                let response = this.snapshotReceiver.processIncomingMessage(msg);
-                socket.write(JSON.stringify(response));
+                await this.snapshotReceiver.processIncomingMessage(msg);
                 break;
             }
             default: return false;

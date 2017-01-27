@@ -55,7 +55,7 @@ export class SnapshotReceiver {
                 await this._updateVectorClock();
                 break;
             default:
-                return {error: `unknown message type ${msg.type}`};
+                throw new Error(`Illegal-state: Unknown message type ${msg.type}`)
         }
     }
 

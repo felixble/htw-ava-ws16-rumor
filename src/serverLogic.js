@@ -52,7 +52,7 @@ export class ServerLogic {
         try {
             if (data.type === MessageTypes.GET_STATUS) {
                 socket.write(JSON.stringify(this._getStatus()));
-            } else if (MessageTypes.doSendEmptyResponse(data.type)) {
+            } else {
                 socket.write(JSON.stringify({}));
             }
             await this.sem.take();
@@ -86,7 +86,7 @@ export class ServerLogic {
                 if (!this._isFinished() || data.type === MessageTypes.SNAPSHOT) {
                     await this._runAlgorithm(data, socket);
                 } else {
-                    this.logE(`I am finished. Cannot process incoming msg of type ${data.type}`);
+                    this.logI(`I am finished. Cannot process incoming msg of type ${data.type}`);
                 }
             }
             this.sem.leave();

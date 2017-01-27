@@ -31,12 +31,6 @@ describe('SnapshotAlgorithm', function() {
         vectorClockStub.reset();
     });
 
-    describe('#constructor', function() {
-        it('should set correct initial values', function() {
-            expect(snapshot.calculatedSnapshotTimestampSuccessfully).to.be.false;
-        });
-    });
-
     describe('#_collectVectorTimestamps', function() {
         beforeEach(function() {
             snapshot._sendMsg = sinon.stub();
