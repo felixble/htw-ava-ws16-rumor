@@ -6,7 +6,9 @@
   "scripts": {
     "clean": "rm -rf build && mkdir build",
     "build": "npm run clean && babel -d build ./src -s",
-    "start": "node build/index.js",
+    "start": "npm run start-node",
+    "start-node": "node build/run-node.js",
+    "start-election": "node build/run-election.js",
     "init": "node build/tools/init.js",
     "graphgen": "node build/tools/graphgen.js",
     "make-doku": "./scripts/make-doku.sh",
@@ -26,6 +28,7 @@
     "babel-register": "^6.18.0",
     "babel-runtime": "^6.18.0",
     "chai": "^3.5.0",
+    "child-process-promise": "^2.2.0",
     "connected-components": "^1.0.0",
     "istanbul": "^1.0.0-alpha",
     "mocha": "^3.1.2",

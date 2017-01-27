@@ -1,8 +1,8 @@
-import { ArrayHelpers } from './lib/array-helpers';
-import { GraphvizParser } from './parser/graphvizParser';
+import { ArrayHelpers } from './../lib/array-helpers';
+import { GraphvizParser } from './../parser/graphvizParser';
 
-let readFile = require('./lib/read-file');
-let endpointParser = require('./parser/endpointParser');
+let readFile = require('./../lib/read-file');
+let endpointParser = require('./../parser/endpointParser');
 
 const MIN_PORT = 4001;
 const OBSERVER_ENDPOINT = {

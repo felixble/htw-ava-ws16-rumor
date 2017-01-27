@@ -11,8 +11,6 @@ export const MessageTypes = {
 
     SNAPSHOT: 'snapshot',
 
-    MY_STATUS: 'my-status',
-
     /*
     * Initializes the
     * candidate-process

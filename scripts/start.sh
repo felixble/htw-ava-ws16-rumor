@@ -32,7 +32,7 @@ rm ${LOGFILE} ${ERR_LOGFILE} 2> /dev/null
 
 #-- Check if build files are available otherwise build project --#
 
-if [ ! -e ../build/index.js ]
+if [ ! -e ../build/run-node.js ]
     then
         echo "Build files missing. Build project..."
         npm run build

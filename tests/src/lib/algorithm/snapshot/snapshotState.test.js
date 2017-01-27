@@ -63,16 +63,17 @@ describe('SnapshotState', function() {
             expect(state.state).to.equal(STATES.CALCULATE_SNAPSHOT_TIMESTAMP);
         });
 
-        it('performs a state transition and resets the number of responses if requested', function() {
+        it('performs a state transition to the previous state if reset-parameter is true at least once', function() {
             let state = new SnapshotState();
             state.state = STATES.DISTRIBUTE_SNAPSHOT_TIMESTAMP;
             state.responseCount = 1;
             state.expectedResponsesCount = 3;
 
             state.incomingResponse(true);
+            state.incomingResponse(false);
 
             expect(state.state).to.equal(STATES.CALCULATE_SNAPSHOT_TIMESTAMP);
-            expect(state.responseCount).to.equal(0);
+            expect(state.responseCount).to.equal(3);
         });
 
     });

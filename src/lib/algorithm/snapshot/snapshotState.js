@@ -5,6 +5,7 @@ export const STATES = {
     CALCULATE_SNAPSHOT_TIMESTAMP: 'calculate-snapshot-timestamp',
     DISTRIBUTE_SNAPSHOT_TIMESTAMP: 'distribute-snapshot-timestamp',
     TIMESTAMP_DISTRIBUTED: 'timestamp-distributed',
+    COLLECT_NODE_STATE: 'collect-node-state',
     FINISHED: 'finished',
 
     next: function(state) {
@@ -18,6 +19,8 @@ export const STATES = {
             case this.DISTRIBUTE_SNAPSHOT_TIMESTAMP:
                 return this.TIMESTAMP_DISTRIBUTED;
             case this.TIMESTAMP_DISTRIBUTED:
+                return this.COLLECT_NODE_STATE;
+            case this.COLLECT_NODE_STATE:
                 return this.FINISHED;
             default:
                 throw new Error(`Illegal-state - unknown next state for ${state}`);
@@ -41,6 +44,7 @@ export class SnapshotState {
         this.state = STATES.IDLE;
         this.responseCount = 0;
         this.expectedResponsesCount = 0;
+        this.receivedAtLeastOneNegativeResult = false;
     }
 
     incomingResponse(reset) {
@@ -50,12 +54,16 @@ export class SnapshotState {
             throw new Error(`Illegal-state - cannot process incoming response in state ${this.state}`);
         }
 
-        if (reset)  {
-            this.responseCount = 0;
-            this._prevState();
-        } else {
-            this.responseCount++;
-            if (this.responseCount === this.expectedResponsesCount) {
+        if (reset) {
+            this.receivedAtLeastOneNegativeResult = true;
+        }
+
+        this.responseCount++;
+        if (this.responseCount === this.expectedResponsesCount) {
+            if (this.receivedAtLeastOneNegativeResult) {
+                this.receivedAtLeastOneNegativeResult = false;
+                this._prevState();
+            } else {
                 this._nextState();
             }
         }
@@ -63,7 +71,7 @@ export class SnapshotState {
 
     waitForResponses(expectedResponsesCount) {
         if (this.state === STATES.COLLECT_TIMESTAMPS || this.state === STATES.DISTRIBUTE_SNAPSHOT_TIMESTAMP
-            || this.state === STATES.FINISHED
+            || this.state === STATES.COLLECT_NODE_STATE || this.state === STATES.FINISHED
         ) {
             throw new Error(`Illegal-state - cannot wait for responses in state ${this.state}`);
         }
@@ -80,10 +88,15 @@ export class SnapshotState {
         return this.state === STATES.DISTRIBUTE_SNAPSHOT_TIMESTAMP;
     }
 
+    isReceivingStates() {
+        return this.state === STATES.COLLECT_NODE_STATE;
+    }
+
     isWaiting() {
         return (this.state === STATES.IDLE
                 || this.state === STATES.COLLECT_TIMESTAMPS
-                || this.state === STATES.DISTRIBUTE_SNAPSHOT_TIMESTAMP);
+                || this.state === STATES.DISTRIBUTE_SNAPSHOT_TIMESTAMP
+                || this.state === STATES.COLLECT_NODE_STATE);
     }
 
     isCalculateSnapshotTimestamp() {

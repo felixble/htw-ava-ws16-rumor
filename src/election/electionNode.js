@@ -1,5 +1,5 @@
 import { _ } from 'underscore';
-import { ServerLogic } from '../serverLogic';
+import { ServerLogic } from '../network-core/serverLogic';
 import { EchoAlgorithm } from '../lib/algorithm/echoAlgorithm';
 import { RumorAlgorithm } from '../lib/algorithm/rumorAlgorithm';
 import { SnapshotReceiver } from '../lib/algorithm/snapshot/snapshotReceiver';
@@ -25,9 +25,8 @@ export class ElectionNode extends ServerLogic {
             friends,
             _.bind(this.sendChooseMeMsgTo, this));
         /** @type {SnapshotReceiver} */
-        this.snapshotReceiver = new SnapshotReceiver(this.myVectorTime, _.bind(this.sendMyStatusToSnapshotTakerOnce, this));
+        this.snapshotReceiver = new SnapshotReceiver(this.myVectorTime, _.bind(this.getStatusCallback, this));
         this.snapshotReceiver.setSendMsgCallback(_.bind(this.sendSnapshotResponse, this));
-        this.statusSentToSnapshotTaker = false;
     }
 
     _isFinished() {
@@ -76,15 +75,8 @@ export class ElectionNode extends ServerLogic {
         await this.sendMsgTo(neighbor, msg, MessageTypes.CHOOSE_ME);
     }
 
-    async sendMyStatusToSnapshotTakerOnce(snapshotTaker) {
-        if (!this.statusSentToSnapshotTaker) {
-            await this._sendStatusToSnapshotTaker(snapshotTaker);
-            this.statusSentToSnapshotTaker = true;
-        }
-    }
-
-    async _sendStatusToSnapshotTaker(snapshotTaker) {
-        await this.sendMsgTo(snapshotTaker, this._getStatus(), MessageTypes.MY_STATUS);
+    getStatusCallback() {
+        return this._getStatus();
     }
 
     async sendSnapshotResponse(node, msg) {

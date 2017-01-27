@@ -189,7 +189,7 @@ wurden. Ähnliche Module wurden dabei in Unterverzeichnissen gruppiert:
 * /parser: enthält Komponenten zum Einlesen von Dateien bestimmter Formate
 * /tools: enthält zusätzliche Skripte, die als eigenständige Node-Anwendungen gestartet werden können
 
-Die Datei "index.js" ist der Einstiegspunkt der Anwendung. Darin werden die einzelnen Komponenten miteinander
+Die Datei "run-node.js" ist der Einstiegspunkt der Anwendung. Darin werden die einzelnen Komponenten miteinander
 verknüpft und der Netzwerkknoten gestartet.
 
 ### Komponenten

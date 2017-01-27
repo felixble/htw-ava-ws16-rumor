@@ -21,6 +21,16 @@ describe('VectorClock', function() {
         expect(vectorClock.getMyTime(), 'VectorTime increments the time value a 2nd time correctly').to.equal(2);
     });
 
+    it('can calculate the maximum timestamp', function() {
+        vectorClock.vector = [
+            {id: 3, time: 20},
+            {id: 7, time: 3},
+            {id: 1, time: 24},
+            {id: 6, time: 23}
+        ];
+        expect(vectorClock.getMaxTimestamp()).to.equal(24);
+    });
+
     it('updates its vector correctly which is empty initially', function() {
         const OTHER_ID = 2;
         let otherClock = new VectorClock(OTHER_ID);
