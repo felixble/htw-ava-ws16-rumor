@@ -2,6 +2,7 @@ import { _ } from 'underscore';
 import { ServerLogic } from '../serverLogic';
 import { EchoAlgorithm } from '../lib/algorithm/echoAlgorithm';
 import { RumorAlgorithm } from '../lib/algorithm/rumorAlgorithm';
+import { SnapshotReceiver } from '../lib/algorithm/snapshot/snapshotReceiver';
 import { MessageTypes } from './messageTypes';
 import { CandidateIdsManager } from './candidateIdsManager';
 
@@ -23,6 +24,18 @@ export class ElectionNode extends ServerLogic {
             this.endpointManager.getMyId(),
             friends,
             _.bind(this.sendChooseMeMsgTo, this));
+        /** @type {SnapshotReceiver} */
+        this.snapshotReceiver = new SnapshotReceiver(this.myVectorTime, _.bind(this.sendMyStatusToSnapshotTakerOnce, this));
+        this.snapshotReceiver.setSendMsgCallback(_.bind(this.sendSnapshotResponse, this));
+        this.statusSentToSnapshotTaker = false;
+    }
+
+    _isFinished() {
+        return this._isSnapshotTimeReached();
+    }
+
+    _isSnapshotTimeReached() {
+        return (this.myVectorTime.getMyTime() >= this.snapshotReceiver.snapshotTimestamp);
     }
 
     _getStatus() {
@@ -45,6 +58,11 @@ export class ElectionNode extends ServerLogic {
                 await this.chooseMeAlgorithm.processIncomingMessage(msg, senderId);
                 break;
             }
+            case MessageTypes.SNAPSHOT:
+            {
+                await this.snapshotReceiver.processIncomingMessage(msg);
+                break;
+            }
             default: return false;
         }
         return true;
@@ -56,6 +74,21 @@ export class ElectionNode extends ServerLogic {
 
     async sendChooseMeMsgTo(neighbor, msg) {
         await this.sendMsgTo(neighbor, msg, MessageTypes.CHOOSE_ME);
+    }
+
+    async sendMyStatusToSnapshotTakerOnce(snapshotTaker) {
+        if (!this.statusSentToSnapshotTaker) {
+            await this._sendStatusToSnapshotTaker(snapshotTaker);
+            this.statusSentToSnapshotTaker = true;
+        }
+    }
+
+    async _sendStatusToSnapshotTaker(snapshotTaker) {
+        await this.sendMsgTo(snapshotTaker, this._getStatus(), MessageTypes.MY_STATUS);
+    }
+
+    async sendSnapshotResponse(node, msg) {
+        await this.sendMsgTo(node, msg, MessageTypes.SNAPSHOT);
     }
 
 }

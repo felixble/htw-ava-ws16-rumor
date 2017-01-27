@@ -9,6 +9,10 @@ export const MessageTypes = {
 
     GET_STATUS: 'get-status',
 
+    SNAPSHOT: 'snapshot',
+
+    MY_STATUS: 'my-status',
+
     /*
     * Initializes the
     * candidate-process

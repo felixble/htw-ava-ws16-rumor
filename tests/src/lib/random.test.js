@@ -27,8 +27,8 @@ describe('Random', function() {
             expect(trueCount).to.be.above(0);
             expect(falseCount).to.be.above(0);
 
-            expect(trueCount).to.be.above(39);
-            expect(trueCount).to.be.below(61);
+            expect(trueCount).to.be.above(35);
+            expect(trueCount).to.be.below(65);
             console.log(`${trueCount} ${falseCount}`);
         });
 
