@@ -71,9 +71,9 @@ export class SpawnElectionNodes {
             this.childStdOutLineCount = 0;
             this.resolveSpawn();
         }
-        if (text.split(/\s+/)[1] === '(0)') {
+        //if (text.split(/\s+/)[1] === '(0)') {
             console.log(text);
-        }
+        //}
 
         if (text.startsWith('FINISH') && this.finishedElectionCallback) {
             let result = JSON.parse(text.split(/\s+/)[10]);
