@@ -20,6 +20,7 @@ export class RumorAlgorithm {
      *
      * @callback NewIncomingRumorCallback
      * @param {object} rumor
+     * @param {string} rumorId
      * @return {boolean} true, iff the rumor shall be distributed
      */
 
@@ -47,6 +48,7 @@ export class RumorAlgorithm {
         /** @type {NewIncomingRumorCallback} */
         this.onNewIncomingRumor = null;
         this.rumors = [];
+        this.currentRumorId = null;
     }
 
     /**
@@ -63,6 +65,15 @@ export class RumorAlgorithm {
      */
     setOnNewIncomingRumorListener(onNewIncomingRumor) {
         this.onNewIncomingRumor = onNewIncomingRumor;
+    }
+
+    resetCurrentRumorId() {
+        this.currentRumorId = null;
+    }
+
+    async initiateRumorDistribution(msg) {
+        this.currentRumorId = Random.generateId();
+        await this.distributeRumor(msg, false, this.currentRumorId);
     }
 
     async distributeRumor(msg, sendMsgToNeighborWithId = false, id = false) {
@@ -89,12 +100,13 @@ export class RumorAlgorithm {
 
 
         let alreadyKnown = this.isKnown(rumorId);
+        this.currentRumorId = rumorId;
         this.addRumor(rumorId, neighborId);
 
         if (!alreadyKnown) {
             let distribute = true;
             if (this.onNewIncomingRumor) {
-                distribute = this.onNewIncomingRumor(content);
+                distribute = this.onNewIncomingRumor(content, rumorId);
             }
             if (distribute) {
                 await this.distributeRumor(

@@ -76,7 +76,7 @@ describe('RumorAlgorithm', function() {
             algorithm.setOnNewIncomingRumorListener(listener);
             await algorithm.processIncomingMessage(MSG, 2);
             expect(listener.calledOnce).to.be.true;
-            expect(listener.calledWithExactly(MSG)).to.be.true;
+            expect(listener.calledWithExactly(MSG, algorithm.currentRumorId)).to.be.true;
             listener.reset();
         });
 

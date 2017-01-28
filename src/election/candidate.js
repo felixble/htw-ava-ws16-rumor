@@ -32,13 +32,9 @@ export class Candidate extends ElectionNode {
             let type = data.type;
             switch (type) {
                 case MessageTypes.NOT_YOU:
-                {
-                    await this.incFeedbackCounter();
-                    break;
-                }
                 case MessageTypes.KEEP_IT_UP:
                 {
-                    await this.incFeedbackCounter();
+                    await this.incFeedbackCounter(data.msg);
                     break;
                 }
                 case MessageTypes.INIT:
@@ -50,7 +46,11 @@ export class Candidate extends ElectionNode {
         }
     }
 
-    async incFeedbackCounter() {
+    async incFeedbackCounter(rumorId) {
+        if (this.chooseMeAlgorithm.currentRumorId !== rumorId) {
+            this.logI(`Drop voter response of message ${rumorId} - this message is outdated.`);
+            return;
+        }
         await this.semaFeedbackCounter.take();
         this.feedbackCounter++;
         if (this.feedbackCounter % this.receives === 0) {
@@ -60,6 +60,7 @@ export class Candidate extends ElectionNode {
     }
 
     async startCampaignOrChooseMeRumor() {
+        this.chooseMeAlgorithm.resetCurrentRumorId();
         if (Candidate.shouldISentACampaign()) {
             this.campaignCounter++;
             this.logI(`Start my ${this.campaignCounter}. campaign`);
@@ -71,7 +72,7 @@ export class Candidate extends ElectionNode {
         } else {
             this.chooseMeCounter++;
             this.logI(`Start my ${this.chooseMeCounter}. choose-me rumor distribution`);
-            await this.chooseMeAlgorithm.distributeRumor(this.endpointManager.getMyId());
+            await this.chooseMeAlgorithm.initiateRumorDistribution(this.endpointManager.getMyId());
         }
     }
 

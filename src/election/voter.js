@@ -31,14 +31,14 @@ export class Voter extends ElectionNode {
         return status;
     }
 
-    onNewIncomingChooseMeMsg(candidateId) {
+    onNewIncomingChooseMeMsg(candidateId, currentRumorId) {
         this.confidenceLevel.updateLevelOnNewChooseMeMsg(candidateId);
         let isFavorite = this.confidenceLevel.isFavorite(candidateId);
         let feedbackPromise;
         if (isFavorite) {
-            feedbackPromise = this.sendKeepItUp(candidateId); // this is async !
+            feedbackPromise = this.sendKeepItUp(candidateId, currentRumorId); // this is async !
         } else {
-            feedbackPromise = this.sendNotYou(candidateId); // this is async !
+            feedbackPromise = this.sendNotYou(candidateId, currentRumorId); // this is async !
         }
         feedbackPromise.catch(e => {
             if (!e.stack) console.error(e);
@@ -51,15 +51,15 @@ export class Voter extends ElectionNode {
         this.confidenceLevel.updateLevelOnNewCampaign(candidateId);
     }
 
-    async sendKeepItUp(candidateId) {
-        await this.sendMsgToCandidate(candidateId, MessageTypes.KEEP_IT_UP);
+    async sendKeepItUp(candidateId, rumorId) {
+        await this.sendMsgToCandidate(candidateId, rumorId, MessageTypes.KEEP_IT_UP);
     }
 
-    async sendNotYou(candidateId) {
-        await this.sendMsgToCandidate(candidateId, MessageTypes.NOT_YOU);
+    async sendNotYou(candidateId, rumorId) {
+        await this.sendMsgToCandidate(candidateId, rumorId, MessageTypes.NOT_YOU);
     }
 
-    async sendMsgToCandidate(candidateId, type) {
-        await this.sendMsgTo(this.endpointManager.findEndpointById(candidateId), '', type);
+    async sendMsgToCandidate(candidateId, content, type) {
+        await this.sendMsgTo(this.endpointManager.findEndpointById(candidateId), content, type);
     }
 }
