@@ -79,7 +79,7 @@ async function execErrStdout(cmd) {
 }
 
 function onElectionFinished(result) {
-    console.log(result);
+    console.log("(0) " + JSON.stringify(result));
     resolveElection();
 }
 
