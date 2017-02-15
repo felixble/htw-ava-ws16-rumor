@@ -1,5 +1,5 @@
 
-Election: Implementierung von Übung 3 in Node (JavaScript)
+Election: Implementierung von Übung 2 in Node (JavaScript)
 ==========================================================
 [![Build Status](https://travis-ci.org/felixble/htw-ava-ws16-rumor.svg?branch=master)](https://travis-ci.org/felixble/htw-ava-ws16-rumor)
 [![Code Climate](https://codeclimate.com/github/felixble/htw-ava-ws16-rumor/badges/gpa.svg)](https://codeclimate.com/github/felixble/htw-ava-ws16-rumor)
@@ -26,11 +26,11 @@ Zunächst müssen alle notwendigen Abhängigkeiten installiert werden:
 Zum Übersetzen der Anwendung sowie zum Starten der einzelnen Applikationen werden NPM-Skripte verwendet, die in der
 Datei [package.json](./package.json) definiert werden.
 
-Ein solches Skript wird über folgendes Kommando ausgeführt, dabei können optional Parameter übergeben werden:
+Ein solches Skript wird über folgendes Kommando ausgeführt. Dabei können optional Parameter übergeben werden:
 
     $ npm run <SkriptName> [-- <Parameter>]
 
-Ein Netzwerkknoten kann als Node.js-Skript als einzelner Prozess über ein NPM-Skript gestartet werden. Zum Starten
+Ein Netzwerkknoten ist ein Node.js-Skript, das als einzelner Prozess über ein NPM-Skript gestartet werden kann. Zum Starten
 einer Testsuite, die anhand verschiedener Parameter eine Netzwerktopologie erstellt und automatisiert alle notwendigen
 Netzwerkknoten startet, dient ein weiteres Node.js-Skript.
     
@@ -52,14 +52,14 @@ JavaScript-Dateien von babel in den Standard ES5 übersetzt und inklusive
 Die Hauptanwendung des Projekts ist ein Netzwerkknoten, der einen Kandidaten bzw. einen Wähler in einem Netzwerk
 an Wähler- und Kandidatenknoten repräsentiert. Das Ziel der Kandidaten ist es, möglichst viele Wähler von sich zu
 überzeugen. Sie machen dies, indem sie über den Echo-Algorithmus Kampagnen verbreiten oder über sog. Flooding 
-"Wähl-Mich"-Nachrichten verbreiten. Solche Nachrichten werden werden wie ein Gerücht im Netzwerk verbreitet, wobei
+"Wähl-Mich"-Nachrichten verbreiten. Solche Nachrichten werden wie ein Gerücht im Netzwerk verbreitet, wobei
 ein Knoten die Nachricht nur dann weiterleitet, wenn er dem Kandidaten anhand des Confidence-Levels zustimmt.
 
 Ein solcher Netzwerkknoten wird über das NPM-Skript "start-node" gestartet. Die Konfiguration eines Knotens
 kann als Parameter übergeben werden. Werden keine Parameter angegeben, so werden die notwendigen Parameter abgefragt
 und für den Rest Default-Werte verwendet:
 
-    $ npm run start-noe
+    $ npm run start-node
     
 Alternativ können die notwendigen Parameter direkt beim Start übergeben werden, sodass die Anwendung ohne weitere
 Interkation mit dem Nutzer ausgeführt werden kann. Der Parameter "-h" listet alle möglichen Parameter auf:
@@ -92,7 +92,7 @@ ist für den Beobachter-Prozess reserviert und wird automatisch dem Port 4000 zu
 
 Analog zur ersten Übung wird auch in diesem Projekt das Init-Tool verwendet, um Kontrollanchrichten an die Prozesse
 zu senden. Diesmal wird -- abgesehen vom Kommando "stop all" zum Beenden aller Prozesse -- hauptsächlich das Kommando
-"msg" verwendet, welches es erlaubt eine Nachricht des gewünschten Typs an einen oder mehrere Knoten zu senden.
+"msg" verwendet, welches es erlaubt, eine Nachricht des gewünschten Typs an einen oder mehrere Knoten zu senden.
 
 Folgender Aufruf sendet beispielsweise eine INIT-Nachricht an beide Kandidaten, was den Wahlprozess startet und
 dafür sorgt, dass die Kandidaten damit beginnen, Kampagnen bzw. "Wähl-Mich"-Nachrichten zu verbreiten:
@@ -105,11 +105,11 @@ einen Inhalt einzugeben.
 
 ### Generieren eines Graphen
 
-Zum Generieren der Netzwerktopologie wurde das Tool graphgen, welches über das Skript "graphgen" ausgeführt werden kann,
+Zum Generieren der Netzwerktopologie wurde das Tool graphgen aus Übung 1, welches über das Skript "graphgen" ausgeführt werden kann,
 erweitert. Dabei wird zunächst mithilfe des [Havel-Hakimi-Algorithmus][havel-hakimi-ppt] ein Graph generiert, welcher 
 anschließend analog zu dem Verfahren in Übung 1 in eine graphviz-Datei gespeichert wird.
 
-Auch hier können die benötigten Informationen direkt als Parameter übergeben. Eine Hilfe wird auch hier mit dem 
+Auch hier können die benötigten Informationen direkt als Parameter übergeben werden. Eine Hilfe wird auch hier mit dem 
 Parameter "-h" angefordert.
 
     $ npm run graphgen -- -h
@@ -128,26 +128,25 @@ werden soll.
 Der [Havel-Hakimi-Algorithmus][havel-hakimi-ppt] dient ursprünglich dazu, anhand einer gegebenen Sequenz an 
 Knotengraden zu überprüfen, ob es möglich ist, einen Graphen zu generieren, der genau die in der Sequenz angegebenen
 Knotengrade besitzt. Eine mögliche Sequenz wäre beispielsweise [4, 3, 3, 3, 1]. Sie gibt an, dass der Graph fünf 
-Knoten besitzt, wobei ein Knoten vier kanten hat, drei Knoten jeweils drei Kanten und ein Knoten lediglich eine Kante
+Knoten besitzt, wobei ein Knoten vier Kanten hat, drei Knoten jeweils drei Kanten und ein Knoten lediglich eine Kante
 besitzt.
 
-In dieser Anwendung wird der Algorithmus dazu verwendet, um die Eingabeparameter zu verifizieren,
-um so sicher zu sein, dass ein Graph erzeugt werden kann, bei dem jeder Wähler f Nachbarknoten besitzt.
-Zusätzlich wurde der Algorithmus dahingehend erweitert, dass sich die im Ablauf verbundenen Kanten gemerkt werden,
-sodass nach einem Durchlauf des Algorithmuses der Graph erzeugt wurde.
+In dieser Anwendung wird der Algorithmus verwendet, um die Eingabeparameter zu verifizieren und damit sicher zu sein, dass ein Graph erzeugt werden kann, bei dem jeder Wähler f Nachbarknoten besitzt.
+Zusätzlich wurde der Algorithmus dahingehend erweitert, dass sich die Anwendung die im Ablauf verbundenen Kanten merkt,
+sodass nach einem Durchlauf des Algorithmus der Graph erzeugt wurde.
 
 Auf diese Weise wird das Wählernetz erzeugt, sodass jeder Wähler exakt *f* Freunde hat. Um sicherzugehen, dass der 
 resultierende Graph zusammenhängend ist, wird der erzeugte Graph anschließend mit der Node-Bibliothek 
-"[connected-components][connected-components]" überprüft. Stellt sich heraus, dass es sich um keinen Zusammenhängenden Graphen handelt, wird
-die Eingabe verworfen und der Benutzer dazu aufgefordert andere Eingabeparameter zu verwenden.
+"[connected-components][connected-components]" überprüft. Stellt sich heraus, dass es sich um keinen zusammenhängenden Graphen handelt, wird
+die Eingabe verworfen und der Benutzer dazu aufgefordert, andere Eingabeparameter zu verwenden.
 
 Nachdem das Wählernetz erzeugt wurde, werden die beiden Kandidatenknoten hinzugefügt und diesen ihre Parteifreunde 
 zugewiesen. Dazu wird ein zufälliger Knoten ausgewählt, dessen ID größer als 0 ist und kleiner als die maximale Anzahl
 an Knoten abzüglich der Anzahl an Parteifreunde *s*. Dieser Knoten sowie die *2 * s* Folgeknoten werden alternierend
-den beiden Kandidaten als Parteifreunde zugewiesen. Die Parteifreunde haben somit in Summe einen Nachbarn mehr als
+den beiden Kandidaten als Parteifreunde zugewiesen. Die Parteifreunde haben somit in der Summe einen Nachbarn mehr als
 normale Wählerknoten.
 
-Ein Nachteil dieser Lösung ist jedoch, dass bei gleichen Eingabeparameter annähernd gleiche Graphen erzeugt werden.
+Ein Nachteil dieser Lösung ist jedoch, dass bei gleichen Eingabeparametern annähernd gleiche Graphen erzeugt werden.
 
 
 ### Starten der Testsuite
@@ -155,7 +154,7 @@ Ein Nachteil dieser Lösung ist jedoch, dass bei gleichen Eingabeparameter annä
 Um eine Wahl durchführen zu können, ist es notwendig, dass alle Wählerknoten sowie die Kandidatenknoten und ein 
 Observerprozess gestartet werden. Hierfür kann die Node-Anwendung "run-election.js" verwendet werden, welche über
 das NPM-Skript "start-election" ausgeführt wird. Als Parameter können u.A. die Anzahl an Knoten, die Anzahl an Freunde
-und Parteifreunde der Wählerknoten übergeben werden. Der Parameter "-h" zeigt eine Übersicht der möglichen Argument:
+und Parteifreunde der Wählerknoten übergeben werden. Der Parameter "-h" zeigt eine Übersicht der möglichen Argumente:
 
     $  npm run start-election -- -h
     Usage: node run-election.js
@@ -182,7 +181,7 @@ werden alle Prozesse beendet und der Vorgang ist abgeschlossen.
 Bei einem Durchlauf werden sehr viele Nachrichten zwischen den einzelnen Knoten ausgetauscht. Da jeder Knoten alle ein-
 sowie ausgehenden Nachrichten auf der Ausgabe protokolliert, wird die Ausgabe der Testsuite schnell sehr unübersichtlich.
 Aus diesem Grund wird empfohlen, die Ausgabe in eine Datei umzulenken, bzw. zum Beispiel mithilfe des *tee*-Kommandos 
-die Ausgabe sowohl anzuzeigen und gleichzeitig in eine Datei zu schreiben. Bei der Ausgabe einer Log-Nachricht schreibt
+die Ausgabe sowohl anzuzeigen als auch gleichzeitig in eine Datei zu schreiben. Bei der Ausgabe einer Log-Nachricht schreibt
 jeder Knoten seine eigene ID in runde Klammern. Dies kann man ausnutzen, um nur die Nachrichten eines bestimmten
 Knotens auszugeben. Folgendes Listing zeigt, wie die Testsuite gestartet wird und anschließend ledigliche die Ausgabe
 des Beobachter-Prozess angezeigt wird, wobei sich die gesamte Ausgabe in der Datei log/out.log befindet:
@@ -209,7 +208,7 @@ Kandidat: candidate.js usw.)
 * /lib/algorithm: enthält die Implementierungen der einzelnen Algorithmen als wiederverwendbare Module
 * /network-core: enthält die Grundmodule der Server-Client-Architektur
 * /parser: enthält Komponenten zum Einlesen von Dateien bestimmter Formate
-* /process-helpers: enhält Komponenten zum starten von Node-Prozessen
+* /process-helpers: enthält Komponenten zum Starten von Node-Prozessen
 * /tools: enthält zusätzliche Skripte, die als eigenständige Node-Anwendungen gestartet werden können, sowie deren
 Module
 
@@ -230,16 +229,16 @@ Die Grundkomponenten zum Ausführen des TCP Servers wurden aus der ersten Übung
 "ServerLogic" wurde für den Observer-Knoten die Erweiterung "ObserverNode" und für die Kandidaten- und Wählerknoten
  die Erweiterung "ElectionNode" entwickelt. 
 
-Die zu Implementierenden Algorithmen wurden jeweils als einzelne Module entwickelt, welche zum Beispiel in eine
+Die zu implementierenden Algorithmen wurden jeweils als einzelne Module entwickelt, welche zum Beispiel in eine
 Server-Implementierung "eingehängt" werden können. Ein solches Modul ist dadurch lediglich für den Ablauf
 des zu implementierenden Algorithmus verantwortlich und besitzt keinerlei Logik zum Austauschen von Nachrichten. 
 Hierfür stellt das jeweilige Modul eine Schnittstelle zur Verfügung, die von dem Modul, das den Algorithmus verwenden
 möchte, implementiert werden muss. Dies ermöglicht eine Entkopplung zwischen dem Algorithmus und der konkret verwendeten
-Variante zum Austausch von Nachrichten. Derjenige der ein solches Modul verwendet, kann also entscheiden, ob die 
+Variante zum Austausch von Nachrichten. Derjenige, der ein solches Modul verwendet, kann also entscheiden, ob die 
 zum Ablauf des Algorithmus ausgetauschten Nachrichten z.B. über TCP, UDP oder gar durch einen einfachen Methodenaufruf 
-des beim Empfänger (falls beide Knoten durch Threading innerhalb eines Prozesses ausgeführt würden) übertragen werden. 
+beim Empfänger (falls beide Knoten durch Threading innerhalb eines Prozesses ausgeführt würden) übertragen werden. 
 Eine solche Entkopllung ist gerade bei der Verwendung von automatisierten Tests enorm von Vorteil, da so die einzelnen 
-Knoten duch verschiedenen Objekte simuliert und der Nachrichtenaustausch in den Testfällen durch entsprechende 
+Knoten durch verschiedene Objekte simuliert und der Nachrichtenaustausch in den Testfällen durch entsprechende 
 Methodenaufrufe ausgeführt werden konnte.
 
 ### Vektorzeit
@@ -278,7 +277,7 @@ wäre, werden alle empfangenen Nachrichten nach dem Erhalt mit einem leeren JSON
 
 Die einzelnen Algorithmen verwenden eine Nachricht eines bestimmten Typs. Alle Nachrichten, die der Echo-Algorithmus
 versendet, werden beispielsweise unter dem Nachrichten-Typ "campaign" versendet. Der Payload einer solchen Echo-Nachricht
-wird in Nachrichtenfeld "msg" übertragen. Dieses Feld ist je nach verwendetem Nachrichtentyp ebenfalls ein JSON-Objekt.
+wird im Nachrichtenfeld "msg" übertragen. Dieses Feld ist je nach verwendetem Nachrichtentyp ebenfalls ein JSON-Objekt.
 
 
 #### Beispiel einer EXPLORER-Nachricht des Echo Algorithmus
@@ -294,18 +293,18 @@ wird in Nachrichtenfeld "msg" übertragen. Dieses Feld ist je nach verwendetem N
 Die dynamische Typisierung von JavaScript birgt die Gefahr von häufigen Laufzeitfehlern. Aus diesem Grund ist es gerade
 bei der Verwendung einer solchen Programmiersprache besonders wichtig, die Komponenten der Anwendung mit automatisierten
 Tests auf korrekte Funktionalität zu überprüfen. Außerdem helfen gerade Unit-Tests bei der Entwicklung von einzelnen
-Komponenten, da man sich durch diese von der korrekten Funktionalität der Komponente überzeugen kann, da diese dann 
-gezielt ohne den Kontext der gesamten Anwendung ausgeführt werden kann.
+Komponenten. Mithilfe von Unit-Tests kann man sich von der korrekten Funktionalität einzelner Komponenten überzeugen, da diese dann 
+gezielt ohne den Kontext der gesamten Anwendung ausgeführt werden können.
 
 ## Automatisierte Tests
 
 Einige Hilfsfunktionen, kleinere Module der Anwendung, wie zum Beispiel der Parser für die Endpoint- bzw. 
 graphviz-Datei oder der Kantengenerator sowie die einzelnen Algorithmen wurden mit Unit-Tests versehen. Für den 
 Echo-Algorithmus wurde darüber hinaus noch eine Test-Suite entwickelt, die verschiedene Knoten als JavaScript-Objekte
-darstellt und das versenden der Nachrichten über Methodenaufrufe simuliert. Auf diese Weise kann die Funktionalität
+darstellt und das Versenden der Nachrichten über Methodenaufrufe simuliert. Auf diese Weise kann die Funktionalität
 des Algorithmus getestet werden, ohne, dass verschiedene Prozesse gestartet werden müssen und eine funktionierende
 TCP-Verbindung vorausgesetzt werden muss.
-npm
+
 Die Tests befinden sich im Verzeichnis "tests" des Projektordners. Damit die Quelldateien mit den zugehörigen Testdateien
 leicht verbunden werden können, ist der "tests"-Ordner nach der gleichen Verzeichnisstruktur aufgebaut wie der "src"-
 Ordner.
@@ -316,7 +315,7 @@ Die Tests können mithilfe des NPM-Skripts "test" ausgeführt werden:
     
 ## Test Coverage
     
-Bei der Verwendung von automatisierten Tests ist es außerdem sinnvoll ein Tool zu verwenden, das die Testabdeckung
+Bei der Verwendung von automatisierten Tests ist es außerdem sinnvoll, ein Tool zu verwenden, das die Testabdeckung
 überprüft. Ein solches Tool überprüft beim Durchlaufen der Tests, welche Codezeilen, Funktionen, Statements und
 Verzweigungen durchlaufen werden und berechnet daraus wie groß die Testabdeckung ist. Schaut man sich den Bericht einer
 solchen Auswertung an, kann man ablesen, wo sich potentielle Fehler verstecken.
@@ -327,14 +326,14 @@ gute Testabdeckung angegeben wird, obwohl manche Module überhaupt gar nicht get
     
 ## Continuous Integration \& Code Quality
 
-Im Rahmen dieses Projekts wird [TravisCI][travis-ci] als Continuous Integration Lösung verwendet. Dieses System ist
+Im Rahmen dieses Projekts wird [TravisCI][travis-ci] als Continuous Integration System verwendet. Dieses System ist
 mit dem github repository verknüpft und sorgt bei jeder Änderung der Daten im Repository dafür, dass die Anwendung 
 erstellt wird und alle automatisierten Tests ausgeführt werden. Die Datei [.travis.yml](./.travis.yml) beschreibt
-die Konfiguration des Testservers und besagt welcher Interpreter in welcher Version verwendet werden soll. Nachdem 
+die Konfiguration des Testservers und besagt, welcher Interpreter in welcher Version verwendet werden soll. Nachdem 
 die automatisierten Tests von TravisCI durchgeführt wurden, wird das Ergebnis der Testabdeckung an einen 
 [Code Climate][code-climate] gesendet.
 
-Code Climate bereitet den Bericht der Testabdeckung graphisch auf und ermöglicht es, zu analysieren, welche Module
+Code Climate bereitet den Bericht der Testabdeckung graphisch auf und ermöglicht es zu analysieren, welche Module
 nicht ausreichend mit Tests abgedeckt sind. Weiterhin lässt sich Code Climate selbst mit einem github repository
 verknüpfen und kann dann eine Überprüfung der Code-Qualität anhand verschiedener Kriterien durchführen und das Projekt
 danach bewerten. So werden beispielsweise Code-Duplikationen aufgedeckt oder vor zu komplexen Funktionen gewarnt.
@@ -353,4 +352,4 @@ danach bewerten. So werden beispielsweise Code-Duplikationen aufgedeckt oder vor
 [travis-ci]: https://travis-ci.org
 [havel-hakimi-ppt]: http://www.dcs.gla.ac.uk/~pat/af2009/mySlides/Havel-Hakimi.ppt
 [connected-components]: https://www.npmjs.com/package/connected-components
-[code-climate]: https://codeclimate.com/github/felixble/htw-ava-ws16-rumor
+[code-climate]: https://codeclimate.com
