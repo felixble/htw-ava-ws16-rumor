@@ -79,50 +79,50 @@ $ tail -f ./log/out.log | grep &quot;(0)&quot;</code></pre>
 <h3 id="verzeichnisstruktur">Verzeichnisstruktur</h3>
 <p>Die Source-Dateien befinden sich alle im Verzeichnis &quot;src&quot; im Hauptordner des Projekts. Prinzipiell kann eine gesamte Node-Anwendung in einer einzelnen JavaScript-Datei entwickelt werden. Dies ist jedoch aufgrund fehlender Übersicht nicht empfehlenswert. Daher wurde das Projekt in verschiedene Komponenten unterteilt, welche in einzelnen Dateien entwickelt wurden. Ähnliche Module wurden dabei in Unterverzeichnissen gruppiert:</p>
 <ul>
+<li>/election: enhält die verschiedenen Klassen, die bei dem Wahlprozess miteinander interagieren (Wähler: voter.js, Kandidat: candidate.js usw.)</li>
 <li>/lib: enthält wiederverwendbare Module, die anwendungsübergreifend verwendet werden können</li>
+<li>/lib/algorithm: enthält die Implementierungen der einzelnen Algorithmen als wiederverwendbare Module</li>
+<li>/network-core: enthält die Grundmodule der Server-Client-Architektur</li>
 <li>/parser: enthält Komponenten zum Einlesen von Dateien bestimmter Formate</li>
-<li>/tools: enthält zusätzliche Skripte, die als eigenständige Node-Anwendungen gestartet werden können</li>
+<li>/process-helpers: enhält Komponenten zum starten von Node-Prozessen</li>
+<li>/tools: enthält zusätzliche Skripte, die als eigenständige Node-Anwendungen gestartet werden können, sowie deren Module</li>
 </ul>
-<p>Die Datei &quot;run-node.js&quot; ist der Einstiegspunkt der Anwendung. Darin werden die einzelnen Komponenten miteinander verknüpft und der Netzwerkknoten gestartet.</p>
+<p>Die Datei &quot;<a href="./src/run-node.js">run-node.js</a>&quot; ist der Einstiegspunkt der Anwendung. Darin werden die einzelnen Komponenten miteinander verknüpft und der Netzwerkknoten gestartet.</p>
+<p>Der Einstiegspunkt der Testsuite befindet sich in der Datei &quot;<a href="./src/run-election.js">run-election.js</a>&quot;. Dort werden -- wie im vorherigen Abschnitt beschrieben -- mehrere Netzwerkknoten gestartet, der Wahlablauf initialisiert und der konsistente Schnapschuss durchgeführt.</p>
 <h3 id="komponenten">Komponenten</h3>
 <p>Das folgende UML-Klassendiagramm zeigt einen Überblick über die einzelnen Komponenten der Anwendung.</p>
 <div class="figure">
 <img src="https://rawgit.com/felixble/htw-ava-ws16-rumor/master/docs/figures/components.svg" alt="Komponenten der Anwendung" />
 <p class="caption">Komponenten der Anwendung</p>
 </div>
-<p>Die Klasse Server ist eine einfache Implementierung eines TCP-Servers, der bei eingehenden Nachrichten eine vorher definierte Funktion aufruft. Ein Aufruf der Methode &quot;listen(callback)&quot; startet den Server und registriert die übergebene Funktion als Callback, welches bei eingehenden Nachrichten aufgerufen wird. Die Methode &quot;stop()&quot; beendet den Server.</p>
-<p>In der Basisklasse &quot;ServerLogic&quot; wird das Behandeln eingehender Nachrichten definiert. Sie kennt die verbundenen Endpunkte -- also die Nachbarknoten -- und besitzt eine Referenz auf den gestarteten Server. Verbunden werden beide Kompomenten, indem dem Konstruktor der ServerLogic die Referenz auf den Server übergeben wird. Anschließend wird die Methode &quot;onReceiveData&quot; der ServerLogic der &quot;listen&quot;-Methode des Servers als Callback übergeben. Auf diese Weise wird die Methode &quot;onReceiveDate&quot; bei jeder eingehenden Nachricht ausgeführt.</p>
-<p>Handelt es sich bei einer eingehenden Nachricht um eine Kontrollnachricht, so wird diese von der ServerLogic direkt behandelt. Alternativ wird die <em>abstrakte</em> Methode &quot;_runAlgorithm&quot; aufgerufen, welche von der konkreten Implementierung &quot;HelloServer&quot; (bei Aufgabenteil a) bzw. &quot;RumorServer&quot; (späterer Aufgabenteil) überschrieben wird.</p>
-<blockquote>
-<p>Hinweis: In JavaScript gibt es eigentlich keine abstrakten Klassen bzw. Methoden. Daher wird die Methode &quot;_runAlgorithm&quot; in der Basisklasse einfach mit einem leeren Rumpf definiert.</p>
-</blockquote>
-<blockquote>
-<p>Speziallfall - Knoten als ein Prozess: In der Aufgabenstellung war gefordert, dass der Knoten als ein Prozess und somit die Bearbeitung einer eingehenden Nachricht als eine atomare Aktion ausgeführt werden soll. Um dies in node zu realisieren, wurde eine Semaphore verwendet, die alle anderen eingehenden Nachrichten blockiert, während eine Nachricht behandelt wird.</p>
-</blockquote>
+<p>Die Grundkomponenten zum Ausführen des TCP Servers wurden aus der ersten Übung übernommen. Auf Grundlage der Klasse &quot;ServerLogic&quot; wurde für den Observer-Knoten die Erweiterung &quot;ObserverNode&quot; und für die Kandidaten- und Wählerknoten die Erweiterung &quot;ElectionNode&quot; entwickelt.</p>
+<p>Die zu Implementierenden Algorithmen wurden jeweils als einzelne Module entwickelt, welche zum Beispiel in eine Server-Implementierung &quot;eingehängt&quot; werden können. Ein solches Modul ist dadurch lediglich für den Ablauf des zu implementierenden Algorithmus verantwortlich und besitzt keinerlei Logik zum Austauschen von Nachrichten. Hierfür stellt das jeweilige Modul eine Schnittstelle zur Verfügung, die von dem Modul, das den Algorithmus verwenden möchte, implementiert werden muss. Dies ermöglicht eine Entkopplung zwischen dem Algorithmus und der konkret verwendeten Variante zum Austausch von Nachrichten. Derjenige der ein solches Modul verwendet, kann also entscheiden, ob die zum Ablauf des Algorithmus ausgetauschten Nachrichten z.B. über TCP, UDP oder gar durch einen einfachen Methodenaufruf des beim Empfänger (falls beide Knoten durch Threading innerhalb eines Prozesses ausgeführt würden) übertragen werden. Eine solche Entkopllung ist gerade bei der Verwendung von automatisierten Tests enorm von Vorteil, da so die einzelnen Knoten duch verschiedenen Objekte simuliert und der Nachrichtenaustausch in den Testfällen durch entsprechende Methodenaufrufe ausgeführt werden konnte.</p>
 <h3 id="vektorzeit">Vektorzeit</h3>
 <p>Damit in der Ausgabe ersichtlich ist, in welcher Reihenfolge die -- teilweise parallel abgesetzen -- Nachrichten gesendet wurden, wird eine logische Zeit eingeführt: Die Vektorzeit. Diese Zeiteinheit besteht aus n-Zählern, wobei n gerade der Anzahl an Netzwerkknoten entspricht. Die Vektorzeit ist Teil einer jeden Nachricht, die versendet wird. Der eigene Zähler wird genau dann erhöht, wenn ein lokales Ereignis passiert (beispielsweise das Senden oder Empfangen einer Nachricht). Beim Empfangen einer Nachricht werden außerdem die Werte aller Zähler verglichen und das Maximum übernommen.</p>
 <p>Implementiert wurde die Vektorzeit als eigenes Modul. Die Klasse VectorClock beinhaltet ein assoziatives Array, welches die Zähler für verschiedene Netzwerkknoten, die anhand einer eindeutigen ID identifiziert werden, speichert. Tritt ein lokales Ereignis auf, so wird der eigene Zähler mittels der Methode &quot;tick(()&quot; erhöht. Beim Empfangen einer Nachricht wird der darin übermittelte Vektor an die Methode &quot;update(clock)&quot; übergeben, was dafür sorgt, dass das Maximum der jeweiligen Zähler übernommen wird. Im initialen Zustand kennt das Modul lediglich den eigenen Zählerstand. Das Vektorfeld wird mit jeder ankommenden Nachricht von einem vorher noch unbekannten Netzwerkknoten entsprechend angepasst und erweitert.</p>
 <h2 id="protokoll">Protokoll</h2>
 <p>Zum Austausch der Nachrichten zwischen den einzelnen Netzwerkknoten wird das <a href="http://www.json.org/">JSON-Format</a> verwendet. Eine Nachricht hat dabei folgende Komponenten:</p>
 <ul>
-<li>type: Typ der Nachricht (rumor oder control)</li>
+<li>type: Typ der Nachricht (control, snapshot, campaign, choose-me, not-you, keep-it-up)</li>
 <li>msg: Inhalt der Nachricht</li>
 <li>from: ID des Absenderknotens (optional)</li>
-<li>time: Vektorzeit des Absenderknotens (optional)</li>
+<li>time: Vektorzeit des Absenderknotens</li>
 </ul>
-<p>Die Vektorzeit ist optional, damit bei dem initialen Gerücht keine Zeit mitgesendet werden muss. Alle zwischen den einzelnen Rumor-Knoten ausgetauschten Nachrichten beinhalten natürlich das Feld &quot;time&quot;.</p>
 <p>Handelt es sich um eine Kontrollnachricht, so enthält das Messagefeld die Aktion (&quot;STOP&quot; zum Beenden des Knotens bzw. &quot;STOP ALL&quot; zum Senden der &quot;STOP ALL&quot; Nachricht an alle Nachbarn und zum anschließenden Beenden des Knotens).</p>
 <p>Alle Nachrichten werden über TCP übertragen. Auch wenn dies -- aufrund der TCP-Übertragung -- nicht explizit notwendig wäre, werden alle empfangenen Nachrichten nach dem Erhalt mit einem leeren JSON-Objekt bestätigt.</p>
-<h4 id="beispiel-einer-nachricht">Beispiel einer Nachricht</h4>
-<pre><code>{&quot;msg&quot;:&quot;g.2&quot;,&quot;from&quot;:22,&quot;type&quot;:&quot;rumor&quot;}</code></pre>
+<p>Die einzelnen Algorithmen verwenden eine Nachricht eines bestimmten Typs. Alle Nachrichten, die der Echo-Algorithmus versendet, werden beispielsweise unter dem Nachrichten-Typ &quot;campaign&quot; versendet. Der Payload einer solchen Echo-Nachricht wird in Nachrichtenfeld &quot;msg&quot; übertragen. Dieses Feld ist je nach verwendetem Nachrichtentyp ebenfalls ein JSON-Objekt.</p>
+<h4 id="beispiel-einer-explorer-nachricht-des-echo-algorithmus">Beispiel einer EXPLORER-Nachricht des Echo Algorithmus</h4>
+<pre><code>{&quot;msg&quot;:{&quot;id&quot;:&quot;hn2CFNx&quot;,&quot;content&quot;:2,&quot;type&quot;:&quot;explorer&quot;},&quot;from&quot;:22,&quot;type&quot;:&quot;campaign&quot;: &quot;time&quot;:{&quot;myId&quot;:0,&quot;vector&quot;:[{&quot;id&quot;:0,&quot;time&quot;:3},{&quot;id&quot;:2,&quot;time&quot;:7]}}</code></pre>
 <h4 id="beispiel-einer-kontrollnachricht">Beispiel einer Kontrollnachricht</h4>
 <pre><code>{&quot;msg&quot;:&quot;STOP&quot;,&quot;type&quot;:&quot;control&quot;}</code></pre>
 <h1 id="tests">Tests</h1>
 <p>Die dynamische Typisierung von JavaScript birgt die Gefahr von häufigen Laufzeitfehlern. Aus diesem Grund ist es gerade bei der Verwendung einer solchen Programmiersprache besonders wichtig, die Komponenten der Anwendung mit automatisierten Tests auf korrekte Funktionalität zu überprüfen. Außerdem helfen gerade Unit-Tests bei der Entwicklung von einzelnen Komponenten, da man sich durch diese von der korrekten Funktionalität der Komponente überzeugen kann, da diese dann gezielt ohne den Kontext der gesamten Anwendung ausgeführt werden kann.</p>
 <h2 id="automatisierte-tests">Automatisierte Tests</h2>
-<p>Einige Hilfsfunktionen sowie kleinere Module der Anwendung, wie zum Beispiel der Parser für die Endpoint- bzw. graphviz-Datei oder der Kantengenerator, wurden mit Unit-Tests versehen. Die Tests befinden sich im Verzeichnis &quot;tests&quot; des Projektordners.</p>
+<p>Einige Hilfsfunktionen, kleinere Module der Anwendung, wie zum Beispiel der Parser für die Endpoint- bzw. graphviz-Datei oder der Kantengenerator sowie die einzelnen Algorithmen wurden mit Unit-Tests versehen. Für den Echo-Algorithmus wurde darüber hinaus noch eine Test-Suite entwickelt, die verschiedene Knoten als JavaScript-Objekte darstellt und das versenden der Nachrichten über Methodenaufrufe simuliert. Auf diese Weise kann die Funktionalität des Algorithmus getestet werden, ohne, dass verschiedene Prozesse gestartet werden müssen und eine funktionierende TCP-Verbindung vorausgesetzt werden muss. npm Die Tests befinden sich im Verzeichnis &quot;tests&quot; des Projektordners. Damit die Quelldateien mit den zugehörigen Testdateien leicht verbunden werden können, ist der &quot;tests&quot;-Ordner nach der gleichen Verzeichnisstruktur aufgebaut wie der &quot;src&quot;- Ordner.</p>
 <p>Die Tests können mithilfe des NPM-Skripts &quot;test&quot; ausgeführt werden:</p>
 <pre><code>$ npm run test</code></pre>
 <h2 id="test-coverage">Test Coverage</h2>
+<p>Bei der Verwendung von automatisierten Tests ist es außerdem sinnvoll ein Tool zu verwenden, das die Testabdeckung überprüft. Ein solches Tool überprüft beim Durchlaufen der Tests, welche Codezeilen, Funktionen, Statements und Verzweigungen durchlaufen werden und berechnet daraus wie groß die Testabdeckung ist. Schaut man sich den Bericht einer solchen Auswertung an, kann man ablesen, wo sich potentielle Fehler verstecken.</p>
+<p>Betrachtet man lediglich den berechneten Wert der Testabdeckung, so kann dies unter Umständen täuschen, da lediglich die vom Test ausgeführten Module bei der Berechnung berücksichtigt werden. So kann es also vorkommen, dass eine sehr gute Testabdeckung angegeben wird, obwohl manche Module überhaupt gar nicht getestet werden.</p>
 <h2 id="continuous-integration-code-quality">Continuous Integration &amp; Code Quality</h2>
 <p>Im Rahmen dieses Projekts wird <a href="https://travis-ci.org">TravisCI</a> als Continuous Integration Lösung verwendet. Dieses System ist mit dem github repository verknüpft und sorgt bei jeder Änderung der Daten im Repository dafür, dass die Anwendung erstellt wird und alle automatisierten Tests ausgeführt werden. Die Datei <a href="./.travis.yml">.travis.yml</a> beschreibt die Konfiguration des Testservers und besagt welcher Interpreter in welcher Version verwendet werden soll.</p>

@@ -226,26 +226,21 @@ Das folgende UML-Klassendiagramm zeigt einen Überblick über die einzelnen Komp
 
 ![Komponenten der Anwendung](https://rawgit.com/felixble/htw-ava-ws16-rumor/master/docs/figures/components.svg)
 
-Die Klasse Server ist eine einfache Implementierung eines TCP-Servers, der bei eingehenden Nachrichten eine vorher definierte
-Funktion aufruft. Ein Aufruf der Methode "listen(callback)" startet den Server und registriert die übergebene Funktion
-als Callback, welches bei eingehenden Nachrichten aufgerufen wird. Die Methode "stop()" beendet den Server.
+Die Grundkomponenten zum Ausführen des TCP Servers wurden aus der ersten Übung übernommen. Auf Grundlage der Klasse
+"ServerLogic" wurde für den Observer-Knoten die Erweiterung "ObserverNode" und für die Kandidaten- und Wählerknoten
+ die Erweiterung "ElectionNode" entwickelt. 
 
-In der Basisklasse "ServerLogic" wird das Behandeln eingehender Nachrichten definiert. Sie kennt die verbundenen
-Endpunkte -- also die Nachbarknoten -- und besitzt eine Referenz auf den gestarteten Server. Verbunden werden beide
-Kompomenten, indem dem Konstruktor der ServerLogic die Referenz auf den Server übergeben wird. Anschließend wird die
-Methode "onReceiveData" der ServerLogic der "listen"-Methode des Servers als Callback übergeben. Auf diese Weise wird die
-Methode "onReceiveDate" bei jeder eingehenden Nachricht ausgeführt.
-
-Handelt es sich bei einer eingehenden Nachricht um eine Kontrollnachricht, so wird diese von der ServerLogic direkt
-behandelt. Alternativ wird die *abstrakte* Methode "_runAlgorithm" aufgerufen, welche von der konkreten Implementierung
-"HelloServer" (bei Aufgabenteil a) bzw. "RumorServer" (späterer Aufgabenteil) überschrieben wird.
-
->Hinweis: In JavaScript gibt es eigentlich keine abstrakten Klassen bzw. Methoden. Daher wird die Methode "_runAlgorithm"
-in der Basisklasse einfach mit einem leeren Rumpf definiert.
-
->Speziallfall - Knoten als ein Prozess: In der Aufgabenstellung war gefordert, dass der Knoten als ein Prozess und somit
-die Bearbeitung einer eingehenden Nachricht als eine atomare Aktion ausgeführt werden soll. Um dies in node zu realisieren,
-wurde eine Semaphore verwendet, die alle anderen eingehenden Nachrichten blockiert, während eine Nachricht behandelt wird.
+Die zu Implementierenden Algorithmen wurden jeweils als einzelne Module entwickelt, welche zum Beispiel in eine
+Server-Implementierung "eingehängt" werden können. Ein solches Modul ist dadurch lediglich für den Ablauf
+des zu implementierenden Algorithmus verantwortlich und besitzt keinerlei Logik zum Austauschen von Nachrichten. 
+Hierfür stellt das jeweilige Modul eine Schnittstelle zur Verfügung, die von dem Modul, das den Algorithmus verwenden
+möchte, implementiert werden muss. Dies ermöglicht eine Entkopplung zwischen dem Algorithmus und der konkret verwendeten
+Variante zum Austausch von Nachrichten. Derjenige der ein solches Modul verwendet, kann also entscheiden, ob die 
+zum Ablauf des Algorithmus ausgetauschten Nachrichten z.B. über TCP, UDP oder gar durch einen einfachen Methodenaufruf 
+des beim Empfänger (falls beide Knoten durch Threading innerhalb eines Prozesses ausgeführt würden) übertragen werden. 
+Eine solche Entkopllung ist gerade bei der Verwendung von automatisierten Tests enorm von Vorteil, da so die einzelnen 
+Knoten duch verschiedenen Objekte simuliert und der Nachrichtenaustausch in den Testfällen durch entsprechende 
+Methodenaufrufe ausgeführt werden konnte.
 
 ### Vektorzeit
 
@@ -270,13 +265,10 @@ angepasst und erweitert.
 Zum Austausch der Nachrichten zwischen den einzelnen Netzwerkknoten wird das [JSON-Format][json] verwendet. Eine 
 Nachricht hat dabei folgende Komponenten:
 
-* type: Typ der Nachricht (rumor oder control)
+* type: Typ der Nachricht (control, snapshot, campaign, choose-me, not-you, keep-it-up)
 * msg: Inhalt der Nachricht
 * from: ID des Absenderknotens (optional)
-* time: Vektorzeit des Absenderknotens (optional)
-
-Die Vektorzeit ist optional, damit bei dem initialen Gerücht keine Zeit mitgesendet werden muss. Alle zwischen den 
-einzelnen Rumor-Knoten ausgetauschten Nachrichten beinhalten natürlich das Feld "time".
+* time: Vektorzeit des Absenderknotens
 
 Handelt es sich um eine Kontrollnachricht, so enthält das Messagefeld die Aktion ("STOP" zum Beenden des Knotens bzw.
 "STOP ALL" zum Senden der "STOP ALL" Nachricht an alle Nachbarn und zum anschließenden Beenden des Knotens).
@@ -284,10 +276,14 @@ Handelt es sich um eine Kontrollnachricht, so enthält das Messagefeld die Aktio
 Alle Nachrichten werden über TCP übertragen. Auch wenn dies -- aufrund der TCP-Übertragung --  nicht explizit notwendig 
 wäre, werden alle empfangenen Nachrichten nach dem Erhalt mit einem leeren JSON-Objekt bestätigt.
 
+Die einzelnen Algorithmen verwenden eine Nachricht eines bestimmten Typs. Alle Nachrichten, die der Echo-Algorithmus
+versendet, werden beispielsweise unter dem Nachrichten-Typ "campaign" versendet. Der Payload einer solchen Echo-Nachricht
+wird in Nachrichtenfeld "msg" übertragen. Dieses Feld ist je nach verwendetem Nachrichtentyp ebenfalls ein JSON-Objekt.
 
-#### Beispiel einer Nachricht
 
-    {"msg":"g.2","from":22,"type":"rumor"}
+#### Beispiel einer EXPLORER-Nachricht des Echo Algorithmus
+
+    {"msg":{"id":"hn2CFNx","content":2,"type":"explorer"},"from":22,"type":"campaign": "time":{"myId":0,"vector":[{"id":0,"time":3},{"id":2,"time":7]}}
 
 #### Beispiel einer Kontrollnachricht
 
@@ -303,22 +299,45 @@ gezielt ohne den Kontext der gesamten Anwendung ausgeführt werden kann.
 
 ## Automatisierte Tests
 
-Einige Hilfsfunktionen sowie kleinere Module der Anwendung, wie zum Beispiel der Parser für die Endpoint- bzw. 
-graphviz-Datei oder der Kantengenerator, wurden mit Unit-Tests versehen. Die Tests befinden sich im Verzeichnis "tests"
-des Projektordners.
+Einige Hilfsfunktionen, kleinere Module der Anwendung, wie zum Beispiel der Parser für die Endpoint- bzw. 
+graphviz-Datei oder der Kantengenerator sowie die einzelnen Algorithmen wurden mit Unit-Tests versehen. Für den 
+Echo-Algorithmus wurde darüber hinaus noch eine Test-Suite entwickelt, die verschiedene Knoten als JavaScript-Objekte
+darstellt und das versenden der Nachrichten über Methodenaufrufe simuliert. Auf diese Weise kann die Funktionalität
+des Algorithmus getestet werden, ohne, dass verschiedene Prozesse gestartet werden müssen und eine funktionierende
+TCP-Verbindung vorausgesetzt werden muss.
+npm
+Die Tests befinden sich im Verzeichnis "tests" des Projektordners. Damit die Quelldateien mit den zugehörigen Testdateien
+leicht verbunden werden können, ist der "tests"-Ordner nach der gleichen Verzeichnisstruktur aufgebaut wie der "src"-
+Ordner.
 
 Die Tests können mithilfe des NPM-Skripts "test" ausgeführt werden:
 
     $ npm run test
     
-## Test Coverage    
+## Test Coverage
+    
+Bei der Verwendung von automatisierten Tests ist es außerdem sinnvoll ein Tool zu verwenden, das die Testabdeckung
+überprüft. Ein solches Tool überprüft beim Durchlaufen der Tests, welche Codezeilen, Funktionen, Statements und
+Verzweigungen durchlaufen werden und berechnet daraus wie groß die Testabdeckung ist. Schaut man sich den Bericht einer
+solchen Auswertung an, kann man ablesen, wo sich potentielle Fehler verstecken.
+
+Betrachtet man lediglich den berechneten Wert der Testabdeckung, so kann dies unter Umständen täuschen, da lediglich
+die vom Test ausgeführten Module bei der Berechnung berücksichtigt werden. So kann es also vorkommen, dass eine sehr
+gute Testabdeckung angegeben wird, obwohl manche Module überhaupt gar nicht getestet werden.
     
 ## Continuous Integration \& Code Quality
 
 Im Rahmen dieses Projekts wird [TravisCI][travis-ci] als Continuous Integration Lösung verwendet. Dieses System ist
 mit dem github repository verknüpft und sorgt bei jeder Änderung der Daten im Repository dafür, dass die Anwendung 
 erstellt wird und alle automatisierten Tests ausgeführt werden. Die Datei [.travis.yml](./.travis.yml) beschreibt
-die Konfiguration des Testservers und besagt welcher Interpreter in welcher Version verwendet werden soll.
+die Konfiguration des Testservers und besagt welcher Interpreter in welcher Version verwendet werden soll. Nachdem 
+die automatisierten Tests von TravisCI durchgeführt wurden, wird das Ergebnis der Testabdeckung an einen 
+[Code Climate][code-climate] gesendet.
+
+Code Climate bereitet den Bericht der Testabdeckung graphisch auf und ermöglicht es, zu analysieren, welche Module
+nicht ausreichend mit Tests abgedeckt sind. Weiterhin lässt sich Code Climate selbst mit einem github repository
+verknüpfen und kann dann eine Überprüfung der Code-Qualität anhand verschiedener Kriterien durchführen und das Projekt
+danach bewerten. So werden beispielsweise Code-Duplikationen aufgedeckt oder vor zu komplexen Funktionen gewarnt.
 
      
 
@@ -334,3 +353,4 @@ die Konfiguration des Testservers und besagt welcher Interpreter in welcher Vers
 [travis-ci]: https://travis-ci.org
 [havel-hakimi-ppt]: http://www.dcs.gla.ac.uk/~pat/af2009/mySlides/Havel-Hakimi.ppt
 [connected-components]: https://www.npmjs.com/package/connected-components
+[code-climate]: https://codeclimate.com/github/felixble/htw-ava-ws16-rumor
