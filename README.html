@@ -1,8 +1,7 @@
-<h1 id="rumor-implementierung-von-übung-1-in-node-javascript">Rumor: Implementierung von Übung 1 in Node (JavaScript)</h1>
+<h1 id="election-implementierung-von-übung-3-in-node-javascript">Election: Implementierung von Übung 3 in Node (JavaScript)</h1>
+<p><a href="https://travis-ci.org/felixble/htw-ava-ws16-rumor"><img src="https://travis-ci.org/felixble/htw-ava-ws16-rumor.svg?branch=master" alt="Build Status" /></a> <a href="https://codeclimate.com/github/felixble/htw-ava-ws16-rumor"><img src="https://codeclimate.com/github/felixble/htw-ava-ws16-rumor/badges/gpa.svg" alt="Code Climate" /></a> <a href="https://codeclimate.com/github/felixble/htw-ava-ws16-rumor/coverage"><img src="https://codeclimate.com/github/felixble/htw-ava-ws16-rumor/badges/coverage.svg" alt="Test Coverage" /></a></p>
 <p>Felix Blechschmitt</p>
-<p>Dieses Dokument enthält Informationen über den Aufbau und die Funktionen von rumor.</p>
-<h2 id="build-status-by-traviscitravis-ci">Build status (by <a href="https://travis-ci.org">TravisCI</a>)</h2>
-<p><a href="https://travis-ci.org/felixble/htw-ava-ws16-rumor"><img src="https://travis-ci.org/felixble/htw-ava-ws16-rumor.svg?branch=master" alt="Build Status" /></a></p>
+<p>Dieses Dokument enthält Informationen über den Aufbau und die Funktionen von election.</p>
 <h1 id="getting-started">Getting Started</h1>
 <p>Das Projekt wurde in der Programmiersprache JavaScript nach dem Standard <a href="http://www.ecma-international.org/ecma-262/6.0/">EcmaScript 6 (ES6)</a> entwickelt. Dabei wurde der Interpreter <a href="https://nodejs.org/">node</a> in der Version v4.4.4 verwendet.</p>
 <h2 id="installation">Installation</h2>
@@ -12,76 +11,69 @@
 <p>Zum Übersetzen der Anwendung sowie zum Starten der einzelnen Applikationen werden NPM-Skripte verwendet, die in der Datei <a href="./package.json">package.json</a> definiert werden.</p>
 <p>Ein solches Skript wird über folgendes Kommando ausgeführt, dabei können optional Parameter übergeben werden:</p>
 <pre><code>$ npm run &lt;SkriptName&gt; [-- &lt;Parameter&gt;]</code></pre>
-<p>Des Weiterhen werden zusätzliche Shell-Skripte zur Verfügung gestellt mit denen eine Testsuite zum Durchführen von Experimenten gestartet werden kann sowie ein Skript zum sofortigen Beenden aller gestarteter Node-Prozesse. Dieses Skript kann im Falle eines Fehlers ausgeführt werden, falls die Prozesse in einem ungewollten Zustand nicht mehr normal beendet werden können.</p>
+<p>Ein Netzwerkknoten kann als Node.js-Skript als einzelner Prozess über ein NPM-Skript gestartet werden. Zum Starten einer Testsuite, die anhand verschiedener Parameter eine Netzwerktopologie erstellt und automatisiert alle notwendigen Netzwerkknoten startet, dient ein weiteres Node.js-Skript.</p>
 <h3 id="build-prozess">Build-Prozess</h3>
 <p>Node ist nicht in der Lage JavaScript-Dateien, die im ES6-Standard entwickelt wurden, direkt auszuführen. Diese müssen zunächst in den <a href="http://www.ecma-international.org/ecma-262/5.1/">ES5-Standard</a> übersetzt (transpiliert) werden. Hierzu wird <a href="https://babeljs.io/">babel</a> verwendet.</p>
 <p>Der Übersetzungsvorgang kann über das NPM-Skript &quot;build&quot; angestoßen werden. Dabei wird zunächst das möglicherweise bereits vorhandene Verzeichnis &quot;build&quot; geleert bzw. ein solches Verzeichnis erstellt. Anschließend werden alle JavaScript-Dateien von babel in den Standard ES5 übersetzt und inklusive <a href="https://www.html5rocks.com/en/tutorials/developertools/sourcemaps/">Source Map</a> im Verzeichnis &quot;build&quot; abgelegt.</p>
 <pre><code>$ npm run build</code></pre>
 <h3 id="starten-eines-netzwerkknotens">Starten eines Netzwerkknotens</h3>
-<p>Die Hauptanwendung des Projekts ist ein Netzwerkknoten, der Gerüchte -- also Nachrichten -- entgegen nimmt und diese an seine Nachbarn verteilt. Ein solcher Knoten kann in einem interaktiven Modus gestartet werden, indem keine Parameter übergeben werden. Dann werden alle benötigten Parameter über einen CLI-Dialog erfragt:</p>
-<pre><code>$ npm run start</code></pre>
+<p>Die Hauptanwendung des Projekts ist ein Netzwerkknoten, der einen Kandidaten bzw. einen Wähler in einem Netzwerk an Wähler- und Kandidatenknoten repräsentiert. Das Ziel der Kandidaten ist es, möglichst viele Wähler von sich zu überzeugen. Sie machen dies, indem sie über den Echo-Algorithmus Kampagnen verbreiten oder über sog. Flooding &quot;Wähl-Mich&quot;-Nachrichten verbreiten. Solche Nachrichten werden werden wie ein Gerücht im Netzwerk verbreitet, wobei ein Knoten die Nachricht nur dann weiterleitet, wenn er dem Kandidaten anhand des Confidence-Levels zustimmt.</p>
+<p>Ein solcher Netzwerkknoten wird über das NPM-Skript &quot;start-node&quot; gestartet. Die Konfiguration eines Knotens kann als Parameter übergeben werden. Werden keine Parameter angegeben, so werden die notwendigen Parameter abgefragt und für den Rest Default-Werte verwendet:</p>
+<pre><code>$ npm run start-noe</code></pre>
 <p>Alternativ können die notwendigen Parameter direkt beim Start übergeben werden, sodass die Anwendung ohne weitere Interkation mit dem Nutzer ausgeführt werden kann. Der Parameter &quot;-h&quot; listet alle möglichen Parameter auf:</p>
-<pre><code>$ npm run start -- -h
-Usage: node index.js
+<pre><code>$ npm run start-node -- -h
+Usage: node run-node.js
 
-      --endpointFilename=[ARG]  path to the endpoints file, leave 
-                                blank to map ids to local ports
-  -g, --graphFilename=[ARG]     path to the graph file defining 
-                                the network node topology
+      --endpointFilename=[ARG]  path to the endpoints file, leave blank to map ids to local ports
+  -g, --graphFilename=[ARG]     path to the graph file defining the network node topology
       --id=[ARG]                ID of this endpoint
-  -c, --count=[ARG]             number of receives until a rumor 
-                                will be believed
+  -r, --receive=[ARG]           number of receives until a candidate starts a new call (e.g. campaign)
+      --observer                start observer node
   -h, --help                    Display this help</code></pre>
 <p>So kann zum Beispiel ein Netzwerkknoten mit der ID 5 wie folgt gestartet werden:</p>
-<pre><code>npm run start -- -g config/graph.dot --id 5 --c 2</code></pre>
-<p>Dieser Knoten ist dann auf localhost:4004 erreichbar. Der Knoten geht von einer Netzwerktopologie wie in der graphviz-Datei config/graph.dot definiert aus und glaubt ein Gerücht genau dann, wenn er die Nachricht von mindestens 2 Knoten erhalten hat. Wird keine endpoint-Datei angegeben (wie in diesem Beispiel), so werden die Endpunkte als Lokal angenommen und der Netzwerkknoten mit der kleinsten ID erhält den Port 4000. Für jeden weiteren Knoten wird die Portnummer entsprechend hochgezählt. Die minimale Portnummer (default: 4000) kann über die Konstante MIN_PORT im <a href="src/network-core/endpointManager.js">EndpointManager</a> angepasst werden.</p>
+<pre><code>npm run start-node -- -g ./config/graphElection.dot --id 5</code></pre>
+<p>Dieser Knoten ist dann auf localhost:4005 erreichbar. Der Knoten geht von einer Netzwerktopologie wie in der graphviz-Datei config/graph.dot definiert aus. Bei diesem Knoten handelt es sich um einen Wählerknoten, da die ID weder 1 noch 2 ist (was den beiden IDs für die Kandidatenknoten entspricht). Wird keine endpoint-Datei angegeben (wie in diesem Beispiel), so werden die Endpunkte als Lokal angenommen und der Netzwerkknoten mit der kleinsten ID erhält den Port 4001. Für jeden weiteren Knoten wird die Portnummer entsprechend hochgezählt. Die minimale Portnummer (default: 4000) kann über die Konstante MIN_PORT im <a href="./src/network-core/endpointManager.js">EndpointManager</a> angepasst werden. Die ID 0 ist für den Beobachter-Prozess reserviert und wird automatisch dem Port 4000 zugewiesen, was ebenso im <a href="./src/network-core/endpointManager.js">EndpointManager</a> definiert ist.</p>
 <h3 id="starten-des-init-tools">Starten des Init-Tools</h3>
-<p>Das Init-Tool kann dazu verwendet werden, um Kontrollnachrichten an einzelne Netzwerkknoten zu senden. Auch diese Tool kann über einen Dialog interaktiv verwendet weden, um verschiedene Kontrollnachrichten abzusetzen.</p>
-<pre><code>$ npm run init
-Enter command: ?
-init: Initialize distribution of a rumor.
-stop: Stop one rumor node
-stop all: Stop all rumor nodes
-exit: Exit this program
-?: Display this help</code></pre>
-<p>Wie in dem vorhergehenden Code-Ausschnitt gezeigt, listet das Kommando &quot;?&quot; eine Übersicht über alle vorhandenen Kommandos auf.</p>
-<p>Alternativ kann auch ein Kommando als Parameter übergeben werden, was dafür sorgt, dass dieses ausgeführt wird und sich das Programm anschließend direkt beendet. Dies kann hilfreich sein, um Kontrollnachrichten aus einem Skript automatisiert abzusetzen. Auch hier kann die Verwendung über den Parameter &quot;-h&quot; angezeigt werden:</p>
-<pre><code>$ npm run init -- -h
-Usage: node init.js
-
-  -c, --cmd=[ARG]    Command: &quot;init&quot; | &quot;stop&quot; | &quot;stop all&quot;
-      --host=[ARG]   host
-      --port=[ARG]   port
-  -r, --rumor=[ARG]  the rumor which should be sent
-  -h, --help         Display this help</code></pre>
+<p>Analog zur ersten Übung wird auch in diesem Projekt das Init-Tool verwendet, um Kontrollanchrichten an die Prozesse zu senden. Diesmal wird -- abgesehen vom Kommando &quot;stop all&quot; zum Beenden aller Prozesse -- hauptsächlich das Kommando &quot;msg&quot; verwendet, welches es erlaubt eine Nachricht des gewünschten Typs an einen oder mehrere Knoten zu senden.</p>
+<p>Folgender Aufruf sendet beispielsweise eine INIT-Nachricht an beide Kandidaten, was den Wahlprozess startet und dafür sorgt, dass die Kandidaten damit beginnen, Kampagnen bzw. &quot;Wähl-Mich&quot;-Nachrichten zu verbreiten:</p>
+<pre><code>$ npm run init -- -c msg -t init --addresses &quot;localhost:4001;localhost:4002&quot; -m &quot;empty&quot;</code></pre>
+<p>Dabei ist es wichtig, dass ein Inhalt für die Nachricht gesetzt wird. Der Inhalt selbst ist bei einer INIT-Nachricht jeoch irrelevant. Andernfalls wechselt das INIT-Skript in den interaktiven Modus und fordert den Nutzer auf, einen Inhalt einzugeben.</p>
 <h3 id="generieren-eines-graphen">Generieren eines Graphen</h3>
-<p>Eine zufällige Netzwerktopologie kann mithilfe des Tools graphgen, das über das Skript &quot;graphgen&quot; ausgeführt werden kann, erstellt werden. Auch diese Anwendung kann ohne Parameter in einem interaktiven Modus gestartet werden, indem die notwendigen Informationen über einen Dialog erfragt werden. Überlicherweise werden jedoch die benötigten Informationen direkt als Parameter übergeben. Eine Hilfe wird auch hier mit dem Parameter &quot;-h&quot; angefordert.</p>
+<p>Zum Generieren der Netzwerktopologie wurde das Tool graphgen, welches über das Skript &quot;graphgen&quot; ausgeführt werden kann, erweitert. Dabei wird zunächst mithilfe des <a href="http://www.dcs.gla.ac.uk/~pat/af2009/mySlides/Havel-Hakimi.ppt">Havel-Hakimi-Algorithmus</a> ein Graph generiert, welcher anschließend analog zu dem Verfahren in Übung 1 in eine graphviz-Datei gespeichert wird.</p>
+<p>Auch hier können die benötigten Informationen direkt als Parameter übergeben. Eine Hilfe wird auch hier mit dem Parameter &quot;-h&quot; angefordert.</p>
 <pre><code>$ npm run graphgen -- -h
 Usage: node graphgen.js
 
-  -n                    Number of nodes
-  -m                    Number of edges
-  -f, --filename=[ARG]  Filename
-  -h, --help            Display this help
-  </code></pre>
-<p>Über den Parameter &quot;-f&quot; bzw. &quot;--filename&quot; (Filename) wird der Pfad angegeben, an dem der erzeugte Graph gespeichert werden soll.</p>
-<h3 id="shellskripte">Shellskripte</h3>
-<p>Zum einfachen Ausführen von Versuchen und als nützliche Hilfe während des Entwicklungsprozesses wurden zusätzliche Shellskripte erstellt. Diese befinden sich im Verzeichnis &quot;scripts&quot;. Ausgaben der Skripte erfolgen entweder auf die Standardausgabe oder in spezielle Log-Dateien, welche unter &quot;scripts/logs&quot; abgelegt werden. Benötigt ein Skript spezielle Eingabeparameter, so werden Hinweise zur Verwendung ausgegeben, falls keine Parameter übergeben wurden.</p>
-<h4 id="skript-kill-all.sh">Skript: kill-all.sh</h4>
-<p>Das Skript &quot;kill-all.sh&quot; sendet das Signal &quot;-SIGKILL&quot; an alle derzeit laufenden node-Prozesse. Es kann dazu verwendet werden, falls sich die Netzwerkknoten in einem ungewolltem Zustand befinden und sich nicht mehr auf &quot;normalem&quot; Weg terminieren lassen.</p>
+  -n                     Number of nodes
+  -s, --supporter=[ARG]  Number of supporters
+  -f, --friends=[ARG]    Number of friends
+  -o, --out=[ARG]        Output filename
+  -h, --help             Display this help</code></pre>
+<p>Über den Parameter &quot;-o&quot; bzw. &quot;--out&quot; (output) wird der Pfad angegeben, an dem der erzeugte Graph gespeichert werden soll.</p>
+<p>Der <a href="http://www.dcs.gla.ac.uk/~pat/af2009/mySlides/Havel-Hakimi.ppt">Havel-Hakimi-Algorithmus</a> dient ursprünglich dazu, anhand einer gegebenen Sequenz an Knotengraden zu überprüfen, ob es möglich ist, einen Graphen zu generieren, der genau die in der Sequenz angegebenen Knotengrade besitzt. Eine mögliche Sequenz wäre beispielsweise [4, 3, 3, 3, 1]. Sie gibt an, dass der Graph fünf Knoten besitzt, wobei ein Knoten vier kanten hat, drei Knoten jeweils drei Kanten und ein Knoten lediglich eine Kante besitzt.</p>
+<p>In dieser Anwendung wird der Algorithmus dazu verwendet, um die Eingabeparameter zu verifizieren, um so sicher zu sein, dass ein Graph erzeugt werden kann, bei dem jeder Wähler f Nachbarknoten besitzt. Zusätzlich wurde der Algorithmus dahingehend erweitert, dass sich die im Ablauf verbundenen Kanten gemerkt werden, sodass nach einem Durchlauf des Algorithmuses der Graph erzeugt wurde.</p>
+<p>Auf diese Weise wird das Wählernetz erzeugt, sodass jeder Wähler exakt <em>f</em> Freunde hat. Um sicherzugehen, dass der resultierende Graph zusammenhängend ist, wird der erzeugte Graph anschließend mit der Node-Bibliothek &quot;<a href="https://www.npmjs.com/package/connected-components">connected-components</a>&quot; überprüft. Stellt sich heraus, dass es sich um keinen Zusammenhängenden Graphen handelt, wird die Eingabe verworfen und der Benutzer dazu aufgefordert andere Eingabeparameter zu verwenden.</p>
+<p>Nachdem das Wählernetz erzeugt wurde, werden die beiden Kandidatenknoten hinzugefügt und diesen ihre Parteifreunde zugewiesen. Dazu wird ein zufälliger Knoten ausgewählt, dessen ID größer als 0 ist und kleiner als die maximale Anzahl an Knoten abzüglich der Anzahl an Parteifreunde <em>s</em>. Dieser Knoten sowie die <em>2 </em> s* Folgeknoten werden alternierend den beiden Kandidaten als Parteifreunde zugewiesen. Die Parteifreunde haben somit in Summe einen Nachbarn mehr als normale Wählerknoten.</p>
+<p>Ein Nachteil dieser Lösung ist jedoch, dass bei gleichen Eingabeparameter annähernd gleiche Graphen erzeugt werden.</p>
+<h3 id="starten-der-testsuite">Starten der Testsuite</h3>
+<p>Um eine Wahl durchführen zu können, ist es notwendig, dass alle Wählerknoten sowie die Kandidatenknoten und ein Observerprozess gestartet werden. Hierfür kann die Node-Anwendung &quot;run-election.js&quot; verwendet werden, welche über das NPM-Skript &quot;start-election&quot; ausgeführt wird. Als Parameter können u.A. die Anzahl an Knoten, die Anzahl an Freunde und Parteifreunde der Wählerknoten übergeben werden. Der Parameter &quot;-h&quot; zeigt eine Übersicht der möglichen Argument:</p>
+<pre><code>$  npm run start-election -- -h
+Usage: node run-election.js
+
+  -n, --nodes=[ARG]          number of nodes (without the observer node)
+  -s, --supporters=[ARG]     number of supporters per candidate
+  -f, --friends=[ARG]        number of friends for each voter
+  -r, --receives=[ARG]       number of receives until a candidate starts a new call (e.g. campaign)
+  -g, --graphFilename=[ARG]  path to the graph file defining the network node topology
+  -d, --delay=[ARG]          delay between initiating the election process and taking the snapshot (in seconds)
+  -h, --help                 Display this help</code></pre>
 <blockquote>
-<p>Hinweis: Das Skript ist mit besonderer Vorsicht zu verwenden, da andere Node-Prozesse, die auf diesem System laufen, ebenfalls terminiert werden.</p>
+<p>Hinweis: werden keine Parameter angegeben, so werden die in &quot;run-election.js&quot; definierten Default-Werte verwendet.</p>
 </blockquote>
-<h3 id="skript-start.sh">Skript: start.sh</h3>
-<p>Das Skript &quot;start.sh&quot; generiert einen zufälligen Graphen, der als Netzwerktopologie verwendet wird und startet für jeden Knoten des Graphen einen Netzwerkknoten-Prozess mit der entsprechenden ID. Sobald alle Prozesse gestartet wurden, wird automatisch die Verbreitung eines Gerüchtes initialisiert und anschließend die Prozesse beendet. Sobald alle Prozesse beendet wurden, beendet sich das Skript ebenso.</p>
-<blockquote>
-<p>Hinweis: Da das Programm in der aktuellen Version die Terminierung der Ausbreitung von Gerüchten nicht feststellen kann, wird nach dem Initialisieren eine feste Zeit gewartet, bis die Prozesse beendet werden.</p>
-</blockquote>
-<pre><code>$ ./scripts/start.sh
-./scripts/start.sh n m c graphFilename rumor</code></pre>
-<p>Der Parameter &quot;n&quot; entspricht der Anzahl an Knoten, &quot;m&quot; bestimmt die Anzahl an Kanten, &quot;c&quot; entspricht der Anzahl an <em>eingehenden</em> Gerüchten, bis das Gerücht <em>geglaubt</em> wird. Der vierte Parameter &quot;graphFilename&quot; gibt den Dateinamen der Datei an, in der der erzeugte Graph gespeichert wird und &quot;rumor&quot; bestimmt das zu sendende Gerücht.</p>
-<h3 id="skript-starttestseries.sh">Skript: startTestSeries.sh</h3>
-<p>Das Skript &quot;startTestSeries.sh&quot; führt eine gesamte Testreihe durch und legt das Ergebnis in einer neuen Datei unter &quot;scripts/results&quot; ab.</p>
+<p>Die Testsuite startet zunächst das graphgen-Tool, um ein Wählernetz passend zur gegeben Konfiguration zu erzeugen. Anschließend werden die einzelnen Knoten als eigenständige Kindprozesse gestartet. Dabei wird die Ausgabe jedes einzelnen Prozesses überwacht und auf die Standardausgabe des Hauptprozesses umgelegt. Sobald durch das Überwachen der Ausgabe erkannt wird, dass alle Knoten bereit sind, wird der Beobachter-Prozess gestartet und danach mithilfe des INIT-Skripts eine INIT-Nachricht an die beiden Kandidaten gesendet. Nach einer konfigurierbaren Verzögerung wird der Beobachter-Prozess angewiesen einen konsistenten Schnappschuss durchzuführen. Sobald ein Wahlergebnis verfügbar ist, werden alle Prozesse beendet und der Vorgang ist abgeschlossen.</p>
+<p>Bei einem Durchlauf werden sehr viele Nachrichten zwischen den einzelnen Knoten ausgetauscht. Da jeder Knoten alle ein- sowie ausgehenden Nachrichten auf der Ausgabe protokolliert, wird die Ausgabe der Testsuite schnell sehr unübersichtlich. Aus diesem Grund wird empfohlen, die Ausgabe in eine Datei umzulenken, bzw. zum Beispiel mithilfe des <em>tee</em>-Kommandos die Ausgabe sowohl anzuzeigen und gleichzeitig in eine Datei zu schreiben. Bei der Ausgabe einer Log-Nachricht schreibt jeder Knoten seine eigene ID in runde Klammern. Dies kann man ausnutzen, um nur die Nachrichten eines bestimmten Knotens auszugeben. Folgendes Listing zeigt, wie die Testsuite gestartet wird und anschließend ledigliche die Ausgabe des Beobachter-Prozess angezeigt wird, wobei sich die gesamte Ausgabe in der Datei log/out.log befindet:</p>
+<pre><code>$ npm run start-election -- -n 8 -s 2 -f 3 -r 3 -g ./config/graphElection.dot &gt; ./log/out.log 2&gt; ./log/err.og &amp;
+$ tail -f ./log/out.log | grep &quot;(0)&quot;</code></pre>
 <h2 id="aufbau">Aufbau</h2>
 <p>Das Projekt wurde nach einem stark modularisierten Konzept entwickelt. Im Folgenden werden die Verzeichnisstruktur, die einzelnen Komponenten sowie das verwendete Nachrichtenprotokoll beschrieben.</p>
 <h3 id="verzeichnisstruktur">Verzeichnisstruktur</h3>
@@ -91,7 +83,7 @@ Usage: node graphgen.js
 <li>/parser: enthält Komponenten zum Einlesen von Dateien bestimmter Formate</li>
 <li>/tools: enthält zusätzliche Skripte, die als eigenständige Node-Anwendungen gestartet werden können</li>
 </ul>
-<p>Die Datei &quot;index.js&quot; ist der Einstiegspunkt der Anwendung. Darin werden die einzelnen Komponenten miteinander verknüpft und der Netzwerkknoten gestartet.</p>
+<p>Die Datei &quot;run-node.js&quot; ist der Einstiegspunkt der Anwendung. Darin werden die einzelnen Komponenten miteinander verknüpft und der Netzwerkknoten gestartet.</p>
 <h3 id="komponenten">Komponenten</h3>
 <p>Das folgende UML-Klassendiagramm zeigt einen Überblick über die einzelnen Komponenten der Anwendung.</p>
 <div class="figure">
@@ -107,17 +99,18 @@ Usage: node graphgen.js
 <blockquote>
 <p>Speziallfall - Knoten als ein Prozess: In der Aufgabenstellung war gefordert, dass der Knoten als ein Prozess und somit die Bearbeitung einer eingehenden Nachricht als eine atomare Aktion ausgeführt werden soll. Um dies in node zu realisieren, wurde eine Semaphore verwendet, die alle anderen eingehenden Nachrichten blockiert, während eine Nachricht behandelt wird.</p>
 </blockquote>
-<h3 id="promise-wrapper">Promise-Wrapper</h3>
-<p>Ein bekanntes Problem bei Anwendungen in JavaScript ist der Umgang mit verschachtelten Callbacks, also Funktionsaufrufe, die als Parameter eine Callback-Funktion übergeben, in der ein weiterer Funktionsaufruf mit einer weiteren Callback- Funktion ausgeführt wird. Dies wird häufig auch als sogenannte <a href="https://zeit.co/blog/async-and-await"><em>callback hell</em></a> bezeichnet. Durch die Verwendung des async-await Sprachfeatures von JavaScript lassen sich asynchrone Ausführungen wesentlich übersichtlicher gestalten.</p>
-<p>Dieses Feature kann auf alle Funktionen angewendet werden, die statt der Verwendung eines Callbacks ein <em>Promise</em> zurück geben. Aus diesem Grund wurden für Standardfunktionen, wie zum Beispiel das Einlesen/Schreiben einer Datei oder das Lesen von der Kommandozeile, eine Wrapper-Funktion geschrieben, welche ein Promise zurückgibt, welches durch ein Callback aufgelöst wird.</p>
-<p>Diese Wrapper befinden sich im Verzeichnis &quot;lib&quot;.</p>
+<h3 id="vektorzeit">Vektorzeit</h3>
+<p>Damit in der Ausgabe ersichtlich ist, in welcher Reihenfolge die -- teilweise parallel abgesetzen -- Nachrichten gesendet wurden, wird eine logische Zeit eingeführt: Die Vektorzeit. Diese Zeiteinheit besteht aus n-Zählern, wobei n gerade der Anzahl an Netzwerkknoten entspricht. Die Vektorzeit ist Teil einer jeden Nachricht, die versendet wird. Der eigene Zähler wird genau dann erhöht, wenn ein lokales Ereignis passiert (beispielsweise das Senden oder Empfangen einer Nachricht). Beim Empfangen einer Nachricht werden außerdem die Werte aller Zähler verglichen und das Maximum übernommen.</p>
+<p>Implementiert wurde die Vektorzeit als eigenes Modul. Die Klasse VectorClock beinhaltet ein assoziatives Array, welches die Zähler für verschiedene Netzwerkknoten, die anhand einer eindeutigen ID identifiziert werden, speichert. Tritt ein lokales Ereignis auf, so wird der eigene Zähler mittels der Methode &quot;tick(()&quot; erhöht. Beim Empfangen einer Nachricht wird der darin übermittelte Vektor an die Methode &quot;update(clock)&quot; übergeben, was dafür sorgt, dass das Maximum der jeweiligen Zähler übernommen wird. Im initialen Zustand kennt das Modul lediglich den eigenen Zählerstand. Das Vektorfeld wird mit jeder ankommenden Nachricht von einem vorher noch unbekannten Netzwerkknoten entsprechend angepasst und erweitert.</p>
 <h2 id="protokoll">Protokoll</h2>
 <p>Zum Austausch der Nachrichten zwischen den einzelnen Netzwerkknoten wird das <a href="http://www.json.org/">JSON-Format</a> verwendet. Eine Nachricht hat dabei folgende Komponenten:</p>
 <ul>
 <li>type: Typ der Nachricht (rumor oder control)</li>
 <li>msg: Inhalt der Nachricht</li>
 <li>from: ID des Absenderknotens (optional)</li>
+<li>time: Vektorzeit des Absenderknotens (optional)</li>
 </ul>
+<p>Die Vektorzeit ist optional, damit bei dem initialen Gerücht keine Zeit mitgesendet werden muss. Alle zwischen den einzelnen Rumor-Knoten ausgetauschten Nachrichten beinhalten natürlich das Feld &quot;time&quot;.</p>
 <p>Handelt es sich um eine Kontrollnachricht, so enthält das Messagefeld die Aktion (&quot;STOP&quot; zum Beenden des Knotens bzw. &quot;STOP ALL&quot; zum Senden der &quot;STOP ALL&quot; Nachricht an alle Nachbarn und zum anschließenden Beenden des Knotens).</p>
 <p>Alle Nachrichten werden über TCP übertragen. Auch wenn dies -- aufrund der TCP-Übertragung -- nicht explizit notwendig wäre, werden alle empfangenen Nachrichten nach dem Erhalt mit einem leeren JSON-Objekt bestätigt.</p>
 <h4 id="beispiel-einer-nachricht">Beispiel einer Nachricht</h4>
@@ -130,237 +123,6 @@ Usage: node graphgen.js
 <p>Einige Hilfsfunktionen sowie kleinere Module der Anwendung, wie zum Beispiel der Parser für die Endpoint- bzw. graphviz-Datei oder der Kantengenerator, wurden mit Unit-Tests versehen. Die Tests befinden sich im Verzeichnis &quot;tests&quot; des Projektordners.</p>
 <p>Die Tests können mithilfe des NPM-Skripts &quot;test&quot; ausgeführt werden:</p>
 <pre><code>$ npm run test</code></pre>
-<h2 id="continuous-integration">Continuous Integration</h2>
+<h2 id="test-coverage">Test Coverage</h2>
+<h2 id="continuous-integration-code-quality">Continuous Integration &amp; Code Quality</h2>
 <p>Im Rahmen dieses Projekts wird <a href="https://travis-ci.org">TravisCI</a> als Continuous Integration Lösung verwendet. Dieses System ist mit dem github repository verknüpft und sorgt bei jeder Änderung der Daten im Repository dafür, dass die Anwendung erstellt wird und alle automatisierten Tests ausgeführt werden. Die Datei <a href="./.travis.yml">.travis.yml</a> beschreibt die Konfiguration des Testservers und besagt welcher Interpreter in welcher Version verwendet werden soll.</p>
-<h1 id="experimente">Experimente</h1>
-<p>Zur Durchführung der Experimente wurden die oben beschriebenen Skripte &quot;start.sh&quot; sowie &quot;startTestSeries.sh&quot; verwendet. Die gesamte Versuchsreihe wird dabei in der Datei <a href="./config/testSeries">config/testSeries</a> definiert. Jede Zeile dieser Datei entspricht einem Versuch und definiert die notwendigen Parameter. Das Shell-Skript &quot;startTestSeries.sh&quot; liest diese Datei aus und startet die einzelnen Versuche.</p>
-<h2 id="beschreibung">Beschreibung</h2>
-<p>Es wurden insgesamt 21 Versuche durchgeführt, wobei jeweils drei Versuche mit den gleichen Parametern in Folge ausgeführt wurden. Anschließend wurde genau einer der drei Parameter verändert.</p>
-<h2 id="auswertung">Auswertung</h2>
-<p>In der unten stehenden Tabelle kann das Ergebnis der Versuchsreihe eingesehen werden. Auffällig ist, dass selbst bei gleichen Parametern die Anzahl an Knoten, die das Gerücht glauben, teilweise stark variiert (siehe zum Beispiel Versuche 10, 11 und 12). Dies lässt sich jedoch dadurch erkären, dass bei jeder Durchführung eines Versuchs ein neuer zufälliger Graph erstellt wird.</p>
-<table>
-<thead>
-<tr class="header">
-<th>Nr.</th>
-<th>Nodes</th>
-<th>Edges</th>
-<th>BelieveCount c</th>
-<th>Rumor</th>
-<th>InitNode</th>
-<th>Believers</th>
-<th>Percentage</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>10</td>
-<td>15</td>
-<td>2</td>
-<td>a.1</td>
-<td>1</td>
-<td>7</td>
-<td>70%</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>10</td>
-<td>15</td>
-<td>2</td>
-<td>a.2</td>
-<td>1</td>
-<td>8</td>
-<td>80%</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>10</td>
-<td>15</td>
-<td>2</td>
-<td>a.3</td>
-<td>1</td>
-<td>7</td>
-<td>70%</td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td>10</td>
-<td>15</td>
-<td>3</td>
-<td>b.1</td>
-<td>1</td>
-<td>3</td>
-<td>30%</td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>10</td>
-<td>15</td>
-<td>3</td>
-<td>b.2</td>
-<td>1</td>
-<td>4</td>
-<td>40%</td>
-</tr>
-<tr class="even">
-<td>6</td>
-<td>10</td>
-<td>15</td>
-<td>3</td>
-<td>b.3</td>
-<td>1</td>
-<td>3</td>
-<td>30%</td>
-</tr>
-<tr class="odd">
-<td>7</td>
-<td>10</td>
-<td>15</td>
-<td>6</td>
-<td>c.1</td>
-<td>1</td>
-<td>2</td>
-<td>20%</td>
-</tr>
-<tr class="even">
-<td>8</td>
-<td>10</td>
-<td>15</td>
-<td>6</td>
-<td>c.2</td>
-<td>1</td>
-<td>0</td>
-<td>0%</td>
-</tr>
-<tr class="odd">
-<td>9</td>
-<td>10</td>
-<td>15</td>
-<td>6</td>
-<td>c.3</td>
-<td>1</td>
-<td>1</td>
-<td>10%</td>
-</tr>
-<tr class="even">
-<td>10</td>
-<td>10</td>
-<td>20</td>
-<td>3</td>
-<td>d.1</td>
-<td>1</td>
-<td>5</td>
-<td>50%</td>
-</tr>
-<tr class="odd">
-<td>11</td>
-<td>10</td>
-<td>20</td>
-<td>3</td>
-<td>d.2</td>
-<td>1</td>
-<td>8</td>
-<td>80%</td>
-</tr>
-<tr class="even">
-<td>12</td>
-<td>10</td>
-<td>20</td>
-<td>3</td>
-<td>d.3</td>
-<td>1</td>
-<td>4</td>
-<td>40%</td>
-</tr>
-<tr class="odd">
-<td>13</td>
-<td>50</td>
-<td>51</td>
-<td>5</td>
-<td>e.1</td>
-<td>1</td>
-<td>5</td>
-<td>10%</td>
-</tr>
-<tr class="even">
-<td>14</td>
-<td>50</td>
-<td>51</td>
-<td>5</td>
-<td>e.2</td>
-<td>1</td>
-<td>3</td>
-<td>60%</td>
-</tr>
-<tr class="odd">
-<td>15</td>
-<td>50</td>
-<td>51</td>
-<td>5</td>
-<td>e.3</td>
-<td>1</td>
-<td>6</td>
-<td>12%</td>
-</tr>
-<tr class="even">
-<td>16</td>
-<td>50</td>
-<td>90</td>
-<td>5</td>
-<td>f.1</td>
-<td>1</td>
-<td>15</td>
-<td>30%</td>
-</tr>
-<tr class="odd">
-<td>17</td>
-<td>50</td>
-<td>90</td>
-<td>5</td>
-<td>f.2</td>
-<td>1</td>
-<td>16</td>
-<td>32%</td>
-</tr>
-<tr class="even">
-<td>18</td>
-<td>50</td>
-<td>90</td>
-<td>5</td>
-<td>f.3</td>
-<td>1</td>
-<td>14</td>
-<td>28%</td>
-</tr>
-<tr class="odd">
-<td>19</td>
-<td>100</td>
-<td>190</td>
-<td>5</td>
-<td>g.1</td>
-<td>1</td>
-<td>14</td>
-<td>14%</td>
-</tr>
-<tr class="even">
-<td>20</td>
-<td>100</td>
-<td>190</td>
-<td>5</td>
-<td>g.2</td>
-<td>1</td>
-<td>13</td>
-<td>13%</td>
-</tr>
-<tr class="odd">
-<td>21</td>
-<td>100</td>
-<td>190</td>
-<td>5</td>
-<td>g.3</td>
-<td>1</td>
-<td>12</td>
-<td>12%</td>
-</tr>
-</tbody>
-</table>

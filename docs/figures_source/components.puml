@@ -6,12 +6,48 @@ Server --right---- ServerLogic
 
 ServerLogic --- VectorClock
 
-ServerLogic <|-- HelloServer
-ServerLogic <|-- RumorServer
+ServerLogic <|-- ElectionNode
+ServerLogic <|-- ObserverNode
+
+ElectionNode <|-- Voter
+ElectionNode <|-- Candidate
+
+ElectionNode --right---- SnapshotReceiver
+ObserverNode --left---- SnapshotAlgorithm
+ElectionNode --right---- RumorAlgorithm
+ElectionNode --left---- EchoAlgorithm
+
+EchoStates -- EchoAlgorithm
 
 EndpointParser -- EndpointManager
 GraphvizParser -- EndpointManager
 
+Voter -- ConfidenceLevel
+
+class RumorAlgorithm {
+    async initiateRumorDistribution(msg)
+    async processIncomingMessage(msg, neighborId)
+}
+
+class EchoAlgorithm {
+    async initEcho(content, onEchoDistributed)
+    async processIncomingMsg(msg, neighborId)
+}
+
+class SnapshotAlgorithm {
+    async takeSnapshot()
+    async processIncomingMessage(msg, senderId)
+}
+
+class SnapshotReceiver {
+    async processIncomingMessage(msg)
+}
+
+class ConfidenceLevel {
+    isFavorite(candidateId)
+    updateLevelOnNewChooseMeMsg(candidateId)
+    updateLevelOnNewCampaign(candidateId)
+}
 
 class EndpointManager {
     myId
@@ -25,12 +61,20 @@ class ServerLogic {
     _runAlgorithm(data, socket)
 }
 
-class RumorServer {
+class ElectionNode {
+    _runAlgorithm(data, socket)
+    async sendCampaignMsgTo(neighbor, msg)
+    async sendChooseMeMsgTo(neighbor, msg)
+    async sendSnapshotResponse(node, msg)
+}
+
+class Candidate {
     _runAlgorithm(data, socket)
 }
 
-class HelloServer {
-    _runAlgorithm(data, socket)
+class Voter {
+    onNewIncomingChooseMeMsg(candidateId, currentRumorId)
+    onNewIncomingCampaignMsg(candidateId)
 }
 
 class Server {
