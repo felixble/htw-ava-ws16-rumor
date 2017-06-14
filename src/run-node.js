@@ -7,6 +7,24 @@ import { CandidateIdsManager } from './election/candidateIdsManager'
 
 let readLine = require('./lib/read-line');
 
+var     blubba = (x, y, z ) =>{
+console.log('Test!');
+var x = 78;;
+var y = 13;
+var tmp = x+y
+return tmp;
+}
+
+var     blubba2 = (x, y, z ) =>{
+console.log('Test!');
+var x = 78;;
+var y = 13;
+var tmp = x+y
+return tmp;
+}
+
+var result = blubba() + blubba2();
+
 /* Define parameters */
 let optionParser = require('node-getopt').create([
     ['', 'endpointFilename=[ARG]', 'path to the endpoints file, leave blank to map ids to local ports'],
